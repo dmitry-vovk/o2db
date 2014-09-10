@@ -4,11 +4,16 @@ import (
 	"config"
 	"net"
 	"bufio"
-	"strings"
 	"log"
 	"io"
-	"bytes"
 	"server/client"
+	"server/message"
+	"bytes"
+	"encoding/json"
+)
+
+const (
+	messageDelimiter byte = 0 // Message delimiter. Every message should end with this byte
 )
 
 type ServerType struct {
@@ -35,14 +40,18 @@ func (s *ServerType) Run() error {
 			continue
 		}
 		log.Printf("Client connected")
-		go s.handler(conn)
+		c := &client.ClientType{
+			Conn: conn,
+		}
+		go s.handler(c)
 	}
 }
 
-func (s *ServerType) handler(c net.Conn) {
-	defer c.Close()
+// Handle single client connection
+func (s *ServerType) handler(c *client.ClientType) {
+	defer c.Conn.Close()
 	for {
-		line, err := bufio.NewReader(c).ReadBytes('\n')
+		msg, err := bufio.NewReader(c.Conn).ReadBytes(messageDelimiter)
 		if err != nil {
 			if err == io.EOF {
 				log.Printf("Client diconnected")
@@ -51,8 +60,23 @@ func (s *ServerType) handler(c net.Conn) {
 			}
 			return
 		}
-		s := strings.TrimRight(string(line), "\n")
-		log.Printf("In: %s", s)
-		io.Copy(c, bytes.NewBufferString(s+"\n"))
+		query, err := message.Parse(msg[:len(msg) - 1])
+		if err != nil {
+			log.Printf("%s", err)
+		} else {
+			log.Printf("Message: %v", query)
+			// TODO Process message here and write response to client
+			s.respond(c, query)
+		}
+	}
+}
+
+func (s *ServerType) respond(c *client.ClientType, r interface{}) error {
+	out, err := json.Marshal(r)
+	if err == nil {
+		io.Copy(c.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
+		return nil
+	} else {
+		return err
 	}
 }
