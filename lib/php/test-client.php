@@ -9,6 +9,9 @@ class O2dbClient {
     /** @var int */
     protected $port;
     const DELIMITER = 0;
+    const TYPE_AUTHENTICATE = 0;
+    const TYPE_CREATE_DB = 1;
+    const TYPE_CREATE_COLLECTION = 2;
 
     /**
      * @param string $address
@@ -63,16 +66,15 @@ class O2dbClient {
 
 $client = new O2dbClient('127.0.0.1');
 $message = [
-    'type'    => 1,
+    'type'    => O2dbClient::TYPE_AUTHENTICATE,
     'payload' => [
         'class' => 'Customer'
     ],
 ];
 $response = $client->send($message);
 echo $response, PHP_EOL;
-
 $message = [
-    'type'    => 2,
+    'type'    => O2dbClient::TYPE_CREATE_DB,
     'payload' => [
         'hello' => 'World!'
     ],
