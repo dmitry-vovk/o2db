@@ -1,7 +1,22 @@
 package main
 
-import "fmt"
+import (
+	"runtime"
+	"config"
+	"flag"
+	"log"
+	"server"
+)
 
 func main() {
-	fmt.Printf("Hello world!")
+	log.Fatal(server.CreateNew(config.Config).Run())
+}
+
+func init() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	var configFile = flag.String("config", "o2db.json", "Path to config.json")
+	flag.Parse()
+	if err := config.Read(*configFile); err != nil {
+		log.Fatal(err)
+	}
 }

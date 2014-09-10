@@ -1,0 +1,5 @@
+{
+    "listen_tcp": ":1333",
+    "listen_http": ":8088",
+    "data_dir": "data"
+}
