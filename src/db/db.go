@@ -7,7 +7,15 @@ import (
 	"server/message"
 )
 
-func Create(p message.Payload) error {
+type database struct {
+
+}
+
+var (
+	databases = make(map[string]*database)
+)
+
+func CreateDatabase(p message.Payload) error {
 	if p["name"] == "" {
 		return errors.New("Cannot create database with empty name")
 	}
@@ -16,4 +24,15 @@ func Create(p message.Payload) error {
 		return errors.New("Database already exists")
 	}
 	return os.Mkdir(dbPath, 0700)
+}
+
+func OpenDatabase(p message.Payload) error {
+	if p["name"] == "" {
+		return errors.New("Database name cannot be empty")
+	}
+	if db, has := databases[p["name"]]; has {
+		return db
+	}
+	// TODO Open DB here and put pointer to databases map
+	return nil
 }

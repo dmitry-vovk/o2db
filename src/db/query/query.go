@@ -20,9 +20,16 @@ func ProcessQuery(c *client.ClientType, q *message.Container) interface{} {
 	if c.Authenticated {
 		switch q.Type {
 		case message.TypeCreateDatabase:
-			err := db.Create(q.Payload)
+			err := db.CreateDatabase(q.Payload)
 			if err == nil {
 				return "Database created"
+			}
+			return string(fmt.Sprintf("%s", err))
+			break
+		case message.TypeOpenDatabase:
+			err := db.OpenDatabase(q.Payload)
+			if err == nil {
+				return "Database opened"
 			}
 			return string(fmt.Sprintf("%s", err))
 			break
