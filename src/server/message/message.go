@@ -7,7 +7,7 @@ const (
 )
 
 type Container struct {
-	Type    uint `json:"type"`
+	Type    uint    `json:"type"`
 	Payload Payload `json:"payload"`
 }
 

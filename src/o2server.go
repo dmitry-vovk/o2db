@@ -1,10 +1,10 @@
 package main
 
 import (
-	"runtime"
 	"config"
 	"flag"
 	"log"
+	"runtime"
 	"server"
 )
 

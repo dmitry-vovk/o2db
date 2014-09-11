@@ -1,6 +1,6 @@
 package schema
 
 type Database struct {
-	DataDir string
+	DataDir     string
 	Collections map[string]Collection
 }

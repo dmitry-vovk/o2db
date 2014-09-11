@@ -68,7 +68,8 @@ $client = new O2dbClient('127.0.0.1');
 $message = [
     'type'    => O2dbClient::TYPE_AUTHENTICATE,
     'payload' => [
-        'class' => 'Customer'
+        'name'     => 'root',
+        'password' => '12345',
     ],
 ];
 $response = $client->send($message);
@@ -76,8 +77,13 @@ echo $response, PHP_EOL;
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_DB,
     'payload' => [
-        'hello' => 'World!'
+        'name' => 'test_01'
     ],
 ];
+/*
+$message = [
+    'type' => O2dbClient::TYPE_CREATE_COLLECTION,
+    'payload' => [],
+];*/
 $response = $client->send($message);
 echo $response, PHP_EOL;

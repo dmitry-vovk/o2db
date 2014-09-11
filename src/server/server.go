@@ -1,16 +1,16 @@
 package server
 
 import (
-	"config"
-	"net"
 	"bufio"
-	"log"
+	"bytes"
+	"config"
+	dbQuery "db/query"
+	"encoding/json"
 	"io"
+	"log"
+	"net"
 	"server/client"
 	"server/message"
-	"bytes"
-	"encoding/json"
-	dbQuery "db/query"
 )
 
 const (
@@ -61,7 +61,7 @@ func (s *ServerType) handler(c *client.ClientType) {
 			}
 			return
 		}
-		query, err := message.Parse(msg[:len(msg) - 1]) // cut out delimiter
+		query, err := message.Parse(msg[:len(msg)-1]) // cut out delimiter
 		if err != nil {
 			log.Printf("%s", err)
 		} else {

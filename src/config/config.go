@@ -1,8 +1,8 @@
 package config
 
 import (
-	"io/ioutil"
 	"encoding/json"
+	"io/ioutil"
 )
 
 var Config *ConfigType

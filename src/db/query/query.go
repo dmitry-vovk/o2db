@@ -1,19 +1,34 @@
 package query
 
 import (
-	"server/message"
+	"db"
+	"db/auth"
+	"fmt"
 	"server/client"
+	"server/message"
 )
 
 // This is the main entry for processing queries
-func ProcessQuery(c *client.ClientType, q *message.Container) interface {} {
+func ProcessQuery(c *client.ClientType, q *message.Container) interface{} {
 	if q.Type == message.TypeAuth {
-		c.Authenticated = true
-		return "client authenticated"
+		if auth.Authenticate(c, q.Payload) {
+			return "Authenticated"
+		} else {
+			return "Authentication failed"
+		}
 	}
 	if c.Authenticated {
-		return "client IS authenticated"
-	} else {
-		return "client IS NOT authenticated"
+		switch q.Type {
+		case message.TypeCreateDatabase:
+			err := db.Create(q.Payload)
+			if err == nil {
+				return "Database created"
+			}
+			return string(fmt.Sprintf("%s", err))
+			break
+		default:
+			return "Unknown query type"
+		}
 	}
+	return "Authentication required"
 }

@@ -1,5 +1,9 @@
 {
     "listen_tcp": ":1333",
     "listen_http": ":8088",
-    "data_dir": "data"
+    "data_dir": "data",
+    "user": {
+        "name": "root",
+        "password": "12345"
+    }
 }
