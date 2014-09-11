@@ -2,8 +2,19 @@ package message
 
 const (
 	TypeAuth uint = iota
+
 	TypeCreateDatabase
 	TypeCreateCollection
+	TypeOpenDatabase
+
+	TypeObjectInsert
+	TypeObjectUpdate
+	TypeObjectDelete
+	TypeObjectSelect
+
+	TypeTransactionStart
+	TypeTransactionCommit
+	TypeTransactionAbort
 )
 
 type Container struct {
