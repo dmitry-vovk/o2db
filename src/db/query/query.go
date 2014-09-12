@@ -27,8 +27,9 @@ func ProcessQuery(c *client.ClientType, q *message.Container) interface{} {
 			return string(fmt.Sprintf("%s", err))
 			break
 		case message.TypeOpenDatabase:
-			err := db.OpenDatabase(q.Payload)
+			dbPtr, err := db.OpenDatabase(q.Payload)
 			if err == nil {
+				c.Db = dbPtr
 				return "Database opened"
 			}
 			return string(fmt.Sprintf("%s", err))

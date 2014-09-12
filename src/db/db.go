@@ -7,12 +7,12 @@ import (
 	"server/message"
 )
 
-type database struct {
+type Database struct {
 
 }
 
 var (
-	databases = make(map[string]*database)
+	databases = make(map[string]*Database)
 )
 
 func CreateDatabase(p message.Payload) error {
@@ -26,13 +26,13 @@ func CreateDatabase(p message.Payload) error {
 	return os.Mkdir(dbPath, 0700)
 }
 
-func OpenDatabase(p message.Payload) error {
+func OpenDatabase(p message.Payload) (*Database, error) {
 	if p["name"] == "" {
-		return errors.New("Database name cannot be empty")
+		return nil, errors.New("Database name cannot be empty")
 	}
 	if db, has := databases[p["name"]]; has {
-		return db
+		return db, nil
 	}
 	// TODO Open DB here and put pointer to databases map
-	return nil
+	return nil, nil
 }
