@@ -2,11 +2,11 @@ package client
 
 import (
 	"net"
-	"db"
+	"db/schema"
 )
 
 type ClientType struct {
 	Conn          net.Conn
 	Authenticated bool
-	Db            *db.Database
+	Db            *schema.Database
 }

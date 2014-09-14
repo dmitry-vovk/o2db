@@ -2,13 +2,13 @@ package auth
 
 import (
 	"server/client"
-	"server/message"
 	"config"
+	"server/types"
 )
 
 // Check client credentials
-func Authenticate(c *client.ClientType, p message.Payload) bool {
-	if p["name"] == config.Config.User.Name && p["password"] == config.Config.User.Password {
+func Authenticate(c *client.ClientType, p types.Authenticate) bool {
+	if p.Name == config.Config.User.Name && p.Password == config.Config.User.Password {
 		c.Authenticated = true
 	}
 	return c.Authenticated

@@ -1,70 +1,9 @@
 <?php
 
-class O2dbClient {
-
-    /** @var resource */
-    protected $socket;
-    /** @var string */
-    protected $address;
-    /** @var int */
-    protected $port;
-    const DELIMITER = 0;
-    const TYPE_AUTHENTICATE = 0;
-    const TYPE_CREATE_DB = 1;
-    const TYPE_CREATE_COLLECTION = 2;
-
-    /**
-     * @param string $address
-     * @param int $port
-     */
-    public function __construct($address, $port = 1333) {
-        $this->address = $address;
-        $this->port = $port;
-        $this->connect();
-    }
-
-    public function __destruct() {
-        socket_close($this->socket);
-    }
-
-    /**
-     * Attempt to establish connection
-     *
-     * @throws Exception
-     */
-    protected function connect() {
-        $this->socket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        if (!$this->socket) {
-            throw new Exception(socket_strerror(socket_last_error()));
-        }
-        if (!@socket_connect($this->socket, $this->address, $this->port)) {
-            throw new Exception(socket_strerror(socket_last_error($this->socket)));
-        }
-    }
-
-    /**
-     * Sends message in JSON encoded format and returns raw response
-     *
-     * @param mixed $message
-     *
-     * @return string
-     */
-    public function send($message) {
-        $msg = json_encode($message, JSON_PRETTY_PRINT) . chr(self::DELIMITER);
-        socket_write($this->socket, $msg, strlen($msg));
-        $incoming = '';
-        while ($response = socket_read($this->socket, 1)) {
-            if (ord($response) === self::DELIMITER) {
-                break;
-            } else {
-                $incoming .= $response;
-            }
-        }
-        return $incoming;
-    }
-}
-
+require 'O2dbClient.php';
 $client = new O2dbClient('127.0.0.1');
+
+// Authenticate
 $message = [
     'type'    => O2dbClient::TYPE_AUTHENTICATE,
     'payload' => [
@@ -73,17 +12,47 @@ $message = [
     ],
 ];
 $response = $client->send($message);
-echo $response, PHP_EOL;
+echo '<<<', $response, PHP_EOL;
+
+// Create database
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_DB,
     'payload' => [
         'name' => 'test_01'
     ],
 ];
-/*
-$message = [
-    'type' => O2dbClient::TYPE_CREATE_COLLECTION,
-    'payload' => [],
-];*/
 $response = $client->send($message);
-echo $response, PHP_EOL;
+echo '<<<', $response, PHP_EOL;
+
+// Open database
+$message = [
+    'type'    => O2dbClient::TYPE_OPEN_DB,
+    'payload' => [
+        'name' => 'test_01'
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+
+// Create collection
+$message = [
+    'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
+    'payload' => [
+        'class'  => 'Job',
+        'fields' => [
+            'id'      => [
+                'type'  => 'int',
+                'index' => 'primary',
+            ],
+            'created' => [
+                'type'  => 'datetime',
+                'index' => 'secondary',
+            ],
+            'payload' => [
+                'type' => 'string',
+            ],
+        ],
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;

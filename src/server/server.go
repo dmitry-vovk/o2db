@@ -11,6 +11,7 @@ import (
 	"net"
 	"server/client"
 	"server/message"
+	"fmt"
 )
 
 const (
@@ -52,6 +53,7 @@ func (s *ServerType) Run() error {
 func (s *ServerType) handler(c *client.ClientType) {
 	defer c.Conn.Close()
 	for {
+		log.Print("---------------------------------------------")
 		msg, err := bufio.NewReader(c.Conn).ReadBytes(messageDelimiter)
 		if err != nil {
 			if err == io.EOF {
@@ -63,7 +65,8 @@ func (s *ServerType) handler(c *client.ClientType) {
 		}
 		query, err := message.Parse(msg[:len(msg)-1]) // cut out delimiter
 		if err != nil {
-			log.Printf("%s", err)
+			log.Printf("Parse error: %s", err)
+			err = s.respond(c, fmt.Sprintf("%s", err))
 		} else {
 			log.Printf("Message: %v", query)
 			response := dbQuery.ProcessQuery(c, query)
