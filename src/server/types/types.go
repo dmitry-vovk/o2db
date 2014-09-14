@@ -38,6 +38,11 @@ type CreateDatabase struct {
 	Name string `json:"name"` // Name for the new database. Must be correct file name.
 }
 
+// Drop database request
+type DropDatabase struct {
+	Name string `json:"name"` // Name for the database
+}
+
 // Open (and set as default for connected client) database
 type OpenDatabase struct {
 	Name string `json:"name"` // Name of the database to open

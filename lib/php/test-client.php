@@ -61,3 +61,14 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+
+// Drop collection
+$message = [
+    'type'    => O2dbClient::TYPE_DROP_DB,
+    'payload' => [
+        'name' => 'test_01',
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+

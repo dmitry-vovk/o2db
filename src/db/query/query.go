@@ -40,6 +40,12 @@ func ProcessQuery(c *client.ClientType, q *types.Container) interface{} {
 				return "Database created"
 			}
 			return string(fmt.Sprintf("%s", err))
+		case types.DropDatabase:
+			err := db.DropDatabase(q.Payload.(types.DropDatabase))
+			if err == nil {
+				return "Database deleted"
+			}
+			return string(fmt.Sprintf("%s", err))
 		// Collection operations
 		case types.CreateCollection:
 			err := db.CreateCollection(c, q.Payload.(types.CreateCollection))
