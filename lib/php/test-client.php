@@ -2,7 +2,6 @@
 
 require 'O2dbClient.php';
 $client = new O2dbClient('127.0.0.1');
-
 // Authenticate
 $message = [
     'type'    => O2dbClient::TYPE_AUTHENTICATE,
@@ -13,7 +12,6 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
 // Create database
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_DB,
@@ -23,7 +21,6 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
 // Open database
 $message = [
     'type'    => O2dbClient::TYPE_OPEN_DB,
@@ -33,7 +30,6 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
 // Create collection
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
@@ -52,6 +48,15 @@ $message = [
                 'type' => 'string',
             ],
         ],
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+// Drop collection
+$message = [
+    'type'    => O2dbClient::TYPE_DROP_COLLECTION,
+    'payload' => [
+        'class' => 'Job',
     ],
 ];
 $response = $client->send($message);

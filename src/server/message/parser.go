@@ -38,6 +38,12 @@ func Parse(msg []byte) (*types.Container, error) {
 		if err == nil {
 			parsedMessage.Payload = p
 		}
+	case types.TypeDropCollection:
+		var p types.DropCollection
+		err = json.Unmarshal(*m["payload"], &p)
+		if err == nil {
+			parsedMessage.Payload = p
+		}
 	default:
 		err = json.Unmarshal(*m["payload"], &parsedMessage.Payload)
 	}

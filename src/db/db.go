@@ -76,6 +76,17 @@ func CreateCollection(c *client.ClientType, p types.CreateCollection) error {
 	return ioutil.WriteFile(collectionPath + string(os.PathSeparator) + "schema.json", schema, os.FileMode(0600))
 }
 
+func DropCollection(c *client.ClientType, p types.DropCollection) error {
+	if c.Db == nil {
+		return errors.New("Database not selected")
+	}
+	var collectionPath = c.Db.DataDir + string(os.PathSeparator) + getHash(p.Name)
+	if _, err := os.Stat(collectionPath); os.IsNotExist(err) {
+		return errors.New("Collection does not exist")
+	}
+	return os.RemoveAll(collectionPath)
+}
+
 func getHash(s string) string {
 	return hex.EncodeToString(sha1.New().Sum([]byte(s)))
 }

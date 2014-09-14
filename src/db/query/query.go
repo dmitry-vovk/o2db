@@ -47,6 +47,12 @@ func ProcessQuery(c *client.ClientType, q *types.Container) interface{} {
 				return "Collection created"
 			}
 			return string(fmt.Sprintf("%s", err))
+		case types.DropCollection:
+			err := db.DropCollection(c, q.Payload.(types.DropCollection))
+			if err == nil {
+				return "Collection deleted"
+			}
+			return string(fmt.Sprintf("%s", err))
 		// Default stub
 		default:
 			log.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))

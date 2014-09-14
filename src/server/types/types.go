@@ -54,3 +54,7 @@ type Field struct {
 	Type  string `json:"type"`   // type
 	Index string `json:"length"` // index or not. Index can be 'primary' or 'secondary'.
 }
+
+type DropCollection struct {
+	Name string `json:"class"` // Collection name (class in terms of OOP)
+}
