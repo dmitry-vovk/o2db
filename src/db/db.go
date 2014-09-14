@@ -12,6 +12,8 @@ import (
 	"encoding/hex"
 	"io/ioutil"
 	"encoding/json"
+	"path/filepath"
+	"strings"
 )
 
 var (
@@ -27,6 +29,43 @@ func CreateDatabase(p types.CreateDatabase) error {
 		return errors.New("Database already exists")
 	}
 	return os.Mkdir(dbPath, os.FileMode(0700))
+}
+
+func DropDatabase(p types.DropDatabase) error {
+	if p.Name == "" {
+		return errors.New("Database name cannot be empty")
+	}
+	var dbPath = config.Config.DataDir + string(os.PathSeparator) + p.Name
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		return errors.New("Database does not exists")
+	}
+	if _, has := databases[p.Name]; has {
+		delete(databases, p.Name)
+	}
+	return os.RemoveAll(dbPath)
+}
+
+func ListDatabases(p types.ListDatabases) (string, error) {
+	if p.Mask == "" {
+		return "", errors.New("Mask cannot be empty")
+	}
+	files, err := filepath.Glob(config.Config.DataDir + string(os.PathSeparator) + p.Mask)
+	if err != nil {
+		return "", err
+	}
+	var dirs []string
+	for _, dir := range files {
+		fi, err := os.Stat(dir)
+		if err == nil && fi.IsDir() {
+			// TODO add more sophisticated check for database presence besides being a directory
+			dirs = append(dirs, strings.Replace(dir, config.Config.DataDir + string(os.PathSeparator), "", 1))
+		}
+	}
+	response, err := json.Marshal(dirs)
+	if err != nil {
+		return "", err
+	}
+	return string(response), nil
 }
 
 func OpenDatabase(p types.OpenDatabase) (*Database, error) {
@@ -85,20 +124,6 @@ func DropCollection(c *client.ClientType, p types.DropCollection) error {
 		return errors.New("Collection does not exist")
 	}
 	return os.RemoveAll(collectionPath)
-}
-
-func DropDatabase(p types.DropDatabase) error {
-	if p.Name == "" {
-		return errors.New("Database name cannot be empty")
-	}
-	var dbPath = config.Config.DataDir + string(os.PathSeparator) + p.Name
-	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
-		return errors.New("Database does not exists")
-	}
-	if _, has := databases[p.Name]; has {
-		delete(databases, p.Name)
-	}
-	return os.RemoveAll(dbPath)
 }
 
 func getHash(s string) string {

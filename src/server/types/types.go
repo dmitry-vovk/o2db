@@ -43,6 +43,11 @@ type DropDatabase struct {
 	Name string `json:"name"` // Name for the database
 }
 
+// List databases according to mask
+type ListDatabases struct {
+	Mask string `json:"mask"` // Mask is glob expression
+}
+
 // Open (and set as default for connected client) database
 type OpenDatabase struct {
 	Name string `json:"name"` // Name of the database to open

@@ -81,7 +81,7 @@ class O2dbClient {
         echo '>>>', var_export($msg, true), PHP_EOL;
         socket_write($this->socket, $msg, strlen($msg));
         $incoming = '';
-        while ($response = socket_read($this->socket, 1)) {
+        while (($response = socket_read($this->socket, 1)) !== false) {
             if (ord($response) === self::DELIMITER) {
                 break;
             } else {

@@ -61,8 +61,16 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
-// Drop collection
+// List databases
+$message = [
+    'type'    => O2dbClient::TYPE_LIST_DB,
+    'payload' => [
+        'mask' => '*',
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+// Drop database
 $message = [
     'type'    => O2dbClient::TYPE_DROP_DB,
     'payload' => [
@@ -71,4 +79,3 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
