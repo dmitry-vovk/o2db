@@ -27,14 +27,10 @@ type Container struct {
 	Payload interface{} `json:"payload"` // any type of payload
 }
 
-
+// Response container
 type Response struct {
 	Result   bool        `json:"result"`
 	Response interface{} `json:"response"`
-}
-
-type ResponseMessage struct {
-	Message string `json:"message"`
 }
 
 // Authentication request payload
@@ -65,8 +61,8 @@ type OpenDatabase struct {
 
 // Create collection with Name and Fields
 type CreateCollection struct {
-	Name    string           `json:"class"`  // Collection name (class in terms of OOP)
-	Fields  map[string]Field `json:"fields"` // Collection of named fields
+	Name   string           `json:"class"`  // Collection name (class in terms of OOP)
+	Fields map[string]Field `json:"fields"` // Collection of named fields
 }
 
 // Collection field description

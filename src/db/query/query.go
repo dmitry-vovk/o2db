@@ -3,13 +3,13 @@ package query
 import (
 	"db"
 	"db/auth"
-	"fmt"
-	"server/client"
-	"server/types"
-	"reflect"
-	"log"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
+	"reflect"
+	"server/client"
+	"server/types"
 )
 
 // This is the main entry for processing queries
@@ -34,7 +34,7 @@ func ProcessQuery(c *client.ClientType, q *types.Container) []byte {
 			if err == nil {
 				c.Db = dbPtr
 			}
-			return respond(types.ResponseMessage{Message:"Database opened"}, err)
+			return respond("Database opened", err)
 		case types.CreateDatabase:
 			return respond("Database created", db.CreateDatabase(q.Payload.(types.CreateDatabase)))
 		case types.DropDatabase:

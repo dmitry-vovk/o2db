@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"server/client"
 	"config"
+	"server/client"
 	"server/types"
 )
 

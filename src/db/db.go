@@ -2,17 +2,17 @@ package db
 
 import (
 	"config"
-	"errors"
-	"os"
-	"server/types"
-	"log"
-	. "db/schema"
-	"server/client"
 	"crypto/sha1"
+	. "db/schema"
 	"encoding/hex"
-	"io/ioutil"
 	"encoding/json"
+	"errors"
+	"io/ioutil"
+	"log"
+	"os"
 	"path/filepath"
+	"server/client"
+	"server/types"
 	"strings"
 )
 
@@ -58,7 +58,7 @@ func ListDatabases(p types.ListDatabases) (string, error) {
 		fi, err := os.Stat(dir)
 		if err == nil && fi.IsDir() {
 			// TODO add more sophisticated check for database presence besides being a directory
-			dirs = append(dirs, strings.Replace(dir, config.Config.DataDir + string(os.PathSeparator), "", 1))
+			dirs = append(dirs, strings.Replace(dir, config.Config.DataDir+string(os.PathSeparator), "", 1))
 		}
 	}
 	response, err := json.Marshal(dirs)
@@ -88,7 +88,7 @@ func openDatabase(dbName string) error {
 		return errors.New("Database does not exists")
 	}
 	databases[dbName] = &Database{
-		DataDir: dbPath,
+		DataDir:     dbPath,
 		Collections: make(map[string]Collection),
 	}
 	return nil
@@ -112,7 +112,7 @@ func CreateCollection(c *client.ClientType, p types.CreateCollection) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(collectionPath + string(os.PathSeparator) + "schema.json", schema, os.FileMode(0600))
+	return ioutil.WriteFile(collectionPath+string(os.PathSeparator)+"schema.json", schema, os.FileMode(0600))
 }
 
 func DropCollection(c *client.ClientType, p types.DropCollection) error {

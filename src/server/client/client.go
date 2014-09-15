@@ -1,8 +1,8 @@
 package client
 
 import (
-	"net"
 	"db/schema"
+	"net"
 )
 
 type ClientType struct {
