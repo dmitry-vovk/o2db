@@ -8,20 +8,22 @@ import (
 	"server/types"
 	"reflect"
 	"log"
+	"encoding/json"
+	"errors"
 )
 
 // This is the main entry for processing queries
-func ProcessQuery(c *client.ClientType, q *types.Container) interface{} {
+func ProcessQuery(c *client.ClientType, q *types.Container) []byte {
 	if q == nil {
-		return "no message"
+		return respond("no message", nil)
 	}
 	log.Printf("Payload type: %s", reflect.TypeOf(q.Payload))
 	switch q.Payload.(type) {
 	case types.Authenticate:
 		if auth.Authenticate(c, q.Payload.(types.Authenticate)) {
-			return "Authenticated"
+			return respond("Authenticated", nil)
 		} else {
-			return "Authentication failed"
+			return respond("Authentication failed", nil)
 		}
 	}
 	if c.Authenticated {
@@ -31,45 +33,44 @@ func ProcessQuery(c *client.ClientType, q *types.Container) interface{} {
 			dbPtr, err := db.OpenDatabase(q.Payload.(types.OpenDatabase))
 			if err == nil {
 				c.Db = dbPtr
-				return "Database opened"
 			}
-			return string(fmt.Sprintf("%s", err))
+			return respond(types.ResponseMessage{Message:"Database opened"}, err)
 		case types.CreateDatabase:
-			err := db.CreateDatabase(q.Payload.(types.CreateDatabase))
-			if err == nil {
-				return "Database created"
-			}
-			return string(fmt.Sprintf("%s", err))
+			return respond("Database created", db.CreateDatabase(q.Payload.(types.CreateDatabase)))
 		case types.DropDatabase:
-			err := db.DropDatabase(q.Payload.(types.DropDatabase))
-			if err == nil {
-				return "Database deleted"
-			}
-			return string(fmt.Sprintf("%s", err))
+			return respond("Database deleted", db.DropDatabase(q.Payload.(types.DropDatabase)))
 		case types.ListDatabases:
 			resp, err := db.ListDatabases(q.Payload.(types.ListDatabases))
-			if err == nil {
-				return resp
-			}
-			return string(fmt.Sprintf("%s", err))
+			return respond(resp, err)
 		// Collection operations
 		case types.CreateCollection:
-			err := db.CreateCollection(c, q.Payload.(types.CreateCollection))
-			if err == nil {
-				return "Collection created"
-			}
-			return string(fmt.Sprintf("%s", err))
+			return respond("Collection created", db.CreateCollection(c, q.Payload.(types.CreateCollection)))
 		case types.DropCollection:
-			err := db.DropCollection(c, q.Payload.(types.DropCollection))
-			if err == nil {
-				return "Collection deleted"
-			}
-			return string(fmt.Sprintf("%s", err))
+			return respond("Collection deleted", db.DropCollection(c, q.Payload.(types.DropCollection)))
 		// Default stub
 		default:
 			log.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
-			return string(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(q.Payload)))
+			return respond(nil, errors.New(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(q.Payload))))
 		}
 	}
-	return "Authentication required"
+	return respond("Authentication required", nil)
+}
+
+// Wraps response structure and error into JSON
+func respond(r interface{}, e error) []byte {
+	resp := types.Response{}
+	if e == nil {
+		resp.Result = true
+		resp.Response = r
+	} else {
+		resp.Result = false
+		resp.Response = fmt.Sprintf("%s", e)
+	}
+	out, err := json.Marshal(resp)
+	if err != nil {
+		log.Printf("Error encoding response: %s", err)
+		return []byte{}
+	}
+	log.Printf("Response: %s", out)
+	return out
 }

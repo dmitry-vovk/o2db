@@ -5,13 +5,11 @@ import (
 	"bytes"
 	"config"
 	dbQuery "db/query"
-	"encoding/json"
 	"io"
 	"log"
 	"net"
 	"server/client"
 	"server/message"
-	"fmt"
 )
 
 const (
@@ -66,23 +64,16 @@ func (s *ServerType) handler(c *client.ClientType) {
 		query, err := message.Parse(msg[:len(msg)-1]) // cut out delimiter
 		if err != nil {
 			log.Printf("Parse error: %s", err)
-			err = s.respond(c, fmt.Sprintf("%s", err))
+			// TODO add proper handling
+			// err = s.respond(c, fmt.Sprintf("%s", err))
 		} else {
 			log.Printf("Message: %v", query)
-			response := dbQuery.ProcessQuery(c, query)
-			err = s.respond(c, response)
+			out := dbQuery.ProcessQuery(c, query)
+			_, err = io.Copy(c.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
 			if err != nil {
-				log.Printf("Error responding to client: %s", err)
+				log.Printf("Error sending response to client: %s", err)
+				return
 			}
 		}
 	}
-}
-
-// Send response to client
-func (s *ServerType) respond(c *client.ClientType, r interface{}) error {
-	out, err := json.Marshal(r)
-	if err == nil {
-		_, err = io.Copy(c.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
-	}
-	return err
 }

@@ -27,6 +27,16 @@ type Container struct {
 	Payload interface{} `json:"payload"` // any type of payload
 }
 
+
+type Response struct {
+	Result   bool        `json:"result"`
+	Response interface{} `json:"response"`
+}
+
+type ResponseMessage struct {
+	Message string `json:"message"`
+}
+
 // Authentication request payload
 type Authenticate struct {
 	Name     string `json:"name"`     // username
