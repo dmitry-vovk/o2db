@@ -1,5 +1,7 @@
 package types
 
+import "net"
+
 const (
 	TypeAuthenticate uint = 0
 
@@ -34,7 +36,7 @@ type Response struct {
 }
 
 // Authentication request payload
-type TAuthenticate struct {
+type Authenticate struct {
 	Name     string `json:"name"`     // username
 	Password string `json:"password"` // and password
 }
@@ -75,3 +77,34 @@ type DropCollection struct {
 	Name string `json:"class"` // Collection name (class in terms of OOP)
 }
 
+type Index struct {
+	Name string
+}
+
+type Schema struct {
+	ClassName string
+	Fields    []Field
+	Indices   []Index
+}
+
+type Object struct {
+	Class  Schema
+	Id     uint64
+	Fields []Field
+}
+
+type Collection struct {
+	Name    string
+	Objects []interface{}
+}
+
+type Database struct {
+	DataDir     string
+	Collections map[string]Collection
+}
+
+type ClientType struct {
+	Conn          net.Conn
+	Authenticated bool
+	Db            *Database
+}

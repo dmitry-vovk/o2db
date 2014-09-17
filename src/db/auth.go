@@ -2,11 +2,11 @@ package db
 
 import (
 	"config"
-	"types"
+	. "types"
 )
 
 // Check client credentials
-func Authenticate(c *ClientType, p types.TAuthenticate) bool {
+func Authenticate(c *ClientType, p Authenticate) bool {
 	if p.Name == config.Config.User.Name && p.Password == config.Config.User.Password {
 		c.Authenticated = true
 	}

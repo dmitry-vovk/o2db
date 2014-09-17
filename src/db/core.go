@@ -13,6 +13,6 @@ type Package struct {
 func (this *DbCore) Processor() {
 	for {
 		pkg := <- this.Input
-		pkg.RespChan <- ProcessQuery(pkg.Client, pkg.Container)
+		pkg.RespChan <- this.ProcessQuery(pkg.Client, pkg.Container)
 	}
 }

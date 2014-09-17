@@ -18,7 +18,7 @@ func Parse(msg []byte) (*types.Container, error) {
 	}
 	switch parsedMessage.Type {
 	case types.TypeAuthenticate:
-		var p types.TAuthenticate
+		var p types.Authenticate
 		err = json.Unmarshal(*m["payload"], &p)
 		if err == nil {
 			parsedMessage.Payload = p

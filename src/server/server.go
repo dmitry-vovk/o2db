@@ -34,8 +34,8 @@ func CreateNew(config *config.ConfigType) *ServerType {
 }
 
 // Run processing
-func (s *ServerType) Run() error {
-	socket, err := net.Listen("tcp4", s.Config.ListenTCP)
+func (this *ServerType) Run() error {
+	socket, err := net.Listen("tcp4", this.Config.ListenTCP)
 	if err != nil {
 		return err
 	}
@@ -49,12 +49,12 @@ func (s *ServerType) Run() error {
 		c := &ClientType{
 			Conn: conn,
 		}
-		go s.handler(c)
+		go this.handler(c)
 	}
 }
 
 // Handle single client connection
-func (s *ServerType) handler(c *ClientType) {
+func (this *ServerType) handler(c *ClientType) {
 	defer c.Conn.Close()
 	for {
 		log.Print("---------------------------------------------")
@@ -80,7 +80,7 @@ func (s *ServerType) handler(c *ClientType) {
 				Client:    c,
 				RespChan:  respChan,
 			}
-			coreChan <- pkg
+			this.Core.Input <- pkg
 			out := <- pkg.RespChan //dbQuery.ProcessQuery(c, query)
 			_, err = io.Copy(c.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
 			if err != nil {

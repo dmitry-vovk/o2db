@@ -10,14 +10,14 @@ import (
 )
 
 // This is the main entry for processing queries
-func ProcessQuery(c *ClientType, q *Container) []byte {
+func (this *DbCore) ProcessQuery(c *ClientType, q *Container) []byte {
 	if q == nil {
 		return respond("no message", nil)
 	}
 	log.Printf("Payload type: %s", reflect.TypeOf(q.Payload))
 	switch q.Payload.(type) {
-	case TAuthenticate:
-		if Authenticate(c, q.Payload.(TAuthenticate)) {
+	case Authenticate:
+		if this.Authenticate(c, q.Payload.(Authenticate)) {
 			return respond("Authenticated", nil)
 		} else {
 			return respond("Authentication failed", nil)
@@ -27,23 +27,23 @@ func ProcessQuery(c *ClientType, q *Container) []byte {
 		switch q.Payload.(type) {
 		// Database operations
 		case OpenDatabase:
-			dbPtr, err := OpenDatabase(q.Payload.(OpenDatabase))
+			dbPtr, err := this.OpenDatabase(q.Payload.(OpenDatabase))
 			if err == nil {
 				c.Db = dbPtr
 			}
 			return respond("Database opened", err)
 		case CreateDatabase:
-			return respond("Database created", CreateDatabase(q.Payload.(CreateDatabase)))
+			return respond("Database created", this.CreateDatabase(q.Payload.(CreateDatabase)))
 		case DropDatabase:
-			return respond("Database deleted", DropDatabase(q.Payload.(DropDatabase)))
+			return respond("Database deleted", this.DropDatabase(q.Payload.(DropDatabase)))
 		case ListDatabases:
-			resp, err := ListDatabases(q.Payload.(ListDatabases))
+			resp, err := this.ListDatabases(q.Payload.(ListDatabases))
 			return respond(resp, err)
 		// Collection operations
 		case CreateCollection:
-			return respond("Collection created", CreateCollection(c, q.Payload.(CreateCollection)))
+			return respond("Collection created", this.CreateCollection(c, q.Payload.(CreateCollection)))
 		case DropCollection:
-			return respond("Collection deleted", DropCollection(c, q.Payload.(DropCollection)))
+			return respond("Collection deleted", this.DropCollection(c, q.Payload.(DropCollection)))
 		// Default stub
 		default:
 			log.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
