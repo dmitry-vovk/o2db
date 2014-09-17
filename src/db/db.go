@@ -10,17 +10,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	. "types"
 	"strings"
-)
-
-type DbCore struct {
-	databases map[string]*Database
-	Input chan Package
-}
-
-var (
-	Core DbCore
+	. "types"
 )
 
 func (this *DbCore) CreateDatabase(p CreateDatabase) error {
