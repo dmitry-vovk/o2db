@@ -16,8 +16,8 @@ func (this *DbCore) ProcessQuery(c *ClientType, q *Container) []byte {
 	}
 	log.Printf("Payload type: %s", reflect.TypeOf(q.Payload))
 	switch q.Payload.(type) {
-	case Authenticate:
-		if this.Authenticate(c, q.Payload.(Authenticate)) {
+	case Authentication:
+		if this.Authenticate(c, q.Payload.(Authentication)) {
 			return respond("Authenticated", nil)
 		} else {
 			return respond("Authentication failed", nil)

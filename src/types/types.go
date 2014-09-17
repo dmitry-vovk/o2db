@@ -36,7 +36,7 @@ type Response struct {
 }
 
 // Authentication request payload
-type Authenticate struct {
+type Authentication struct {
 	Name     string `json:"name"`     // username
 	Password string `json:"password"` // and password
 }

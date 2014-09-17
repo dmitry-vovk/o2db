@@ -28,8 +28,8 @@ func CreateNew(config *config.ConfigType) *ServerType {
 		Config: config,
 		Core: &db.DbCore{},
 	}
-	c.Core = make(chan db.Package)
-	go c.Processor()
+	c.Core.Input = make(chan db.Package)
+	go c.Core.Processor()
 	return c
 }
 
@@ -74,19 +74,23 @@ func (this *ServerType) handler(c *ClientType) {
 			// err = s.respond(c, fmt.Sprintf("%s", err))
 		} else {
 			log.Printf("Message: %v", query)
-			var respChan chan types.Response
+			var respChan chan []byte
 			pkg := db.Package{
-				Container: &query,
+				Container: query,
 				Client:    c,
 				RespChan:  respChan,
 			}
+			go handle(pkg)
 			this.Core.Input <- pkg
-			out := <- pkg.RespChan //dbQuery.ProcessQuery(c, query)
-			_, err = io.Copy(c.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
-			if err != nil {
-				log.Printf("Error sending response to client: %s", err)
-				return
-			}
 		}
+	}
+}
+
+func handle(in db.Package) {
+	out := <- in.RespChan //dbQuery.ProcessQuery(c, query)
+	_, err := io.Copy(in.Client.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
+	if err != nil {
+		log.Printf("Error sending response to client: %s", err)
+		return
 	}
 }

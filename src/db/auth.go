@@ -6,7 +6,7 @@ import (
 )
 
 // Check client credentials
-func Authenticate(c *ClientType, p Authenticate) bool {
+func (this *DbCore) Authenticate(c *ClientType, p Authentication) bool {
 	if p.Name == config.Config.User.Name && p.Password == config.Config.User.Password {
 		c.Authenticated = true
 	}
