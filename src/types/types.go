@@ -34,7 +34,7 @@ type Response struct {
 }
 
 // Authentication request payload
-type Authenticate struct {
+type TAuthenticate struct {
 	Name     string `json:"name"`     // username
 	Password string `json:"password"` // and password
 }
@@ -74,3 +74,4 @@ type Field struct {
 type DropCollection struct {
 	Name string `json:"class"` // Collection name (class in terms of OOP)
 }
+

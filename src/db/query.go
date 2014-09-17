@@ -1,26 +1,23 @@
-package query
+package db
 
 import (
-	"db"
-	"db/auth"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"reflect"
-	"server/client"
-	"server/types"
+	. "types"
 )
 
 // This is the main entry for processing queries
-func ProcessQuery(c *client.ClientType, q *types.Container) []byte {
+func ProcessQuery(c *ClientType, q *Container) []byte {
 	if q == nil {
 		return respond("no message", nil)
 	}
 	log.Printf("Payload type: %s", reflect.TypeOf(q.Payload))
 	switch q.Payload.(type) {
-	case types.Authenticate:
-		if auth.Authenticate(c, q.Payload.(types.Authenticate)) {
+	case TAuthenticate:
+		if Authenticate(c, q.Payload.(TAuthenticate)) {
 			return respond("Authenticated", nil)
 		} else {
 			return respond("Authentication failed", nil)
@@ -29,24 +26,24 @@ func ProcessQuery(c *client.ClientType, q *types.Container) []byte {
 	if c.Authenticated {
 		switch q.Payload.(type) {
 		// Database operations
-		case types.OpenDatabase:
-			dbPtr, err := db.OpenDatabase(q.Payload.(types.OpenDatabase))
+		case OpenDatabase:
+			dbPtr, err := OpenDatabase(q.Payload.(OpenDatabase))
 			if err == nil {
 				c.Db = dbPtr
 			}
 			return respond("Database opened", err)
-		case types.CreateDatabase:
-			return respond("Database created", db.CreateDatabase(q.Payload.(types.CreateDatabase)))
-		case types.DropDatabase:
-			return respond("Database deleted", db.DropDatabase(q.Payload.(types.DropDatabase)))
-		case types.ListDatabases:
-			resp, err := db.ListDatabases(q.Payload.(types.ListDatabases))
+		case CreateDatabase:
+			return respond("Database created", CreateDatabase(q.Payload.(CreateDatabase)))
+		case DropDatabase:
+			return respond("Database deleted", DropDatabase(q.Payload.(DropDatabase)))
+		case ListDatabases:
+			resp, err := ListDatabases(q.Payload.(ListDatabases))
 			return respond(resp, err)
 		// Collection operations
-		case types.CreateCollection:
-			return respond("Collection created", db.CreateCollection(c, q.Payload.(types.CreateCollection)))
-		case types.DropCollection:
-			return respond("Collection deleted", db.DropCollection(c, q.Payload.(types.DropCollection)))
+		case CreateCollection:
+			return respond("Collection created", CreateCollection(c, q.Payload.(CreateCollection)))
+		case DropCollection:
+			return respond("Collection deleted", DropCollection(c, q.Payload.(DropCollection)))
 		// Default stub
 		default:
 			log.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
@@ -58,7 +55,7 @@ func ProcessQuery(c *client.ClientType, q *types.Container) []byte {
 
 // Wraps response structure and error into JSON
 func respond(r interface{}, e error) []byte {
-	resp := types.Response{}
+	resp := Response{}
 	if e == nil {
 		resp.Result = true
 		resp.Response = r

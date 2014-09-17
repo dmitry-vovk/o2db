@@ -2,7 +2,7 @@ package message
 
 import (
 	"encoding/json"
-	"server/types"
+	"types"
 )
 
 func Parse(msg []byte) (*types.Container, error) {
@@ -18,7 +18,7 @@ func Parse(msg []byte) (*types.Container, error) {
 	}
 	switch parsedMessage.Type {
 	case types.TypeAuthenticate:
-		var p types.Authenticate
+		var p types.TAuthenticate
 		err = json.Unmarshal(*m["payload"], &p)
 		if err == nil {
 			parsedMessage.Payload = p

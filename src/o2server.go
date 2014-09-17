@@ -9,7 +9,9 @@ import (
 )
 
 func main() {
-	log.Fatal(server.CreateNew(config.Config).Run())
+	log.Fatal(
+		server.CreateNew(config.Config).Run(),
+	)
 }
 
 func init() {

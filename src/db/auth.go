@@ -1,13 +1,12 @@
-package auth
+package db
 
 import (
 	"config"
-	"server/client"
-	"server/types"
+	"types"
 )
 
 // Check client credentials
-func Authenticate(c *client.ClientType, p types.Authenticate) bool {
+func Authenticate(c *ClientType, p types.TAuthenticate) bool {
 	if p.Name == config.Config.User.Name && p.Password == config.Config.User.Password {
 		c.Authenticated = true
 	}

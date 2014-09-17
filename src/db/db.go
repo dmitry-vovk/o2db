@@ -3,7 +3,6 @@ package db
 import (
 	"config"
 	"crypto/sha1"
-	. "db/schema"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -11,16 +10,20 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"server/client"
-	"server/types"
+	. "types"
 	"strings"
 )
 
+type DbCore struct {
+	databases map[string]*Database
+	Input chan Package
+}
+
 var (
-	databases = make(map[string]*Database)
+	Core DbCore
 )
 
-func CreateDatabase(p types.CreateDatabase) error {
+func (this *DbCore) CreateDatabase(p CreateDatabase) error {
 	if p.Name == "" {
 		return errors.New("Cannot create database with empty name")
 	}
@@ -31,7 +34,7 @@ func CreateDatabase(p types.CreateDatabase) error {
 	return os.Mkdir(dbPath, os.FileMode(0700))
 }
 
-func DropDatabase(p types.DropDatabase) error {
+func (this *DbCore) DropDatabase(p DropDatabase) error {
 	if p.Name == "" {
 		return errors.New("Database name cannot be empty")
 	}
@@ -39,13 +42,13 @@ func DropDatabase(p types.DropDatabase) error {
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		return errors.New("Database does not exists")
 	}
-	if _, has := databases[p.Name]; has {
-		delete(databases, p.Name)
+	if _, has := this.databases[p.Name]; has {
+		delete(this.databases, p.Name)
 	}
 	return os.RemoveAll(dbPath)
 }
 
-func ListDatabases(p types.ListDatabases) (string, error) {
+func (this *DbCore) ListDatabases(p ListDatabases) (string, error) {
 	if p.Mask == "" {
 		return "", errors.New("Mask cannot be empty")
 	}
@@ -68,33 +71,33 @@ func ListDatabases(p types.ListDatabases) (string, error) {
 	return string(response), nil
 }
 
-func OpenDatabase(p types.OpenDatabase) (*Database, error) {
+func (this *DbCore) OpenDatabase(p OpenDatabase) (*Database, error) {
 	if p.Name == "" {
 		return nil, errors.New("Database name cannot be empty")
 	}
-	if db, has := databases[p.Name]; has {
+	if db, has := this.databases[p.Name]; has {
 		return db, nil
 	}
-	err := openDatabase(p.Name)
+	err := this.openDatabase(p.Name)
 	if err == nil {
-		return databases[p.Name], nil
+		return this.databases[p.Name], nil
 	}
 	return nil, err
 }
 
-func openDatabase(dbName string) error {
+func (this *DbCore) openDatabase(dbName string) error {
 	var dbPath = config.Config.DataDir + string(os.PathSeparator) + dbName
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		return errors.New("Database does not exists")
 	}
-	databases[dbName] = &Database{
+	this.databases[dbName] = &Database{
 		DataDir:     dbPath,
 		Collections: make(map[string]Collection),
 	}
 	return nil
 }
 
-func CreateCollection(c *client.ClientType, p types.CreateCollection) error {
+func (this *DbCore) CreateCollection(c *ClientType, p CreateCollection) error {
 	if c.Db == nil {
 		return errors.New("Database not selected")
 	}
@@ -115,7 +118,7 @@ func CreateCollection(c *client.ClientType, p types.CreateCollection) error {
 	return ioutil.WriteFile(collectionPath+string(os.PathSeparator)+"schema.json", schema, os.FileMode(0600))
 }
 
-func DropCollection(c *client.ClientType, p types.DropCollection) error {
+func (this *DbCore) DropCollection(c *ClientType, p DropCollection) error {
 	if c.Db == nil {
 		return errors.New("Database not selected")
 	}

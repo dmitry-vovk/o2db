@@ -4,12 +4,12 @@ import (
 	"bufio"
 	"bytes"
 	"config"
-	dbQuery "db/query"
 	"io"
 	"log"
 	"net"
-	"server/client"
 	"server/message"
+	"db"
+	. "types"
 )
 
 const (
@@ -18,16 +18,22 @@ const (
 
 type ServerType struct {
 	Config  *config.ConfigType
-	Clients []*client.ClientType
+	Clients []*ClientType
+	Core    *db.DbCore
 }
 
+// Create and initialise new server instance
 func CreateNew(config *config.ConfigType) *ServerType {
 	c := &ServerType{
 		Config: config,
+		Core: &db.DbCore{},
 	}
+	c.Core = make(chan db.Package)
+	go c.Processor()
 	return c
 }
 
+// Run processing
 func (s *ServerType) Run() error {
 	socket, err := net.Listen("tcp4", s.Config.ListenTCP)
 	if err != nil {
@@ -40,7 +46,7 @@ func (s *ServerType) Run() error {
 			continue
 		}
 		log.Printf("Client connected")
-		c := &client.ClientType{
+		c := &ClientType{
 			Conn: conn,
 		}
 		go s.handler(c)
@@ -48,7 +54,7 @@ func (s *ServerType) Run() error {
 }
 
 // Handle single client connection
-func (s *ServerType) handler(c *client.ClientType) {
+func (s *ServerType) handler(c *ClientType) {
 	defer c.Conn.Close()
 	for {
 		log.Print("---------------------------------------------")
@@ -61,14 +67,21 @@ func (s *ServerType) handler(c *client.ClientType) {
 			}
 			return
 		}
-		query, err := message.Parse(msg[:len(msg)-1]) // cut out delimiter
+		query, err := message.Parse(msg[:len(msg) - 1]) // cut out delimiter
 		if err != nil {
 			log.Printf("Parse error: %s", err)
 			// TODO add proper handling
 			// err = s.respond(c, fmt.Sprintf("%s", err))
 		} else {
 			log.Printf("Message: %v", query)
-			out := dbQuery.ProcessQuery(c, query)
+			var respChan chan types.Response
+			pkg := db.Package{
+				Container: &query,
+				Client:    c,
+				RespChan:  respChan,
+			}
+			coreChan <- pkg
+			out := <- pkg.RespChan //dbQuery.ProcessQuery(c, query)
 			_, err = io.Copy(c.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
 			if err != nil {
 				log.Printf("Error sending response to client: %s", err)

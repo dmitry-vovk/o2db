@@ -1,4 +1,4 @@
-package schema
+package db
 
 type Field struct {
 	Name string
