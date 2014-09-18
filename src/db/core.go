@@ -20,6 +20,7 @@ var (
 )
 
 func (this *DbCore) Processor() {
+	this.databases = make(map[string]*Database)
 	for {
 		pkg := <-this.Input
 		pkg.RespChan <- this.ProcessQuery(pkg.Client, pkg.Container)

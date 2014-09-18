@@ -74,11 +74,10 @@ func (this *ServerType) handler(c *ClientType) {
 			// err = s.respond(c, fmt.Sprintf("%s", err))
 		} else {
 			log.Printf("Message: %v", query)
-			var respChan chan []byte
 			pkg := &db.Package{
 				Container: query,
 				Client:    c,
-				RespChan:  respChan,
+				RespChan:  make(chan []byte),
 			}
 			go handle(pkg)
 			this.Core.Input <- pkg
@@ -86,8 +85,9 @@ func (this *ServerType) handler(c *ClientType) {
 	}
 }
 
+// Wait for response from DbCore and send response to client
 func handle(in *db.Package) {
-	out := <-in.RespChan //dbQuery.ProcessQuery(c, query)
+	out := <-in.RespChan
 	_, err := io.Copy(in.Client.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
 	if err != nil {
 		log.Printf("Error sending response to client: %s", err)
