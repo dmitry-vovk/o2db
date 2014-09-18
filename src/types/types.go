@@ -103,3 +103,8 @@ type Client struct {
 	Authenticated bool
 	Db            string
 }
+
+type WriteObject struct {
+	Collection string
+	Data       map[string]string
+}

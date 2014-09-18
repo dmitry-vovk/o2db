@@ -43,7 +43,10 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 			return respond("Collection created", this.databases[c.Db].CreateCollection(q.Payload.(CreateCollection)))
 		case DropCollection:
 			return respond("Collection deleted", this.databases[c.Db].DropCollection(q.Payload.(DropCollection)))
-		// Default stub
+		// Object operations
+		case WriteObject:
+			return respond("Object written", this.databases[c.Db].Collections[q.Payload.(WriteObject).Collection].WriteObject(q.Payload.(WriteObject)))
+			// Default stub
 		default:
 			log.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
 			return respond(nil, errors.New(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(q.Payload))))
