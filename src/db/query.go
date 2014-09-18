@@ -9,7 +9,7 @@ import (
 )
 
 // This is the main entry for processing queries
-func (this *DbCore) ProcessQuery(c *ClientType, q *Container) Response {
+func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 	if q == nil {
 		return respond("no message", nil)
 	}
@@ -26,9 +26,9 @@ func (this *DbCore) ProcessQuery(c *ClientType, q *Container) Response {
 		switch q.Payload.(type) {
 		// Database operations
 		case OpenDatabase:
-			dbPtr, err := this.OpenDatabase(q.Payload.(OpenDatabase))
+			dbName, err := this.OpenDatabase(q.Payload.(OpenDatabase))
 			if err == nil {
-				c.Db = dbPtr
+				c.Db = dbName
 			}
 			return respond("Database opened", err)
 		case CreateDatabase:
@@ -40,9 +40,9 @@ func (this *DbCore) ProcessQuery(c *ClientType, q *Container) Response {
 			return respond(resp, err)
 		// Collection operations
 		case CreateCollection:
-			return respond("Collection created", this.CreateCollection(c, q.Payload.(CreateCollection)))
+			return respond("Collection created", this.databases[c.Db].CreateCollection(q.Payload.(CreateCollection)))
 		case DropCollection:
-			return respond("Collection deleted", this.DropCollection(c, q.Payload.(DropCollection)))
+			return respond("Collection deleted", this.databases[c.Db].DropCollection(q.Payload.(DropCollection)))
 		// Default stub
 		default:
 			log.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))

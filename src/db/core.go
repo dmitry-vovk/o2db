@@ -12,7 +12,7 @@ import (
 
 type Package struct {
 	Container *Container
-	Client    *ClientType
+	Client    *Client
 	RespChan  chan Response
 }
 
@@ -41,7 +41,14 @@ func (this *DbCore) CreateDatabase(p CreateDatabase) error {
 	if _, err := os.Stat(dbPath); !os.IsNotExist(err) {
 		return errors.New("Database already exists")
 	}
-	return os.Mkdir(dbPath, os.FileMode(0700))
+	if err := os.Mkdir(dbPath, os.FileMode(0700)); err != nil {
+		return err
+	}
+	this.databases[p.Name] = &Database{
+		DataDir: p.Name,
+		Collections: make(map[string]*Collection),
+	}
+	return nil
 }
 
 func (this *DbCore) DropDatabase(p DropDatabase) error {
@@ -81,18 +88,18 @@ func (this *DbCore) ListDatabases(p ListDatabases) (string, error) {
 	return string(response), nil
 }
 
-func (this *DbCore) OpenDatabase(p OpenDatabase) (*Database, error) {
+func (this *DbCore) OpenDatabase(p OpenDatabase) (string, error) {
 	if p.Name == "" {
-		return nil, errors.New("Database name cannot be empty")
+		return "", errors.New("Database name cannot be empty")
 	}
-	if db, has := this.databases[p.Name]; has {
-		return db, nil
+	if _, has := this.databases[p.Name]; has {
+		return p.Name, nil
 	}
 	err := this.openDatabase(p.Name)
 	if err == nil {
-		return this.databases[p.Name], nil
+		return p.Name, nil
 	}
-	return nil, err
+	return "", err
 }
 
 func (this *DbCore) openDatabase(dbName string) error {
@@ -102,7 +109,7 @@ func (this *DbCore) openDatabase(dbName string) error {
 	}
 	this.databases[dbName] = &Database{
 		DataDir:     dbPath,
-		Collections: make(map[string]Collection),
+		Collections: make(map[string]*Collection),
 	}
 	return nil
 }

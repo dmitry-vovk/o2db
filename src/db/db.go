@@ -11,11 +11,13 @@ import (
 	. "types"
 )
 
-func (this *DbCore) CreateCollection(c *ClientType, p CreateCollection) error {
-	if c.Db == nil {
-		return errors.New("Database not selected")
-	}
-	var collectionPath = c.Db.DataDir + string(os.PathSeparator) + getHash(p.Name)
+type Database struct {
+	DataDir     string
+	Collections map[string]*Collection
+}
+
+func (this *Database) CreateCollection(p CreateCollection) error {
+	var collectionPath = this.DataDir + string(os.PathSeparator) + getHash(p.Name)
 	if _, err := os.Stat(collectionPath); !os.IsNotExist(err) {
 		return errors.New("Collection already exists")
 	}
@@ -32,11 +34,8 @@ func (this *DbCore) CreateCollection(c *ClientType, p CreateCollection) error {
 	return ioutil.WriteFile(collectionPath+string(os.PathSeparator)+"schema.json", schema, os.FileMode(0600))
 }
 
-func (this *DbCore) DropCollection(c *ClientType, p DropCollection) error {
-	if c.Db == nil {
-		return errors.New("Database not selected")
-	}
-	var collectionPath = c.Db.DataDir + string(os.PathSeparator) + getHash(p.Name)
+func (this *Database) DropCollection(p DropCollection) error {
+	var collectionPath = this.DataDir + string(os.PathSeparator) + getHash(p.Name)
 	if _, err := os.Stat(collectionPath); os.IsNotExist(err) {
 		return errors.New("Collection does not exist")
 	}

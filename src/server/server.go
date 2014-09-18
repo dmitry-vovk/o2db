@@ -19,7 +19,7 @@ const (
 
 type ServerType struct {
 	Config  *config.ConfigType
-	Clients []*ClientType
+	Clients []*Client
 	Core    *db.DbCore
 }
 
@@ -47,7 +47,7 @@ func (this *ServerType) Run() error {
 			continue
 		}
 		log.Printf("Client connected")
-		c := &ClientType{
+		c := &Client{
 			Conn: conn,
 		}
 		go this.handler(c)
@@ -55,7 +55,7 @@ func (this *ServerType) Run() error {
 }
 
 // Handle single client connection
-func (this *ServerType) handler(c *ClientType) {
+func (this *ServerType) handler(c *Client) {
 	defer c.Conn.Close()
 	for {
 		log.Print("---------------------------------------------")

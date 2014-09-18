@@ -98,13 +98,8 @@ type Collection struct {
 	Objects []interface{}
 }
 
-type Database struct {
-	DataDir     string
-	Collections map[string]Collection
-}
-
-type ClientType struct {
+type Client struct {
 	Conn          net.Conn
 	Authenticated bool
-	Db            *Database
+	Db            string
 }
