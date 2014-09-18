@@ -45,7 +45,7 @@ func (this *DbCore) CreateDatabase(p CreateDatabase) error {
 		return err
 	}
 	this.databases[p.Name] = &Database{
-		DataDir: p.Name,
+		DataDir:     p.Name,
 		Collections: make(map[string]*Collection),
 	}
 	return nil

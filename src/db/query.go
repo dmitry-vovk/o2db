@@ -38,12 +38,12 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 		case ListDatabases:
 			resp, err := this.ListDatabases(q.Payload.(ListDatabases))
 			return respond(resp, err)
-		// Collection operations
+			// Collection operations
 		case CreateCollection:
 			return respond("Collection created", this.databases[c.Db].CreateCollection(q.Payload.(CreateCollection)))
 		case DropCollection:
 			return respond("Collection deleted", this.databases[c.Db].DropCollection(q.Payload.(DropCollection)))
-		// Object operations
+			// Object operations
 		case WriteObject:
 			return respond("Object written", this.databases[c.Db].Collections[q.Payload.(WriteObject).Collection].WriteObject(q.Payload.(WriteObject)))
 			// Default stub
@@ -57,13 +57,15 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 
 // Wraps response structure and error into JSON
 func respond(r interface{}, e error) Response {
-	resp := Response{}
 	if e == nil {
-		resp.Result = true
-		resp.Response = r
+		return Response{
+			Result:   true,
+			Response: r,
+		}
 	} else {
-		resp.Result = false
-		resp.Response = fmt.Sprintf("%s", e)
+		return Response{
+			Result:   false,
+			Response: fmt.Sprintf("%s", e),
+		}
 	}
-	return resp
 }
