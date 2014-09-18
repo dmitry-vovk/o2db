@@ -1,7 +1,6 @@
 package db
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -10,7 +9,7 @@ import (
 )
 
 // This is the main entry for processing queries
-func (this *DbCore) ProcessQuery(c *ClientType, q *Container) []byte {
+func (this *DbCore) ProcessQuery(c *ClientType, q *Container) Response {
 	if q == nil {
 		return respond("no message", nil)
 	}
@@ -54,7 +53,7 @@ func (this *DbCore) ProcessQuery(c *ClientType, q *Container) []byte {
 }
 
 // Wraps response structure and error into JSON
-func respond(r interface{}, e error) []byte {
+func respond(r interface{}, e error) Response {
 	resp := Response{}
 	if e == nil {
 		resp.Result = true
@@ -63,11 +62,5 @@ func respond(r interface{}, e error) []byte {
 		resp.Result = false
 		resp.Response = fmt.Sprintf("%s", e)
 	}
-	out, err := json.Marshal(resp)
-	if err != nil {
-		log.Printf("Error encoding response: %s", err)
-		return []byte{}
-	}
-	log.Printf("Response: %s", out)
-	return out
+	return resp
 }

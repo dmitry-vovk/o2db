@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"config"
 	"db"
+	"encoding/json"
 	"io"
 	"log"
 	"net"
@@ -77,7 +78,7 @@ func (this *ServerType) handler(c *ClientType) {
 			pkg := &db.Package{
 				Container: query,
 				Client:    c,
-				RespChan:  make(chan []byte),
+				RespChan:  make(chan Response),
 			}
 			go handle(pkg)
 			this.Core.Input <- pkg
@@ -87,8 +88,14 @@ func (this *ServerType) handler(c *ClientType) {
 
 // Wait for response from DbCore and send response to client
 func handle(in *db.Package) {
-	out := <-in.RespChan
-	_, err := io.Copy(in.Client.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
+	resp := <-in.RespChan
+	out, err := json.Marshal(resp)
+	if err != nil {
+		log.Printf("Error encoding response: %s", err)
+		return
+	}
+	log.Printf("Response: %s", out)
+	_, err = io.Copy(in.Client.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
 	if err != nil {
 		log.Printf("Error sending response to client: %s", err)
 		return
