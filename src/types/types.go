@@ -93,10 +93,7 @@ type Object struct {
 	Fields []Field
 }
 
-type Collection struct {
-	Name    string
-	Objects []interface{}
-}
+
 
 type Client struct {
 	Conn          net.Conn
