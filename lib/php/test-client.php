@@ -3,7 +3,7 @@
 require 'O2dbClient.php';
 $client = new O2dbClient('127.0.0.1');
 
-$message = ['type' => 'hello'];
+$message = [];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 
