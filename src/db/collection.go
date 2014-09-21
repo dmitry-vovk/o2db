@@ -1,7 +1,7 @@
 package db
 
 import (
-	"log"
+	. "logger"
 	. "types"
 )
 
@@ -11,6 +11,6 @@ type Collection struct {
 }
 
 func (this *Collection) WriteObject(p WriteObject) error {
-	log.Printf("Writing object %v", p)
+	DebugLog.Printf("Writing object %v", p)
 	return nil
 }

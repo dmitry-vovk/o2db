@@ -4,6 +4,7 @@ import (
 	"config"
 	"flag"
 	"log"
+	. "logger"
 	"runtime"
 	"server"
 )
@@ -21,4 +22,5 @@ func init() {
 	if err := config.Read(*configFile); err != nil {
 		log.Fatal(err)
 	}
+	SetupLogs()
 }

@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	. "logger"
 	"net"
 	"server/message"
 	. "types"
@@ -44,10 +44,10 @@ func (this *ServerType) Run() error {
 	for {
 		conn, err := socket.Accept()
 		if err != nil {
-			log.Printf("Accept error: %s", err)
+			ErrorLog.Printf("Accept error: %s", err)
 			continue
 		}
-		log.Printf("Client connected")
+		DebugLog.Printf("Client connected")
 		c := &Client{
 			Conn: conn,
 		}
@@ -59,19 +59,19 @@ func (this *ServerType) Run() error {
 func (this *ServerType) handler(client *Client) {
 	defer client.Conn.Close()
 	for {
-		log.Print("---------------------------------------------")
+		DebugLog.Print("---------------------------------------------")
 		msg, err := bufio.NewReader(client.Conn).ReadBytes(messageDelimiter)
 		if err != nil {
 			if err == io.EOF {
-				log.Printf("Client diconnected")
+				DebugLog.Printf("Client diconnected")
 			} else {
-				log.Printf("Read error: %s", err)
+				ErrorLog.Printf("Read error: %s", err)
 			}
 			return
 		}
 		query, err := message.Parse(msg[:len(msg)-1]) // cut out delimiter
 		if err != nil {
-			log.Printf("Parser returned error: %s", err)
+			ErrorLog.Printf("Parser returned error: %s", err)
 			handle(
 				Response{
 					Result:   false,
@@ -80,7 +80,7 @@ func (this *ServerType) handler(client *Client) {
 				client,
 			)
 		} else {
-			log.Printf("Message: %v", query)
+			DebugLog.Printf("Message: %v", query)
 			pkg := &db.Package{
 				Container: query,
 				Client:    client,
@@ -98,13 +98,13 @@ func (this *ServerType) handler(client *Client) {
 func handle(resp Response, client *Client) {
 	out, err := json.Marshal(resp)
 	if err != nil {
-		log.Printf("Error encoding response: %s", err)
+		ErrorLog.Printf("Error encoding response: %s", err)
 		return
 	}
-	log.Printf("Response: %s", out)
+	DebugLog.Printf("Response: %s", out)
 	_, err = io.Copy(client.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
 	if err != nil {
-		log.Printf("Error sending response to client: %s", err)
+		ErrorLog.Printf("Error sending response to client: %s", err)
 		return
 	}
 }

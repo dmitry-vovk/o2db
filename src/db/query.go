@@ -3,7 +3,7 @@ package db
 import (
 	"errors"
 	"fmt"
-	"log"
+	. "logger"
 	"reflect"
 	. "types"
 )
@@ -13,7 +13,7 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 	if q == nil {
 		return respond("no message", nil)
 	}
-	log.Printf("Payload type: %s", reflect.TypeOf(q.Payload))
+	DebugLog.Printf("Payload type: %s", reflect.TypeOf(q.Payload))
 	switch q.Payload.(type) {
 	case Authentication:
 		if this.Authenticate(c, q.Payload.(Authentication)) {
@@ -68,7 +68,7 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 				return respond("Database not selected", nil)
 			}
 		default:
-			log.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
+			ErrorLog.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
 			return respond(nil, errors.New(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(q.Payload))))
 		}
 	}

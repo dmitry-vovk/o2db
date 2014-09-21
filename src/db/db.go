@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
+	. "logger"
 	"os"
 	. "types"
 )
@@ -25,7 +25,7 @@ func (this *Database) CreateCollection(p CreateCollection) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Creating collection %s in %s", p.Name, collectionPath)
+	DebugLog.Printf("Creating collection %s in %s", p.Name, collectionPath)
 	var schema []byte
 	schema, err = json.MarshalIndent(p.Fields, "", "  ")
 	if err != nil {
