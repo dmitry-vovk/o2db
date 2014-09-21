@@ -71,7 +71,7 @@ func (this *ServerType) handler(client *Client) {
 		}
 		query, err := message.Parse(msg[:len(msg)-1]) // cut out delimiter
 		if err != nil {
-			ErrorLog.Printf("Parser returned error: %s", err)
+			ErrorLog.Printf("Parse error: %s", err)
 			handle(
 				Response{
 					Result:   false,

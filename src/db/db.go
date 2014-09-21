@@ -1,3 +1,4 @@
+// Database definition and methods to work with database collections
 package db
 
 import (
@@ -16,8 +17,9 @@ type Database struct {
 	Collections map[string]*Collection
 }
 
+// Creates new empty collection
 func (this *Database) CreateCollection(p CreateCollection) error {
-	var collectionPath = this.DataDir + string(os.PathSeparator) + getHash(p.Name)
+	var collectionPath = this.DataDir + string(os.PathSeparator) + hash(p.Name)
 	if _, err := os.Stat(collectionPath); !os.IsNotExist(err) {
 		return errors.New("Collection already exists")
 	}
@@ -34,14 +36,16 @@ func (this *Database) CreateCollection(p CreateCollection) error {
 	return ioutil.WriteFile(collectionPath+string(os.PathSeparator)+"schema.json", schema, os.FileMode(0600))
 }
 
+// Deletes collection
 func (this *Database) DropCollection(p DropCollection) error {
-	var collectionPath = this.DataDir + string(os.PathSeparator) + getHash(p.Name)
+	var collectionPath = this.DataDir + string(os.PathSeparator) + hash(p.Name)
 	if _, err := os.Stat(collectionPath); os.IsNotExist(err) {
 		return errors.New("Collection does not exist")
 	}
 	return os.RemoveAll(collectionPath)
 }
 
-func getHash(s string) string {
+// Shorthand to get SHA1 string
+func hash(s string) string {
 	return hex.EncodeToString(sha1.New().Sum([]byte(s)))
 }

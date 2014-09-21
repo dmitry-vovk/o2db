@@ -2,6 +2,11 @@
 
 require 'O2dbClient.php';
 $client = new O2dbClient('127.0.0.1');
+
+$message = ['type' => 'hello'];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+
 // Authenticate
 $message = [
     'type'    => O2dbClient::TYPE_AUTHENTICATE,

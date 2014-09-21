@@ -1,3 +1,4 @@
+// Core method that processes parsed message and returns response
 package db
 
 import (

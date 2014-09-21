@@ -1,3 +1,5 @@
+// The file contains types for package and
+// core database object with methods to handle databases
 package db
 
 import (
@@ -25,6 +27,7 @@ var (
 	Core DbCore
 )
 
+// Goroutine that handles queries asynchronously
 func (this *DbCore) Processor() {
 	this.databases = make(map[string]*Database)
 	for {
@@ -33,6 +36,7 @@ func (this *DbCore) Processor() {
 	}
 }
 
+// Creates new database
 func (this *DbCore) CreateDatabase(p CreateDatabase) error {
 	if p.Name == "" {
 		return errors.New("Cannot create database with empty name")
@@ -51,6 +55,7 @@ func (this *DbCore) CreateDatabase(p CreateDatabase) error {
 	return nil
 }
 
+// Deletes existing database
 func (this *DbCore) DropDatabase(p DropDatabase) error {
 	if p.Name == "" {
 		return errors.New("Database name cannot be empty")
@@ -65,6 +70,7 @@ func (this *DbCore) DropDatabase(p DropDatabase) error {
 	return os.RemoveAll(dbPath)
 }
 
+// Returns the list of existing databases
 func (this *DbCore) ListDatabases(p ListDatabases) (string, error) {
 	if p.Mask == "" {
 		return "", errors.New("Mask cannot be empty")
@@ -88,6 +94,7 @@ func (this *DbCore) ListDatabases(p ListDatabases) (string, error) {
 	return string(response), nil
 }
 
+// Open existing database
 func (this *DbCore) OpenDatabase(p OpenDatabase) (string, error) {
 	if p.Name == "" {
 		return "", errors.New("Database name cannot be empty")
@@ -102,6 +109,7 @@ func (this *DbCore) OpenDatabase(p OpenDatabase) (string, error) {
 	return "", err
 }
 
+// Low level database opener
 func (this *DbCore) openDatabase(dbName string) error {
 	var dbPath = config.Config.DataDir + string(os.PathSeparator) + dbName
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
