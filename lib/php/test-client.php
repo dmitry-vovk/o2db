@@ -13,6 +13,7 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 // Create database
+
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_DB,
     'payload' => [
@@ -21,7 +22,9 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+
 // Open database
+
 $message = [
     'type'    => O2dbClient::TYPE_OPEN_DB,
     'payload' => [
@@ -30,7 +33,9 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+
 // Create collection
+/*
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
     'payload' => [
@@ -52,7 +57,9 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+*/
 // Drop collection
+/*
 $message = [
     'type'    => O2dbClient::TYPE_DROP_COLLECTION,
     'payload' => [
@@ -61,7 +68,9 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+*/
 // List databases
+/*
 $message = [
     'type'    => O2dbClient::TYPE_LIST_DB,
     'payload' => [
@@ -70,7 +79,23 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+*/
+// Write object
+$message = [
+    'type'    => O2dbClient::TYPE_OBJECT_WRITE,
+    'payload' => [
+        'class' => 'Job',
+        'data'  => [
+            'id'    => '5',
+            'prop1' => 'val1',
+            'prop2' => 'val2',
+        ],
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
 // Drop database
+/*
 $message = [
     'type'    => O2dbClient::TYPE_DROP_DB,
     'payload' => [
@@ -79,3 +104,4 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+*/

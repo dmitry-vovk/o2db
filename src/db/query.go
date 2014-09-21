@@ -24,7 +24,6 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 	}
 	if c.Authenticated {
 		switch q.Payload.(type) {
-		// Database operations
 		case OpenDatabase:
 			dbName, err := this.OpenDatabase(q.Payload.(OpenDatabase))
 			if err == nil {
@@ -38,15 +37,36 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 		case ListDatabases:
 			resp, err := this.ListDatabases(q.Payload.(ListDatabases))
 			return respond(resp, err)
-			// Collection operations
 		case CreateCollection:
-			return respond("Collection created", this.databases[c.Db].CreateCollection(q.Payload.(CreateCollection)))
+			if clientDb, ok := this.databases[c.Db]; ok {
+				if _, ok := clientDb.Collections[q.Payload.(WriteObject).Collection]; !ok {
+					return respond("Collection created", clientDb.CreateCollection(q.Payload.(CreateCollection)))
+				} else {
+					return respond("Collection already exists", nil)
+				}
+			} else {
+				return respond("Database not selected", nil)
+			}
 		case DropCollection:
-			return respond("Collection deleted", this.databases[c.Db].DropCollection(q.Payload.(DropCollection)))
-			// Object operations
+			if clientDb, ok := this.databases[c.Db]; ok {
+				if _, ok := clientDb.Collections[q.Payload.(WriteObject).Collection]; ok {
+					return respond("Collection deleted", clientDb.DropCollection(q.Payload.(DropCollection)))
+				} else {
+					return respond("Collection does not exist", nil)
+				}
+			} else {
+				return respond("Database not selected", nil)
+			}
 		case WriteObject:
-			return respond("Object written", this.databases[c.Db].Collections[q.Payload.(WriteObject).Collection].WriteObject(q.Payload.(WriteObject)))
-			// Default stub
+			if clientDb, ok := this.databases[c.Db]; ok {
+				if collection, ok := clientDb.Collections[q.Payload.(WriteObject).Collection]; ok {
+					return respond("Object written", collection.WriteObject(q.Payload.(WriteObject)))
+				} else {
+					return respond("Collection does not exist", nil)
+				}
+			} else {
+				return respond("Database not selected", nil)
+			}
 		default:
 			log.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
 			return respond(nil, errors.New(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(q.Payload))))

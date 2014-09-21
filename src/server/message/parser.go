@@ -2,6 +2,7 @@ package message
 
 import (
 	"encoding/json"
+	"errors"
 	"types"
 )
 
@@ -59,6 +60,14 @@ func Parse(msg []byte) (*types.Container, error) {
 		if err == nil {
 			parsedMessage.Payload = p
 		}
+	case types.TypeObjectWrite:
+		var p types.WriteObject
+		err = json.Unmarshal(*m["payload"], &p)
+		if err == nil {
+			parsedMessage.Payload = p
+		}
+	default:
+		return nil, errors.New("Unknown message type")
 	}
 	return parsedMessage, err
 }

@@ -6,6 +6,7 @@ import (
 	"config"
 	"db"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -55,11 +56,11 @@ func (this *ServerType) Run() error {
 }
 
 // Handle single client connection
-func (this *ServerType) handler(c *Client) {
-	defer c.Conn.Close()
+func (this *ServerType) handler(client *Client) {
+	defer client.Conn.Close()
 	for {
 		log.Print("---------------------------------------------")
-		msg, err := bufio.NewReader(c.Conn).ReadBytes(messageDelimiter)
+		msg, err := bufio.NewReader(client.Conn).ReadBytes(messageDelimiter)
 		if err != nil {
 			if err == io.EOF {
 				log.Printf("Client diconnected")
@@ -70,32 +71,38 @@ func (this *ServerType) handler(c *Client) {
 		}
 		query, err := message.Parse(msg[:len(msg)-1]) // cut out delimiter
 		if err != nil {
-			log.Printf("Parse error: %s", err)
-			// TODO add proper handling
-			// err = s.respond(c, fmt.Sprintf("%s", err))
+			log.Printf("Parser returned error: %s", err)
+			handle(
+				Response{
+					Result:   false,
+					Response: fmt.Sprintf("%s", err),
+				},
+				client,
+			)
 		} else {
 			log.Printf("Message: %v", query)
 			pkg := &db.Package{
 				Container: query,
-				Client:    c,
+				Client:    client,
 				RespChan:  make(chan Response),
 			}
-			go handle(pkg)
+			go func(in *db.Package) {
+				go handle(<-in.RespChan, client)
+			}(pkg)
 			this.Core.Input <- pkg
 		}
 	}
 }
 
-// Wait for response from DbCore and send response to client
-func handle(in *db.Package) {
-	resp := <-in.RespChan
+// Send response to client
+func handle(resp Response, client *Client) {
 	out, err := json.Marshal(resp)
 	if err != nil {
 		log.Printf("Error encoding response: %s", err)
 		return
 	}
 	log.Printf("Response: %s", out)
-	_, err = io.Copy(in.Client.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
+	_, err = io.Copy(client.Conn, bytes.NewBuffer(append(out, messageDelimiter)))
 	if err != nil {
 		log.Printf("Error sending response to client: %s", err)
 		return

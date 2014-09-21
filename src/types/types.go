@@ -93,8 +93,6 @@ type Object struct {
 	Fields []Field
 }
 
-
-
 type Client struct {
 	Conn          net.Conn
 	Authenticated bool
