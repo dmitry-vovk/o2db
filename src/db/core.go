@@ -6,6 +6,7 @@ import (
 	"config"
 	"encoding/json"
 	"errors"
+	. "logger"
 	"os"
 	"path/filepath"
 	"strings"
@@ -103,10 +104,11 @@ func (this *DbCore) OpenDatabase(p OpenDatabase) (string, error) {
 		return p.Name, nil
 	}
 	err := this.openDatabase(p.Name)
-	if err == nil {
-		return p.Name, nil
+	if err != nil {
+		return "", err
 	}
-	return "", err
+	ErrorLog.Printf("%v", this.databases[p.Name].Collections)
+	return p.Name, nil
 }
 
 // Low level database opener
@@ -118,6 +120,27 @@ func (this *DbCore) openDatabase(dbName string) error {
 	this.databases[dbName] = &Database{
 		DataDir:     dbPath,
 		Collections: make(map[string]*Collection),
+	}
+	return this.populateCollections(this.databases[dbName])
+}
+
+// Scans directories under database data directory
+func (this *DbCore) populateCollections(d *Database) error {
+	files, err := filepath.Glob(d.DataDir + string(os.PathSeparator) + "*")
+	if err != nil {
+		return err
+	}
+	for _, dir := range files {
+		fi, err := os.Stat(dir)
+		if err != nil {
+			return err
+		}
+		if fi.IsDir() {
+			collectionName := strings.Replace(dir, d.DataDir+string(os.PathSeparator), "", 1)
+			d.Collections[collectionName] = &Collection{
+				Name: collectionName,
+			}
+		}
 	}
 	return nil
 }
