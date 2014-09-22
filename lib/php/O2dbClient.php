@@ -90,4 +90,14 @@ class O2dbClient {
         }
         return $incoming;
     }
+
+    public function createDatabase($dbName) {
+        $message = [
+            'type'    => O2dbClient::TYPE_CREATE_DB,
+            'payload' => [
+                'name' => $dbName,
+            ],
+        ];
+        return $this->send($message);
+    }
 }

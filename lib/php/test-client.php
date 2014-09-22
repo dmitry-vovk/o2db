@@ -63,6 +63,28 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 
+$message = [
+    'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
+    'payload' => [
+        'class'  => 'Batch',
+        'fields' => [
+            'id'      => [
+                'type'  => 'int',
+                'index' => 'primary',
+            ],
+            'created' => [
+                'type'  => 'datetime',
+                'index' => 'secondary',
+            ],
+            'payload' => [
+                'type' => 'string',
+            ],
+        ],
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+
 // Drop collection
 /*
 $message = [
