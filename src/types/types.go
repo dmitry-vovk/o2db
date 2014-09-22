@@ -100,6 +100,6 @@ type Client struct {
 }
 
 type WriteObject struct {
-	Collection string
+	Collection string `json:"class"`
 	Data       map[string]string
 }

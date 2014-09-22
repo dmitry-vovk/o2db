@@ -33,6 +33,9 @@ func (this *Database) CreateCollection(p CreateCollection) error {
 	if err != nil {
 		return err
 	}
+	this.Collections[p.Name] = &Collection{
+		Name: p.Name,
+	}
 	return ioutil.WriteFile(collectionPath+string(os.PathSeparator)+"schema.json", schema, os.FileMode(0600))
 }
 

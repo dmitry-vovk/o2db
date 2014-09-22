@@ -40,7 +40,7 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 			return respond(resp, err)
 		case CreateCollection:
 			if clientDb, ok := this.databases[c.Db]; ok {
-				if _, ok := clientDb.Collections[q.Payload.(WriteObject).Collection]; !ok {
+				if _, ok := clientDb.Collections[q.Payload.(CreateCollection).Name]; !ok {
 					return respond("Collection created", clientDb.CreateCollection(q.Payload.(CreateCollection)))
 				} else {
 					return respond("Collection already exists", nil)
