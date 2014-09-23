@@ -1,9 +1,14 @@
 package db
 
 import (
+	"errors"
 	mmap "github.com/edsrzf/mmap-go"
 	"os"
-	"errors"
+)
+
+var (
+	ErrTruncated      = errors.New("Could not write all data")
+	ErrNotImplemented = errors.New("TODO!")
 )
 
 type DbFile struct {
@@ -14,7 +19,7 @@ type DbFile struct {
 
 // Opens a file and maps it into memory
 func OpenFile(fileName string) (*DbFile, error) {
-	dbFile := &DbFile{
+	dbFile := DbFile{
 		FileName: fileName,
 	}
 	var err error
@@ -22,11 +27,15 @@ func OpenFile(fileName string) (*DbFile, error) {
 	if err != nil {
 		return nil, err
 	}
+	// We are not trying to map empty file
+	if stat, _ := os.Stat(fileName); stat.Size() == 0 {
+		dbFile.Handler.Truncate(int64(os.Getpagesize()))
+	}
 	dbFile.Buffer, err = mmap.Map(dbFile.Handler, mmap.RDWR, 0)
 	if err != nil {
 		return nil, err
 	}
-	return dbFile, nil
+	return &dbFile, nil
 }
 
 // Flush, unmap, and close the file
@@ -45,6 +54,23 @@ func (this *DbFile) Close() error {
 	err = this.Handler.Close()
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+// Return portion of file starting at 'start' and of 'len' length
+func (this *DbFile) Read(start, len int) ([]byte, error) {
+	return this.Buffer[start : start+len], nil
+}
+
+// Write 'data' bytes starting at 'offset'
+func (this *DbFile) Write(data []byte, offset int) error {
+	if len(this.Buffer) < offset+len(data) {
+		// TODO increase length/size of slice/file
+		return ErrNotImplemented
+	}
+	if n := copy(this.Buffer[offset:], data); n != len(data) {
+		return ErrTruncated
 	}
 	return nil
 }

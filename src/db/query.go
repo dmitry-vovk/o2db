@@ -60,7 +60,8 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 			}
 		case WriteObject:
 			if clientDb, ok := this.databases[c.Db]; ok {
-				if collection, ok := clientDb.Collections[q.Payload.(WriteObject).Collection]; ok {
+				collectionKey := hash(q.Payload.(WriteObject).Collection)
+				if collection, ok := clientDb.Collections[collectionKey]; ok {
 					return respond("Object written", collection.WriteObject(q.Payload.(WriteObject)))
 				} else {
 					return respond("Collection does not exist", nil)

@@ -6,7 +6,6 @@ import (
 	"config"
 	"encoding/json"
 	"errors"
-	. "logger"
 	"os"
 	"path/filepath"
 	"strings"
@@ -107,7 +106,6 @@ func (this *DbCore) OpenDatabase(p OpenDatabase) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	ErrorLog.Printf("%v", this.databases[p.Name].Collections)
 	return p.Name, nil
 }
 
