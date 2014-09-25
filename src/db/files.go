@@ -22,20 +22,25 @@ func OpenFile(fileName string) (*DbFile, error) {
 	dbFile := DbFile{
 		FileName: fileName,
 	}
+	err := dbFile.openFile()
+	return &dbFile, err
+}
+
+func (this *DbFile) openFile() error {
 	var err error
-	dbFile.Handler, err = os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, os.FileMode(0600))
+	this.Handler, err = os.OpenFile(this.FileName, os.O_RDWR|os.O_CREATE, os.FileMode(0600))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	// We are not trying to map empty file
-	if stat, _ := os.Stat(fileName); stat.Size() == 0 {
-		dbFile.Handler.Truncate(int64(os.Getpagesize()))
+	if stat, _ := os.Stat(this.FileName); stat.Size() == 0 {
+		this.Handler.Truncate(int64(os.Getpagesize()))
 	}
-	dbFile.Buffer, err = mmap.Map(dbFile.Handler, mmap.RDWR, 0)
+	this.Buffer, err = mmap.Map(this.Handler, mmap.RDWR, 0)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &dbFile, nil
+	return nil
 }
 
 // Flush, unmap, and close the file
@@ -65,12 +70,30 @@ func (this *DbFile) Read(start, len int) ([]byte, error) {
 
 // Write 'data' bytes starting at 'offset'
 func (this *DbFile) Write(data []byte, offset int) error {
-	if len(this.Buffer) < offset+len(data) {
-		// TODO increase length/size of slice/file
-		return ErrNotImplemented
+	var diff = offset+len(data) - len(this.Buffer)
+	if diff > 0 {
+		var zeroes = make([]byte, diff)
+		this.append(zeroes)
 	}
 	if n := copy(this.Buffer[offset:], data); n != len(data) {
 		return ErrTruncated
 	}
 	return nil
+}
+
+// Append data to the end of the file (resizing it)
+func (this *DbFile) append(data []byte) error {
+	err := this.Close()
+	if err != nil {
+		return err
+	}
+	f, err := os.OpenFile(this.FileName, os.O_APPEND|os.O_WRONLY, os.FileMode(0600))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if _, err = f.Write(data); err != nil {
+		return err
+	}
+	return this.openFile()
 }

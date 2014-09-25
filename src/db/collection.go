@@ -20,7 +20,7 @@ func (this *Collection) WriteObject(p WriteObject) error {
 		logger.ErrorLog.Printf("Open file: %s", err)
 		return err
 	}
-	err = f.Write([]byte("Hello there"), 100)
+	err = f.Write([]byte("Hello there"), 5000)
 	if err != nil {
 		logger.ErrorLog.Printf("Writing: %s", err)
 		return err
