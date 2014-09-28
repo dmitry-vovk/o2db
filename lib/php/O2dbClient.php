@@ -100,4 +100,15 @@ class O2dbClient {
         ];
         return $this->send($message);
     }
+
+    public function getOne($class, $id) {
+        $message = [
+            'type'    => O2dbClient::TYPE_OBJECT_GET,
+            'payload' => [
+                'class' => $class,
+                'id'    => $id,
+            ],
+        ];
+        return $this->send($message);
+    }
 }

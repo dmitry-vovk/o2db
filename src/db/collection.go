@@ -31,7 +31,7 @@ func (this *Collection) WriteObject(p WriteObject) error {
 		logger.ErrorLog.Printf("%s", err)
 		return err
 	}
-	f, err := OpenFile("file.txt")
+	f, err := OpenFile("file.db")
 	if err != nil {
 		logger.ErrorLog.Printf("Open file: %s", err)
 		return err
@@ -49,20 +49,13 @@ func (this *Collection) WriteObject(p WriteObject) error {
 
 // Reads object from collection file
 func (this *Collection) ReadObject(p ReadObject) (*ObjectFields, error) {
-	f, err := OpenFile("file.txt")
+	f, err := OpenFile("file.db")
 	if err != nil {
 		logger.ErrorLog.Printf("Open file: %s", err)
 		return nil, err
 	}
 	defer f.Close()
-	var b bytes.Buffer
-	buf, err := f.Read(0, 91)
-	if err != nil {
-		logger.ErrorLog.Printf("Reading: %s", err)
-		return nil, err
-	}
-	b.Read(buf)
-	dec := gob.NewDecoder(&b)
+	dec := gob.NewDecoder(f.Handler)
 	var fields ObjectFields
 	err = dec.Decode(&fields)
 	if err != nil {
