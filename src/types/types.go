@@ -99,7 +99,14 @@ type Client struct {
 	Db            string
 }
 
+type ObjectFields map[string]interface{}
+
 type WriteObject struct {
-	Collection string `json:"class"`
-	Data       map[string]string
+	Collection string       `json:"class"`
+	Data       ObjectFields `json:"data"`
+}
+
+type ReadObject struct {
+	Collection string       `json:"class"`
+	Fields     ObjectFields `json:"data"`
 }

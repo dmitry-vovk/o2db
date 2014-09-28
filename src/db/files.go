@@ -70,7 +70,7 @@ func (this *DbFile) Read(start, len int) ([]byte, error) {
 
 // Write 'data' bytes starting at 'offset'
 func (this *DbFile) Write(data []byte, offset int) error {
-	var diff = offset+len(data) - len(this.Buffer)
+	var diff = offset + len(data) - len(this.Buffer)
 	if diff > 0 {
 		var zeroes = make([]byte, diff)
 		this.append(zeroes)
