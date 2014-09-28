@@ -23,6 +23,11 @@ type Collection struct {
 
 // Writes (inserts/updates) object instance into collection
 func (this *Collection) WriteObject(p WriteObject) error {
+	// TODO
+	// 1. Encode object
+	// 2. Write to file
+	// 3. Add field indices
+	// 4. Add starting position and length to data index
 	DebugLog.Printf("Writing object data %v", p.Data)
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)
@@ -49,6 +54,12 @@ func (this *Collection) WriteObject(p WriteObject) error {
 
 // Reads object from collection file
 func (this *Collection) ReadObject(p ReadObject) (*ObjectFields, error) {
+	// TODO
+	// 1. Get conditions from p
+	// 2. Figure corresponding indices
+	// 3. Find object id according to indices
+	// 4. Figure out starting position and length of GOB record
+	// 5. Read and decode it
 	f, err := OpenFile("file.db")
 	if err != nil {
 		logger.ErrorLog.Printf("Open file: %s", err)
