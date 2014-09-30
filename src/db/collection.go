@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"logger"
-	. "logger"
 	. "types"
 )
 
@@ -14,11 +13,12 @@ type Hash [20]byte // SHA1 hash
 type ObjectIndex map[Hash][]uint64
 
 type Collection struct {
-	Name      string                 // Collection/class name
-	Objects   map[uint64]interface{} // Objects
-	Indices   map[string]ObjectIndex // collection of indices
-	DataFile  *DbFile                // Objects storage
-	IndexFile map[string]*DbFile     // List of indices
+	Name           string                 // Collection/class name
+	Objects        map[uint64]interface{} // Objects
+	Indices        map[string]ObjectIndex // collection of indices
+	DataFile       *DbFile                // Objects storage
+	IndexFile      map[string]*DbFile     // List of indices
+	freeSlotOffset int
 }
 
 // Writes (inserts/updates) object instance into collection
@@ -28,28 +28,43 @@ func (this *Collection) WriteObject(p WriteObject) error {
 	// 2. Write to file
 	// 3. Add field indices
 	// 4. Add starting position and length to data index
-	DebugLog.Printf("Writing object data %v", p.Data)
-	var b bytes.Buffer
-	enc := gob.NewEncoder(&b)
-	err := enc.Encode(&p.Data)
+	buf, err := this.encodeObject(&p.Data)
+	f, err := OpenFile(this.DataFile.FileName)
 	if err != nil {
-		logger.ErrorLog.Printf("%s", err)
-		return err
-	}
-	f, err := OpenFile("file.db")
-	if err != nil {
-		logger.ErrorLog.Printf("Open file: %s", err)
 		return err
 	}
 	defer f.Close()
-	len := b.Len()
-	logger.DebugLog.Printf("Writing %d bytes", len)
-	err = f.Write(b.Bytes(), 0)
+	//len := buf.Len()
+	offset := this.getFreeSpaceOffset()
+	err = f.Write(buf.Bytes(), offset)
 	if err != nil {
-		logger.ErrorLog.Printf("Writing: %s", err)
 		return err
 	}
+	this.addObjectToIndex(&p.Data, offset, buf.Len())
 	return nil
+}
+
+// GOB encodes object
+func (this *Collection) encodeObject(data *ObjectFields) (*bytes.Buffer, error) {
+	var b bytes.Buffer
+	enc := gob.NewEncoder(&b)
+	err := enc.Encode(data)
+	if err != nil {
+		logger.ErrorLog.Printf("%s", err)
+		return nil, err
+	}
+	return &b, nil
+}
+
+// Returns pointer to the start of unallocated file space
+func (this *Collection) getFreeSpaceOffset() int {
+	return this.freeSlotOffset
+}
+
+// Adds object to indices
+func (this *Collection) addObjectToIndex(data *ObjectFields, offset, len int) {
+	this.freeSlotOffset += len
+
 }
 
 // Reads object from collection file
@@ -60,7 +75,7 @@ func (this *Collection) ReadObject(p ReadObject) (*ObjectFields, error) {
 	// 3. Find object id according to indices
 	// 4. Figure out starting position and length of GOB record
 	// 5. Read and decode it
-	f, err := OpenFile("file.db")
+	f, err := OpenFile(this.DataFile.FileName)
 	if err != nil {
 		logger.ErrorLog.Printf("Open file: %s", err)
 		return nil, err

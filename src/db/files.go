@@ -34,7 +34,7 @@ func (this *DbFile) openFile() error {
 	}
 	// We are not trying to map empty file
 	if stat, _ := os.Stat(this.FileName); stat.Size() == 0 {
-		this.Handler.Truncate(int64(os.Getpagesize()))
+		this.Handler.Truncate(int64(os.Getpagesize() * 1024 * 32))
 	}
 	this.Buffer, err = mmap.Map(this.Handler, mmap.RDWR, 0)
 	if err != nil {

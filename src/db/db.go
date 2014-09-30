@@ -36,7 +36,19 @@ func (this *Database) CreateCollection(p CreateCollection) error {
 	this.Collections[p.Name] = &Collection{
 		Name: p.Name,
 	}
-	return ioutil.WriteFile(collectionPath+string(os.PathSeparator)+"schema.json", schema, os.FileMode(0600))
+	basePath := collectionPath + string(os.PathSeparator)
+	err = ioutil.WriteFile(basePath+"schema.json", schema, os.FileMode(0600))
+	if err != nil {
+		return err
+	}
+	this.Collections[p.Name].DataFile = &DbFile{
+		FileName: basePath + dataFileName,
+	}
+	this.Collections[p.Name].IndexFile = make(map[string]*DbFile)
+	this.Collections[p.Name].IndexFile["primary"] = &DbFile{
+		FileName: basePath + primaryIndexFileName,
+	}
+	return nil
 }
 
 // Deletes collection

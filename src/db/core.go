@@ -12,6 +12,11 @@ import (
 	. "types"
 )
 
+const (
+	dataFileName         = "objects.data"
+	primaryIndexFileName = "primary.index"
+)
+
 type Package struct {
 	Container *Container
 	Client    *Client
@@ -134,9 +139,23 @@ func (this *DbCore) populateCollections(d *Database) error {
 			return err
 		}
 		if fi.IsDir() {
-			collectionName := strings.Replace(dir, d.DataDir+string(os.PathSeparator), "", 1)
-			d.Collections[collectionName] = &Collection{
-				Name: collectionName,
+			// get directory name
+			collectionHashedName := strings.Replace(dir, d.DataDir+string(os.PathSeparator), "", 1)
+			// full path to collection directory
+			collectionDir := d.DataDir + string(os.PathSeparator) + collectionHashedName + string(os.PathSeparator)
+			// create collection object
+			d.Collections[collectionHashedName] = &Collection{
+				Name:    collectionHashedName,
+				Objects: make(map[uint64]interface{}),
+				Indices: make(map[string]ObjectIndex),
+				DataFile: &DbFile{
+					FileName: collectionDir + dataFileName,
+				},
+				IndexFile: make(map[string]*DbFile),
+			}
+			// check if primary index file is present
+			if primaryIndexFile, err := os.Stat(collectionDir + primaryIndexFileName); err == nil {
+				d.Collections[collectionHashedName].IndexFile["primary"].FileName = primaryIndexFile.Name()
 			}
 		}
 	}
