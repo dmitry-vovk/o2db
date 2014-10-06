@@ -15,6 +15,7 @@ import (
 const (
 	dataFileName         = "objects.data"
 	primaryIndexFileName = "primary.index"
+	objectIndexFileName  = "object.index"
 )
 
 type Package struct {
@@ -146,12 +147,15 @@ func (this *DbCore) populateCollections(d *Database) error {
 			// create collection object
 			d.Collections[collectionHashedName] = &Collection{
 				Name:    collectionHashedName,
-				Objects: make(map[uint64]interface{}),
+				Objects: make(map[int]ObjectPointer),
 				Indices: make(map[string]ObjectIndex),
 				DataFile: &DbFile{
 					FileName: collectionDir + dataFileName,
 				},
 				IndexFile: make(map[string]*DbFile),
+				IndexPointerFile: &DbFile{
+					FileName: collectionDir + objectIndexFileName,
+				},
 			}
 			// check if primary index file is present
 			if primaryIndexFile, err := os.Stat(collectionDir + primaryIndexFileName); err == nil {

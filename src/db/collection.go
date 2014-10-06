@@ -10,15 +10,21 @@ import (
 
 type Hash [20]byte // SHA1 hash
 
-type ObjectIndex map[Hash][]uint64
+type ObjectIndex map[Hash][]int
+
+type ObjectPointer struct {
+	Offset int
+	Len    int
+}
 
 type Collection struct {
-	Name           string                 // Collection/class name
-	Objects        map[uint64]interface{} // Objects
-	Indices        map[string]ObjectIndex // collection of indices
-	DataFile       *DbFile                // Objects storage
-	IndexFile      map[string]*DbFile     // List of indices
-	freeSlotOffset int
+	Name             string                 // Collection/class name
+	Objects          map[int]ObjectPointer  // Objects
+	Indices          map[string]ObjectIndex // collection of indices
+	DataFile         *DbFile                // Objects storage
+	IndexFile        map[string]*DbFile     // List of indices
+	freeSlotOffset   int
+	IndexPointerFile *DbFile
 }
 
 // Writes (inserts/updates) object instance into collection
@@ -40,7 +46,7 @@ func (this *Collection) WriteObject(p WriteObject) error {
 	if err != nil {
 		return err
 	}
-	this.addObjectToIndex(&p.Data, offset, buf.Len())
+	this.addObjectToIndex(&p, offset, buf.Len())
 	return nil
 }
 
@@ -62,9 +68,24 @@ func (this *Collection) getFreeSpaceOffset() int {
 }
 
 // Adds object to indices
-func (this *Collection) addObjectToIndex(data *ObjectFields, offset, len int) {
-	this.freeSlotOffset += len
+func (this *Collection) addObjectToIndex(wo *WriteObject, offset, length int) {
+	logger.ErrorLog.Printf("Object written at offset %d", offset)
+	this.freeSlotOffset += length
+	logger.ErrorLog.Printf("Next offset is %d", this.freeSlotOffset)
+	wo.Id = len(this.Objects)
+	this.Objects[wo.Id] = ObjectPointer{offset, length}
+	logger.ErrorLog.Printf("Object index: %v", this.Objects)
+	this.flushObjectIndex() // TODO Can be made async
+}
 
+func (this *Collection) flushObjectIndex() error {
+	var b bytes.Buffer
+	enc := gob.NewEncoder(&b)
+	err := enc.Encode(this.Objects)
+	if err != nil {
+		return err
+	}
+	return this.IndexPointerFile.Dump(&b)
 }
 
 // Reads object from collection file

@@ -102,7 +102,8 @@ type Client struct {
 type ObjectFields map[string]interface{}
 
 type WriteObject struct {
-	Collection string       `json:"class"`
+	Collection string `json:"class"`
+	Id         int
 	Data       ObjectFields `json:"data"`
 }
 

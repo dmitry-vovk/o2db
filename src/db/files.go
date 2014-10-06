@@ -4,6 +4,7 @@ import (
 	"errors"
 	mmap "github.com/edsrzf/mmap-go"
 	"os"
+	"bytes"
 )
 
 var (
@@ -99,17 +100,19 @@ func (this *DbFile) append(data []byte) error {
 }
 
 // Replace content of the file with data using temporary file
-func (this *DbFile) Dump(data []byte) error {
-	err := this.Close()
-	if err != nil {
-		return err
+func (this *DbFile) Dump(data *bytes.Buffer) error {
+	if this.Handler != nil {
+		err := this.Close()
+		if err != nil {
+			return err
+		}
 	}
 	f, err := os.OpenFile(this.FileName+".tmp", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.FileMode(0600))
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	if _, err = f.Write(data); err != nil {
+	if _, err = f.Write(data.Bytes()); err != nil {
 		return err
 	}
 	err = os.Remove(this.FileName)
