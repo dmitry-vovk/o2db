@@ -18,8 +18,8 @@ type Database struct {
 }
 
 // Creates new empty collection
-func (this *Database) CreateCollection(p CreateCollection) error {
-	var collectionPath = this.DataDir + string(os.PathSeparator) + hash(p.Name)
+func (d *Database) CreateCollection(p CreateCollection) error {
+	var collectionPath = d.DataDir + string(os.PathSeparator) + hash(p.Name)
 	if _, err := os.Stat(collectionPath); !os.IsNotExist(err) {
 		return errors.New("Collection already exists")
 	}
@@ -33,27 +33,35 @@ func (this *Database) CreateCollection(p CreateCollection) error {
 	if err != nil {
 		return err
 	}
-	this.Collections[p.Name] = &Collection{
-		Name: p.Name,
+	collectionNameHash := hash(p.Name)
+	d.Collections[collectionNameHash] = &Collection{
+		Name:             p.Name,
+		Objects:          make(map[int]ObjectPointer),
+		IndexPointerFile: &DbFile{},
+		ObjectIndexFlush: make(chan (bool), 100),
 	}
+	d.Collections[collectionNameHash].IndexPointerFile.Touch()
 	basePath := collectionPath + string(os.PathSeparator)
 	err = ioutil.WriteFile(basePath+"schema.json", schema, os.FileMode(0600))
 	if err != nil {
 		return err
 	}
-	this.Collections[p.Name].DataFile = &DbFile{
+	d.Collections[collectionNameHash].DataFile = &DbFile{
 		FileName: basePath + dataFileName,
 	}
-	this.Collections[p.Name].IndexFile = make(map[string]*DbFile)
-	this.Collections[p.Name].IndexFile["primary"] = &DbFile{
+	d.Collections[collectionNameHash].DataFile.Touch()
+	d.Collections[collectionNameHash].IndexFile = make(map[string]*DbFile)
+	d.Collections[collectionNameHash].IndexFile["primary"] = &DbFile{
 		FileName: basePath + primaryIndexFileName,
 	}
+	d.Collections[collectionNameHash].IndexFile["primary"].Touch()
+	go d.Collections[collectionNameHash].objectIndexFlusher()
 	return nil
 }
 
 // Deletes collection
-func (this *Database) DropCollection(p DropCollection) error {
-	var collectionPath = this.DataDir + string(os.PathSeparator) + hash(p.Name)
+func (d *Database) DropCollection(p DropCollection) error {
+	var collectionPath = d.DataDir + string(os.PathSeparator) + hash(p.Name)
 	if _, err := os.Stat(collectionPath); os.IsNotExist(err) {
 		return errors.New("Collection does not exist")
 	}
@@ -62,5 +70,7 @@ func (this *Database) DropCollection(p DropCollection) error {
 
 // Shorthand to get SHA1 string
 func hash(s string) string {
-	return hex.EncodeToString(sha1.New().Sum([]byte(s)))
+	sh := sha1.New()
+	sh.Write([]byte(s))
+	return hex.EncodeToString(sh.Sum(nil))
 }

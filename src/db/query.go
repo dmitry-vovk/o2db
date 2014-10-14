@@ -64,7 +64,7 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 				if collection, ok := clientDb.Collections[collectionKey]; ok {
 					return respond("Object written", collection.WriteObject(q.Payload.(WriteObject)))
 				} else {
-					return respond("Collection does not exist", nil)
+					return respond("Collection "+q.Payload.(WriteObject).Collection+" does not exist", nil)
 				}
 			} else {
 				return respond("Database not selected", nil)

@@ -25,33 +25,34 @@ type Collection struct {
 	IndexFile        map[string]*DbFile     // List of indices
 	freeSlotOffset   int
 	IndexPointerFile *DbFile
+	ObjectIndexFlush chan (bool)
 }
 
 // Writes (inserts/updates) object instance into collection
-func (this *Collection) WriteObject(p WriteObject) error {
+func (c *Collection) WriteObject(p WriteObject) error {
 	// TODO
 	// 1. Encode object
 	// 2. Write to file
 	// 3. Add field indices
 	// 4. Add starting position and length to data index
-	buf, err := this.encodeObject(&p.Data)
-	f, err := OpenFile(this.DataFile.FileName)
+	buf, err := c.encodeObject(&p.Data)
+	f, err := OpenFile(c.DataFile.FileName)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 	//len := buf.Len()
-	offset := this.getFreeSpaceOffset()
+	offset := c.getFreeSpaceOffset()
 	err = f.Write(buf.Bytes(), offset)
 	if err != nil {
 		return err
 	}
-	this.addObjectToIndex(&p, offset, buf.Len())
+	c.addObjectToIndex(&p, offset, buf.Len())
 	return nil
 }
 
 // GOB encodes object
-func (this *Collection) encodeObject(data *ObjectFields) (*bytes.Buffer, error) {
+func (c *Collection) encodeObject(data *ObjectFields) (*bytes.Buffer, error) {
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)
 	err := enc.Encode(data)
@@ -63,40 +64,56 @@ func (this *Collection) encodeObject(data *ObjectFields) (*bytes.Buffer, error) 
 }
 
 // Returns pointer to the start of unallocated file space
-func (this *Collection) getFreeSpaceOffset() int {
-	return this.freeSlotOffset
+func (c *Collection) getFreeSpaceOffset() int {
+	return c.freeSlotOffset
 }
 
 // Adds object to indices
-func (this *Collection) addObjectToIndex(wo *WriteObject, offset, length int) {
+func (c *Collection) addObjectToIndex(wo *WriteObject, offset, length int) {
 	logger.ErrorLog.Printf("Object written at offset %d", offset)
-	this.freeSlotOffset += length
-	logger.ErrorLog.Printf("Next offset is %d", this.freeSlotOffset)
-	wo.Id = len(this.Objects)
-	this.Objects[wo.Id] = ObjectPointer{offset, length}
-	logger.ErrorLog.Printf("Object index: %v", this.Objects)
-	this.flushObjectIndex() // TODO Can be made async
+	c.freeSlotOffset += length
+	logger.ErrorLog.Printf("Next offset is %d", c.freeSlotOffset)
+	wo.Id = len(c.Objects)
+	c.Objects[wo.Id] = ObjectPointer{offset, length}
+	logger.ErrorLog.Printf("Object index: %v", c.Objects)
+	c.flushObjectIndex() // TODO Can be made async
 }
 
-func (this *Collection) flushObjectIndex() error {
+// Goroutine to trigger object index flushing to disk
+func (c *Collection) objectIndexFlusher() {
+	var flag bool
+	select {
+	case <-c.ObjectIndexFlush:
+		flag = true
+	default:
+		if flag {
+			c.flushObjectIndex()
+			flag = false
+		}
+	}
+}
+
+// Dump index structure to disk
+func (c *Collection) flushObjectIndex() error {
+	// TODO use simple file writes, not DbFile
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)
-	err := enc.Encode(this.Objects)
+	err := enc.Encode(c.Objects)
 	if err != nil {
 		return err
 	}
-	return this.IndexPointerFile.Dump(&b)
+	return c.IndexPointerFile.Dump(&b)
 }
 
 // Reads object from collection file
-func (this *Collection) ReadObject(p ReadObject) (*ObjectFields, error) {
+func (c *Collection) ReadObject(p ReadObject) (*ObjectFields, error) {
 	// TODO
 	// 1. Get conditions from p
 	// 2. Figure corresponding indices
 	// 3. Find object id according to indices
 	// 4. Figure out starting position and length of GOB record
 	// 5. Read and decode it
-	f, err := OpenFile(this.DataFile.FileName)
+	f, err := OpenFile(c.DataFile.FileName)
 	if err != nil {
 		logger.ErrorLog.Printf("Open file: %s", err)
 		return nil, err

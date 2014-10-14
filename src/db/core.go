@@ -6,6 +6,7 @@ import (
 	"config"
 	"encoding/json"
 	"errors"
+	"logger"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,7 +16,7 @@ import (
 const (
 	dataFileName         = "objects.data"
 	primaryIndexFileName = "primary.index"
-	objectIndexFileName  = "object.index"
+	objectIndexFileName  = "objects.index"
 )
 
 type Package struct {
@@ -34,16 +35,16 @@ var (
 )
 
 // Goroutine that handles queries asynchronously
-func (this *DbCore) Processor() {
-	this.databases = make(map[string]*Database)
+func (с *DbCore) Processor() {
+	с.databases = make(map[string]*Database)
 	for {
-		pkg := <-this.Input
-		pkg.RespChan <- this.ProcessQuery(pkg.Client, pkg.Container)
+		pkg := <-с.Input
+		pkg.RespChan <- с.ProcessQuery(pkg.Client, pkg.Container)
 	}
 }
 
 // Creates new database
-func (this *DbCore) CreateDatabase(p CreateDatabase) error {
+func (с *DbCore) CreateDatabase(p CreateDatabase) error {
 	if p.Name == "" {
 		return errors.New("Cannot create database with empty name")
 	}
@@ -54,7 +55,7 @@ func (this *DbCore) CreateDatabase(p CreateDatabase) error {
 	if err := os.Mkdir(dbPath, os.FileMode(0700)); err != nil {
 		return err
 	}
-	this.databases[p.Name] = &Database{
+	с.databases[p.Name] = &Database{
 		DataDir:     p.Name,
 		Collections: make(map[string]*Collection),
 	}
@@ -62,7 +63,7 @@ func (this *DbCore) CreateDatabase(p CreateDatabase) error {
 }
 
 // Deletes existing database
-func (this *DbCore) DropDatabase(p DropDatabase) error {
+func (с *DbCore) DropDatabase(p DropDatabase) error {
 	if p.Name == "" {
 		return errors.New("Database name cannot be empty")
 	}
@@ -70,14 +71,14 @@ func (this *DbCore) DropDatabase(p DropDatabase) error {
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		return errors.New("Database does not exists")
 	}
-	if _, has := this.databases[p.Name]; has {
-		delete(this.databases, p.Name)
+	if _, has := с.databases[p.Name]; has {
+		delete(с.databases, p.Name)
 	}
 	return os.RemoveAll(dbPath)
 }
 
 // Returns the list of existing databases
-func (this *DbCore) ListDatabases(p ListDatabases) (string, error) {
+func (с *DbCore) ListDatabases(p ListDatabases) (string, error) {
 	if p.Mask == "" {
 		return "", errors.New("Mask cannot be empty")
 	}
@@ -101,14 +102,14 @@ func (this *DbCore) ListDatabases(p ListDatabases) (string, error) {
 }
 
 // Open existing database
-func (this *DbCore) OpenDatabase(p OpenDatabase) (string, error) {
+func (с *DbCore) OpenDatabase(p OpenDatabase) (string, error) {
 	if p.Name == "" {
 		return "", errors.New("Database name cannot be empty")
 	}
-	if _, has := this.databases[p.Name]; has {
+	if _, has := с.databases[p.Name]; has {
 		return p.Name, nil
 	}
-	err := this.openDatabase(p.Name)
+	err := с.openDatabase(p.Name)
 	if err != nil {
 		return "", err
 	}
@@ -116,24 +117,26 @@ func (this *DbCore) OpenDatabase(p OpenDatabase) (string, error) {
 }
 
 // Low level database opener
-func (this *DbCore) openDatabase(dbName string) error {
+func (с *DbCore) openDatabase(dbName string) error {
 	var dbPath = config.Config.DataDir + string(os.PathSeparator) + dbName
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		return errors.New("Database does not exists")
 	}
-	this.databases[dbName] = &Database{
+	с.databases[dbName] = &Database{
 		DataDir:     dbPath,
 		Collections: make(map[string]*Collection),
 	}
-	return this.populateCollections(this.databases[dbName])
+	return с.populateCollections(с.databases[dbName])
 }
 
 // Scans directories under database data directory
-func (this *DbCore) populateCollections(d *Database) error {
+// and creates collection structures from found files
+func (c *DbCore) populateCollections(d *Database) error {
 	files, err := filepath.Glob(d.DataDir + string(os.PathSeparator) + "*")
 	if err != nil {
 		return err
 	}
+	// Iterate through all directories under database data dir
 	for _, dir := range files {
 		fi, err := os.Stat(dir)
 		if err != nil {
@@ -144,6 +147,12 @@ func (this *DbCore) populateCollections(d *Database) error {
 			collectionHashedName := strings.Replace(dir, d.DataDir+string(os.PathSeparator), "", 1)
 			// full path to collection directory
 			collectionDir := d.DataDir + string(os.PathSeparator) + collectionHashedName + string(os.PathSeparator)
+			// check if primary index file is present
+			primaryIndexFile, err := os.Stat(collectionDir + primaryIndexFileName)
+			if err != nil {
+				logger.ErrorLog.Printf("No primary index file found in %s", collectionDir)
+				continue
+			}
 			// create collection object
 			d.Collections[collectionHashedName] = &Collection{
 				Name:    collectionHashedName,
@@ -157,9 +166,9 @@ func (this *DbCore) populateCollections(d *Database) error {
 					FileName: collectionDir + objectIndexFileName,
 				},
 			}
-			// check if primary index file is present
-			if primaryIndexFile, err := os.Stat(collectionDir + primaryIndexFileName); err == nil {
-				d.Collections[collectionHashedName].IndexFile["primary"].FileName = primaryIndexFile.Name()
+			// Add primary index
+			d.Collections[collectionHashedName].IndexFile["primary"] = &DbFile{
+				FileName: primaryIndexFile.Name(),
 			}
 		}
 	}
