@@ -12,6 +12,7 @@ import (
 	"net"
 	"server/message"
 	. "types"
+	"time"
 )
 
 const (
@@ -35,9 +36,9 @@ func CreateNew(config *config.ConfigType) *ServerType {
 }
 
 // Run processing
-func (this *ServerType) Run() error {
-	go this.Core.Processor()
-	socket, err := net.Listen("tcp4", this.Config.ListenTCP)
+func (s *ServerType) Run() error {
+	go s.Core.Processor()
+	socket, err := net.Listen("tcp4", s.Config.ListenTCP)
 	if err != nil {
 		return err
 	}
@@ -51,12 +52,16 @@ func (this *ServerType) Run() error {
 		c := &Client{
 			Conn: conn,
 		}
-		go this.handler(c)
+		go s.handler(c)
 	}
 }
 
 // Handle single client connection
-func (this *ServerType) handler(client *Client) {
+func (s *ServerType) handler(client *Client) {
+	start := time.Now()
+	defer func() {
+		DebugLog.Printf("Completed in %.4f seconds", time.Now().Sub(start).Seconds())
+	}()
 	defer client.Conn.Close()
 	for {
 		DebugLog.Print("---------------------------------------------")
@@ -89,7 +94,7 @@ func (this *ServerType) handler(client *Client) {
 			go func(in *db.Package) {
 				go handle(<-in.RespChan, client)
 			}(pkg)
-			this.Core.Input <- pkg
+			s.Core.Input <- pkg
 		}
 	}
 }
