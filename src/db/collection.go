@@ -9,6 +9,10 @@ import (
 	. "types"
 )
 
+const (
+	flushDelay = 100 * time.Millisecond
+)
+
 type Hash [20]byte // SHA1 hash
 
 type ObjectIndex map[Hash][]int
@@ -92,7 +96,7 @@ func (c *Collection) objectIndexFlusher() {
 				c.flushObjectIndex()
 				flag = false
 			} else {
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(flushDelay)
 			}
 		}
 	}
