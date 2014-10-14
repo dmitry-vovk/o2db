@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"logger"
+	"time"
 	. "types"
 )
 
@@ -76,32 +77,36 @@ func (c *Collection) addObjectToIndex(wo *WriteObject, offset, length int) {
 	wo.Id = len(c.Objects)
 	c.Objects[wo.Id] = ObjectPointer{offset, length}
 	logger.ErrorLog.Printf("Object index: %v", c.Objects)
-	c.flushObjectIndex() // TODO Can be made async
+	c.ObjectIndexFlush <- true
 }
 
 // Goroutine to trigger object index flushing to disk
 func (c *Collection) objectIndexFlusher() {
-	var flag bool
-	select {
-	case <-c.ObjectIndexFlush:
-		flag = true
-	default:
-		if flag {
-			c.flushObjectIndex()
-			flag = false
+	var flag bool = false
+	for {
+		select {
+		case <-c.ObjectIndexFlush:
+			flag = true
+		default:
+			if flag {
+				c.flushObjectIndex()
+				flag = false
+			} else {
+				time.Sleep(100 * time.Millisecond)
+			}
 		}
 	}
 }
 
 // Dump index structure to disk
 func (c *Collection) flushObjectIndex() error {
-	// TODO use simple file writes, not DbFile
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)
 	err := enc.Encode(c.Objects)
 	if err != nil {
 		return err
 	}
+	// TODO use simple file writes, not DbFile
 	return c.IndexPointerFile.Dump(&b)
 }
 

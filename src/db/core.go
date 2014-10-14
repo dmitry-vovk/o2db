@@ -165,11 +165,13 @@ func (c *DbCore) populateCollections(d *Database) error {
 				IndexPointerFile: &DbFile{
 					FileName: collectionDir + objectIndexFileName,
 				},
+				ObjectIndexFlush: make(chan (bool), 100),
 			}
 			// Add primary index
 			d.Collections[collectionHashedName].IndexFile["primary"] = &DbFile{
 				FileName: primaryIndexFile.Name(),
 			}
+			go d.Collections[collectionHashedName].objectIndexFlusher()
 		}
 	}
 	return nil
