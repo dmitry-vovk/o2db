@@ -4,9 +4,12 @@ package db
 import (
 	"bytes"
 	"encoding/gob"
+	"github.com/kr/pretty"
 	"logger"
+	"os"
 	"time"
 	. "types"
+	"strconv"
 )
 
 const (
@@ -17,19 +20,23 @@ type Hash [20]byte // SHA1 hash
 
 type ObjectIndex map[Hash][]int
 
-type ObjectPointer struct {
-	Offset int
-	Len    int
+// Object instance
+type ObjectVersion struct {
+	Offset int // Offset from the beginning of object data file
+	Len    int // Number of bytes to read
 }
+
+// List of object instances. index is version number.
+type ObjectPointer map[int]ObjectVersion
 
 type Collection struct {
 	Name             string                 // Collection/class name
-	Objects          map[int]ObjectPointer  // Objects
+	Objects          map[int]ObjectPointer  // Objects. map index is object ID
 	Indices          map[string]ObjectIndex // collection of indices
 	DataFile         *DbFile                // Objects storage
 	IndexFile        map[string]*DbFile     // List of indices
 	freeSlotOffset   int
-	IndexPointerFile *DbFile
+	IndexPointerFile string
 	ObjectIndexFlush chan (bool)
 }
 
@@ -75,12 +82,24 @@ func (c *Collection) getFreeSpaceOffset() int {
 
 // Adds object to indices
 func (c *Collection) addObjectToIndex(wo *WriteObject, offset, length int) {
-	logger.ErrorLog.Printf("Object written at offset %d", offset)
 	c.freeSlotOffset += length
-	logger.ErrorLog.Printf("Next offset is %d", c.freeSlotOffset)
-	wo.Id = len(c.Objects)
-	c.Objects[wo.Id] = ObjectPointer{offset, length}
-	logger.ErrorLog.Printf("Object index: %v", c.Objects)
+	switch wo.Data["id"].(type) {
+	case string:
+		id, _ := strconv.Atoi(wo.Data["id"].(string))
+		wo.Id = id
+	case float64: wo.Id = int(wo.Data["id"].(float64))
+	default:
+		wo.Id = len(c.Objects)
+	}
+	next := len(c.Objects[wo.Id])
+	logger.ErrorLog.Printf("%+v", c.Objects[wo.Id])
+	if len(c.Objects[wo.Id]) == 0 {
+		c.Objects[wo.Id] = ObjectPointer{}
+	}
+	c.Objects[wo.Id][next] = ObjectVersion{
+		Len:    length,
+		Offset: offset,
+	}
 	c.ObjectIndexFlush <- true
 }
 
@@ -93,7 +112,9 @@ func (c *Collection) objectIndexFlusher() {
 			flag = true
 		default:
 			if flag {
-				c.flushObjectIndex()
+				if err := c.flushObjectIndex(); err != nil {
+					logger.ErrorLog.Printf("Error flushing objects index: %s", err)
+				}
 				flag = false
 			} else {
 				time.Sleep(flushDelay)
@@ -105,13 +126,18 @@ func (c *Collection) objectIndexFlusher() {
 // Dump index structure to disk
 func (c *Collection) flushObjectIndex() error {
 	var b bytes.Buffer
+	logger.ErrorLog.Printf("%# v", pretty.Formatter(c.Objects))
 	enc := gob.NewEncoder(&b)
 	err := enc.Encode(c.Objects)
 	if err != nil {
 		return err
 	}
-	// TODO use simple file writes, not DbFile
-	return c.IndexPointerFile.Dump(&b)
+	handler, err := os.OpenFile(c.IndexPointerFile, os.O_RDWR|os.O_CREATE, os.FileMode(0600))
+	if err != nil {
+		return err
+	}
+	_, err = handler.Write(b.Bytes())
+	return err
 }
 
 // Reads object from collection file

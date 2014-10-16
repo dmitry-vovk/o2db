@@ -161,10 +161,8 @@ func (c *DbCore) populateCollections(d *Database) error {
 				DataFile: &DbFile{
 					FileName: collectionDir + dataFileName,
 				},
-				IndexFile: make(map[string]*DbFile),
-				IndexPointerFile: &DbFile{
-					FileName: collectionDir + objectIndexFileName,
-				},
+				IndexFile:        make(map[string]*DbFile),
+				IndexPointerFile: collectionDir + objectIndexFileName,
 				ObjectIndexFlush: make(chan (bool), 100),
 			}
 			// Add primary index

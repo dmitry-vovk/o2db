@@ -37,10 +37,9 @@ func (d *Database) CreateCollection(p CreateCollection) error {
 	d.Collections[collectionNameHash] = &Collection{
 		Name:             p.Name,
 		Objects:          make(map[int]ObjectPointer),
-		IndexPointerFile: &DbFile{},
+		IndexPointerFile: collectionPath + string(os.PathSeparator) + objectIndexFileName,
 		ObjectIndexFlush: make(chan (bool), 100),
 	}
-	d.Collections[collectionNameHash].IndexPointerFile.Touch()
 	basePath := collectionPath + string(os.PathSeparator)
 	err = ioutil.WriteFile(basePath+"schema.json", schema, os.FileMode(0600))
 	if err != nil {
