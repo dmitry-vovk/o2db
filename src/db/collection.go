@@ -92,7 +92,6 @@ func (c *Collection) addObjectToIndex(wo *WriteObject, offset, length int) {
 		wo.Id = len(c.Objects)
 	}
 	next := len(c.Objects[wo.Id])
-	logger.ErrorLog.Printf("%+v", c.Objects[wo.Id])
 	if len(c.Objects[wo.Id]) == 0 {
 		c.Objects[wo.Id] = ObjectPointer{}
 	}
