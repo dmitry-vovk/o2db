@@ -6,6 +6,7 @@ import (
 	"config"
 	"encoding/json"
 	"errors"
+	_ "github.com/kr/pretty"
 	"logger"
 	"os"
 	"path/filepath"
@@ -165,12 +166,21 @@ func (c *DbCore) populateCollections(d *Database) error {
 				IndexPointerFile: collectionDir + objectIndexFileName,
 				ObjectIndexFlush: make(chan (bool), 100),
 			}
+			// Open object storage
+			d.Collections[collectionHashedName].DataFile.Open()
 			// Add primary index
 			d.Collections[collectionHashedName].IndexFile["primary"] = &DbFile{
 				FileName: primaryIndexFile.Name(),
 			}
+			// Run goroutine that will flush objects index
 			go d.Collections[collectionHashedName].objectIndexFlusher()
+			// Try to read existing objects index (it may not exist for empty collection)
+			if err := d.Collections[collectionHashedName].readObjectIndex(); err != nil {
+				logger.ErrorLog.Printf("Could not read object index: %s", err)
+				return err
+			}
 		}
 	}
+	//logger.ErrorLog.Printf("%# v", pretty.Formatter(c.databases))
 	return nil
 }

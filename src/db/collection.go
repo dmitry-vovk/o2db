@@ -9,11 +9,12 @@ import (
 	"os"
 	"time"
 	. "types"
-	"strconv"
 )
 
 const (
-	flushDelay = 100 * time.Millisecond
+	flushDelay    = 100 * time.Millisecond
+	FIELD_ID      = "__id__"
+	FIELD_VERSION = "__version__"
 )
 
 type Hash [20]byte // SHA1 hash
@@ -42,20 +43,12 @@ type Collection struct {
 
 // Writes (inserts/updates) object instance into collection
 func (c *Collection) WriteObject(p WriteObject) error {
-	// TODO
-	// 1. Encode object
-	// 2. Write to file
-	// 3. Add field indices
-	// 4. Add starting position and length to data index
 	buf, err := c.encodeObject(&p.Data)
-	f, err := OpenFile(c.DataFile.FileName)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	//len := buf.Len()
 	offset := c.getFreeSpaceOffset()
-	err = f.Write(buf.Bytes(), offset)
+	err = c.DataFile.Write(buf.Bytes(), offset)
 	if err != nil {
 		return err
 	}
@@ -83,14 +76,7 @@ func (c *Collection) getFreeSpaceOffset() int {
 // Adds object to indices
 func (c *Collection) addObjectToIndex(wo *WriteObject, offset, length int) {
 	c.freeSlotOffset += length
-	switch wo.Data["id"].(type) {
-	case string:
-		id, _ := strconv.Atoi(wo.Data["id"].(string))
-		wo.Id = id
-	case float64: wo.Id = int(wo.Data["id"].(float64))
-	default:
-		wo.Id = len(c.Objects)
-	}
+	wo.Id = getInt(wo.Data["id"])
 	next := len(c.Objects[wo.Id])
 	if len(c.Objects[wo.Id]) == 0 {
 		c.Objects[wo.Id] = ObjectPointer{}
@@ -135,31 +121,73 @@ func (c *Collection) flushObjectIndex() error {
 	if err != nil {
 		return err
 	}
+	defer handler.Close()
 	_, err = handler.Write(b.Bytes())
 	return err
 }
 
+// Read index structure from disk
+func (c *Collection) readObjectIndex() error {
+	handler, err := os.Open(c.IndexPointerFile)
+	if err != nil {
+		return err
+	}
+	dec := gob.NewDecoder(handler)
+	err = dec.Decode(&c.Objects)
+	if err != nil {
+		return err
+	}
+	// Find the end of storage space
+	for _, obj := range c.Objects {
+		for _, ver := range obj {
+			end := ver.Offset + ver.Len
+			if end > c.freeSlotOffset {
+				c.freeSlotOffset = end
+			}
+		}
+	}
+	return handler.Close()
+}
+
 // Reads object from collection file
 func (c *Collection) ReadObject(p ReadObject) (*ObjectFields, error) {
-	// TODO
-	// 1. Get conditions from p
-	// 2. Figure corresponding indices
-	// 3. Find object id according to indices
-	// 4. Figure out starting position and length of GOB record
-	// 5. Read and decode it
-	f, err := OpenFile(c.DataFile.FileName)
+	// Special case when object selected by ID only
+	var id int
+	// Prettify ID
+	if rawId, ok := p.Fields[FIELD_ID]; ok {
+		id = getInt(rawId)
+	}
+	// Object with zero ID cannot exist
+	if id == 0 {
+		return nil, nil
+	}
+	// No objects there
+	if len(c.Objects[id]) == 0 {
+		return nil, nil
+	}
+	// Get by ID
+	if len(p.Fields) == 1 {
+		var version = len(c.Objects[id])-1
+		return c.getObjectByIdAndVersion(id, version)
+	}
+	// Get by ID and version
+	if rawVersion, ok := p.Fields[FIELD_VERSION]; ok && len(p.Fields) == 2 {
+		version := getInt(rawVersion)
+		return c.getObjectByIdAndVersion(id, version)
+	}
+	// TODO get by conditions
+	return nil, nil
+}
+
+func (c *Collection) getObjectByIdAndVersion(id, version int) (*ObjectFields, error) {
+	data, err := c.DataFile.Read(c.Objects[id][version].Offset, c.Objects[id][version].Len)
 	if err != nil {
-		logger.ErrorLog.Printf("Open file: %s", err)
 		return nil, err
 	}
-	defer f.Close()
-	dec := gob.NewDecoder(f.Handler)
-	var fields ObjectFields
-	err = dec.Decode(&fields)
-	if err != nil {
-		logger.ErrorLog.Printf("Decoding: %s", err)
-		return nil, err
-	}
-	logger.DebugLog.Printf("Read fields: %v", fields)
-	return &fields, nil
+	// Decode bytes into object
+	dec := gob.NewDecoder(bytes.NewBuffer(data))
+	obj := &ObjectFields{}
+	err = dec.Decode(obj)
+	return obj, err
+	return nil, nil
 }

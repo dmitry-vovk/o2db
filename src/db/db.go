@@ -2,8 +2,6 @@
 package db
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -55,6 +53,7 @@ func (d *Database) CreateCollection(p CreateCollection) error {
 	}
 	d.Collections[collectionNameHash].IndexFile["primary"].Touch()
 	go d.Collections[collectionNameHash].objectIndexFlusher()
+	d.Collections[collectionNameHash].ObjectIndexFlush <- true
 	return nil
 }
 
@@ -65,11 +64,4 @@ func (d *Database) DropCollection(p DropCollection) error {
 		return errors.New("Collection does not exist")
 	}
 	return os.RemoveAll(collectionPath)
-}
-
-// Shorthand to get SHA1 string
-func hash(s string) string {
-	sh := sha1.New()
-	sh.Write([]byte(s))
-	return hex.EncodeToString(sh.Sum(nil))
 }

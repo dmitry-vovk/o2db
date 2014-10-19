@@ -3,7 +3,7 @@ package db
 import (
 	"bytes"
 	"errors"
-	mmap "github.com/edsrzf/mmap-go"
+	"logger"
 	"os"
 )
 
@@ -15,11 +15,16 @@ var (
 type DbFile struct {
 	FileName string
 	Handler  *os.File
-	Buffer   mmap.MMap
+}
+
+func (f *DbFile) Open() {
+	if err := f.openFile(); err != nil {
+		logger.ErrorLog.Printf("Error opening data file: %s", err)
+	}
 }
 
 // Opens a file and maps it into memory
-func OpenFile(fileName string) (*DbFile, error) {
+func NewFile(fileName string) (*DbFile, error) {
 	dbFile := DbFile{
 		FileName: fileName,
 	}
@@ -34,18 +39,7 @@ func (f *DbFile) Touch() error {
 func (f *DbFile) openFile() error {
 	var err error
 	f.Handler, err = os.OpenFile(f.FileName, os.O_RDWR|os.O_CREATE, os.FileMode(0600))
-	if err != nil {
-		return err
-	}
-	// We are not trying to map empty file
-	if stat, _ := os.Stat(f.FileName); stat.Size() == 0 {
-		f.Handler.Truncate(int64(os.Getpagesize() * 1024 * 32))
-	}
-	f.Buffer, err = mmap.Map(f.Handler, mmap.RDWR, 0)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Flush, unmap, and close the file
@@ -53,37 +47,20 @@ func (f *DbFile) Close() error {
 	if f.Handler == nil {
 		return errors.New("File is not open")
 	}
-	err := f.Buffer.Flush()
-	if err != nil {
-		return err
-	}
-	err = f.Buffer.Unmap()
-	if err != nil {
-		return err
-	}
-	err = f.Handler.Close()
-	if err != nil {
-		return err
-	}
-	return nil
+	return f.Handler.Close()
 }
 
-// Return portion of file starting at 'start' and of 'len' length
-func (f *DbFile) Read(start, len int) ([]byte, error) {
-	return f.Buffer[start : start+len], nil
+// Return portion of file starting at 'offset' and of 'len' length
+func (f *DbFile) Read(offset, count int) ([]byte, error) {
+	buf := make([]byte, count)
+	_, err := f.Handler.ReadAt(buf, int64(offset))
+	return buf, err
 }
 
 // Write 'data' bytes starting at 'offset'
 func (f *DbFile) Write(data []byte, offset int) error {
-	var diff = offset + len(data) - len(f.Buffer)
-	if diff > 0 {
-		var zeroes = make([]byte, diff)
-		f.append(zeroes)
-	}
-	if n := copy(f.Buffer[offset:], data); n != len(data) {
-		return ErrTruncated
-	}
-	return nil
+	_, err := f.Handler.WriteAt(data, int64(offset))
+	return err
 }
 
 // Append data to the end of the file (resizing it)
