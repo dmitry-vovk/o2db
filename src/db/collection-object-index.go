@@ -1,3 +1,4 @@
+// File contains collection methods for managing object index
 package db
 
 import (
