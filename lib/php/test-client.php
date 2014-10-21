@@ -5,9 +5,9 @@ $client = new O2dbClient('127.0.0.1');
 
 // Authenticate
 $message = [
-    'type'    => O2dbClient::TYPE_AUTHENTICATE,
+    'type' => O2dbClient::TYPE_AUTHENTICATE,
     'payload' => [
-        'name'     => 'root',
+        'name' => 'root',
         'password' => '12345',
     ],
 ];
@@ -27,7 +27,7 @@ echo '<<<', $response, PHP_EOL;
 // Open database
 
 $message = [
-    'type'    => O2dbClient::TYPE_OPEN_DB,
+    'type' => O2dbClient::TYPE_OPEN_DB,
     'payload' => [
         'name' => 'test_01'
     ],
@@ -147,6 +147,16 @@ $message = [
         'data' => [
             '__id__' => 13,
         ],
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+
+$message = [
+    'type' => O2dbClient::TYPE_GET_OBJECT_VERSIONS,
+    'payload' => [
+        'class' => 'Job',
+        'id' => 17,
     ],
 ];
 $response = $client->send($message);

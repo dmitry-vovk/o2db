@@ -167,7 +167,7 @@ func (c *Collection) ReadObject(p ReadObject) (*ObjectFields, error) {
 	}
 	// Get by ID
 	if len(p.Fields) == 1 {
-		var version = len(c.Objects[id])-1
+		var version = len(c.Objects[id]) - 1
 		return c.getObjectByIdAndVersion(id, version)
 	}
 	// Get by ID and version
@@ -186,8 +186,14 @@ func (c *Collection) getObjectByIdAndVersion(id, version int) (*ObjectFields, er
 	}
 	// Decode bytes into object
 	dec := gob.NewDecoder(bytes.NewBuffer(data))
-	obj := &ObjectFields{}
-	err = dec.Decode(obj)
-	return obj, err
-	return nil, nil
+	obj := ObjectFields{}
+	err = dec.Decode(&obj)
+	obj[FIELD_ID] = id
+	obj[FIELD_VERSION] = version
+	return &obj, err
+}
+
+// Returns the number of object versions
+func (c *Collection) GetObjectVersions(p GetObjectVersions) (ObjectVersions, error) {
+	return ObjectVersions(len(c.Objects[p.Id])), nil
 }

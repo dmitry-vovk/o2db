@@ -81,6 +81,18 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 			} else {
 				return respond("Database not selected", nil)
 			}
+		case GetObjectVersions:
+			if clientDb, ok := this.databases[c.Db]; ok {
+				collectionKey := hash(q.Payload.(GetObjectVersions).Collection)
+				if collection, ok := clientDb.Collections[collectionKey]; ok {
+					obj, err := collection.GetObjectVersions(q.Payload.(GetObjectVersions))
+					return respond(obj, err)
+				} else {
+					return respond("Collection does not exist", nil)
+				}
+			} else {
+				return respond("Database not selected", nil)
+			}
 		default:
 			ErrorLog.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
 			return respond(nil, errors.New(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(q.Payload))))

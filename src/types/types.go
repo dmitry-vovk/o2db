@@ -14,9 +14,10 @@ const (
 	TypeDropCollection   uint = 201
 	TypeListCollections  uint = 202
 
-	TypeObjectGet    uint = 300
-	TypeObjectWrite  uint = 301
-	TypeObjectDelete uint = 302
+	TypeObjectGet         uint = 300
+	TypeObjectWrite       uint = 301
+	TypeObjectDelete      uint = 302
+	TypeGetObjectVersions uint = 303
 
 	TypeTransactionStart  uint = 400
 	TypeTransactionCommit uint = 401
@@ -101,13 +102,24 @@ type Client struct {
 
 type ObjectFields map[string]interface{}
 
+// Query of type TypeObjectWrite
 type WriteObject struct {
-	Collection string `json:"class"`
-	Id         int
+	Collection string       `json:"class"`
+	Id         int          `json:"-"`
 	Data       ObjectFields `json:"data"`
 }
 
+// Query of type TypeObjectGet
 type ReadObject struct {
 	Collection string       `json:"class"`
 	Fields     ObjectFields `json:"data"`
 }
+
+// Query of type TypeGetObjectVersions
+type GetObjectVersions struct {
+	Collection string `json:"class"`
+	Id         int    `json:"id"`
+}
+
+// Response
+type ObjectVersions int

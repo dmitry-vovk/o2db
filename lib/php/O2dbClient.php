@@ -23,6 +23,7 @@ class O2dbClient {
     const TYPE_OBJECT_GET = 300;
     const TYPE_OBJECT_WRITE = 301;
     const TYPE_OBJECT_DROP = 302;
+    const TYPE_GET_OBJECT_VERSIONS = 303;
     /*
      0 TypeAuth
      1 TypeCreateDatabase
