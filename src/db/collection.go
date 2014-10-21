@@ -13,7 +13,7 @@ import (
 
 const (
 	flushDelay    = 100 * time.Millisecond
-	FIELD_ID      = "__id__"
+	FIELD_ID      = "id"
 	FIELD_VERSION = "__version__"
 )
 
@@ -188,7 +188,6 @@ func (c *Collection) getObjectByIdAndVersion(id, version int) (*ObjectFields, er
 	dec := gob.NewDecoder(bytes.NewBuffer(data))
 	obj := ObjectFields{}
 	err = dec.Decode(&obj)
-	obj[FIELD_ID] = id
 	obj[FIELD_VERSION] = version
 	return &obj, err
 }

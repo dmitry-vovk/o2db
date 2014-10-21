@@ -145,7 +145,7 @@ $message = [
     'payload' => [
         'class' => 'Job',
         'data' => [
-            '__id__' => 13,
+            'id' => 13,
         ],
     ],
 ];
@@ -156,7 +156,7 @@ $message = [
     'type' => O2dbClient::TYPE_GET_OBJECT_VERSIONS,
     'payload' => [
         'class' => 'Job',
-        'id' => 17,
+        'id' => 13,
     ],
 ];
 $response = $client->send($message);
