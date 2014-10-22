@@ -18,10 +18,9 @@ const (
 	TypeObjectWrite       uint = 301
 	TypeObjectDelete      uint = 302
 	TypeGetObjectVersions uint = 303
+	TypeGetObjectDiff     uint = 304
 
-	TypeTransactionStart  uint = 400
-	TypeTransactionCommit uint = 401
-	TypeTransactionAbort  uint = 402
+	TypeSubscribe uint = 400
 )
 
 // Query message container
@@ -123,3 +122,14 @@ type GetObjectVersions struct {
 
 // Response
 type ObjectVersions int
+
+// Get diff between two object versions
+type GetObjectDiff struct {
+	Collection string `json:"class"`
+	Id         int    `json:"id"`
+	From       int    `json:"from"` // Version one
+	To         int    `json:"to"`   // Version two
+}
+
+// Difference between two object versions
+type ObjectDiff ObjectFields

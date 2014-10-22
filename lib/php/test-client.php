@@ -139,7 +139,22 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 */
-
+/*
+$message = [
+    'type'    => O2dbClient::TYPE_OBJECT_WRITE,
+    'payload' => [
+        'class' => 'Job',
+        'data'  => [
+            'id'    => '5',
+            'prop1' => 'New property value here!',
+            'prop2' => 'val2',
+        ],
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+*/
+/*
 $message = [
     'type' => O2dbClient::TYPE_OBJECT_GET,
     'payload' => [
@@ -151,12 +166,24 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
+*/
 $message = [
     'type' => O2dbClient::TYPE_GET_OBJECT_VERSIONS,
     'payload' => [
         'class' => 'Job',
-        'id' => 13,
+        'id' => 5,
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+
+$message = [
+    'type' => O2dbClient::TYPE_GET_OBJECT_DIFF,
+    'payload' => [
+        'class' => 'Job',
+        'id' => 5,
+        'from' => 6,
+        'to' => 5,
     ],
 ];
 $response = $client->send($message);

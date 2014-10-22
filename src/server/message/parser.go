@@ -88,6 +88,12 @@ func Parse(msg []byte) (*Container, error) {
 		if err == nil {
 			parsedMessage.Payload = p
 		}
+	case TypeGetObjectDiff:
+		var p GetObjectDiff
+		err = json.Unmarshal(payload, &p)
+		if err == nil {
+			parsedMessage.Payload = p
+		}
 	default:
 		return nil, errors.New(fmt.Sprintf("Unsupported message type: %d", parsedMessage.Type))
 	}

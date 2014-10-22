@@ -10,14 +10,14 @@ import (
 )
 
 // This is the main entry for processing queries
-func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
+func (d *DbCore) ProcessQuery(c *Client, q *Container) Response {
 	if q == nil {
 		return respond("no message", nil)
 	}
 	DebugLog.Printf("Payload type: %s", reflect.TypeOf(q.Payload))
 	switch q.Payload.(type) {
 	case Authentication:
-		if this.Authenticate(c, q.Payload.(Authentication)) {
+		if d.Authenticate(c, q.Payload.(Authentication)) {
 			return respond("Authenticated", nil)
 		} else {
 			return respond("Authentication failed", nil)
@@ -26,20 +26,20 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 	if c.Authenticated {
 		switch q.Payload.(type) {
 		case OpenDatabase:
-			dbName, err := this.OpenDatabase(q.Payload.(OpenDatabase))
+			dbName, err := d.OpenDatabase(q.Payload.(OpenDatabase))
 			if err == nil {
 				c.Db = dbName
 			}
 			return respond("Database opened", err)
 		case CreateDatabase:
-			return respond("Database created", this.CreateDatabase(q.Payload.(CreateDatabase)))
+			return respond("Database created", d.CreateDatabase(q.Payload.(CreateDatabase)))
 		case DropDatabase:
-			return respond("Database deleted", this.DropDatabase(q.Payload.(DropDatabase)))
+			return respond("Database deleted", d.DropDatabase(q.Payload.(DropDatabase)))
 		case ListDatabases:
-			resp, err := this.ListDatabases(q.Payload.(ListDatabases))
+			resp, err := d.ListDatabases(q.Payload.(ListDatabases))
 			return respond(resp, err)
 		case CreateCollection:
-			if clientDb, ok := this.databases[c.Db]; ok {
+			if clientDb, ok := d.databases[c.Db]; ok {
 				if _, ok := clientDb.Collections[q.Payload.(CreateCollection).Name]; !ok {
 					return respond("Collection created", clientDb.CreateCollection(q.Payload.(CreateCollection)))
 				} else {
@@ -49,56 +49,54 @@ func (this *DbCore) ProcessQuery(c *Client, q *Container) Response {
 				return respond("Database not selected", nil)
 			}
 		case DropCollection:
-			if clientDb, ok := this.databases[c.Db]; ok {
-				if _, ok := clientDb.Collections[q.Payload.(WriteObject).Collection]; ok {
-					return respond("Collection deleted", clientDb.DropCollection(q.Payload.(DropCollection)))
-				} else {
-					return respond("Collection does not exist", nil)
-				}
-			} else {
-				return respond("Database not selected", nil)
+			_, err := d.getCollection(c, q.Payload.(DropCollection).Name)
+			if err != nil {
+				return respond(nil, err)
 			}
+			return respond("Collection deleted", d.databases[c.Db].DropCollection(q.Payload.(DropCollection)))
 		case WriteObject:
-			if clientDb, ok := this.databases[c.Db]; ok {
-				collectionKey := hash(q.Payload.(WriteObject).Collection)
-				if collection, ok := clientDb.Collections[collectionKey]; ok {
-					return respond("Object written", collection.WriteObject(q.Payload.(WriteObject)))
-				} else {
-					return respond("Collection "+q.Payload.(WriteObject).Collection+" does not exist", nil)
-				}
-			} else {
-				return respond("Database not selected", nil)
+			collection, err := d.getCollection(c, q.Payload.(WriteObject).Collection)
+			if err != nil {
+				return respond(nil, err)
 			}
+			return respond("Object written", collection.WriteObject(q.Payload.(WriteObject)))
 		case ReadObject:
-			if clientDb, ok := this.databases[c.Db]; ok {
-				collectionKey := hash(q.Payload.(ReadObject).Collection)
-				if collection, ok := clientDb.Collections[collectionKey]; ok {
-					obj, err := collection.ReadObject(q.Payload.(ReadObject))
-					return respond(obj, err)
-				} else {
-					return respond("Collection does not exist", nil)
-				}
-			} else {
-				return respond("Database not selected", nil)
+			collection, err := d.getCollection(c, q.Payload.(ReadObject).Collection)
+			if err != nil {
+				return respond(nil, err)
 			}
+			return respond(collection.ReadObject(q.Payload.(ReadObject)))
 		case GetObjectVersions:
-			if clientDb, ok := this.databases[c.Db]; ok {
-				collectionKey := hash(q.Payload.(GetObjectVersions).Collection)
-				if collection, ok := clientDb.Collections[collectionKey]; ok {
-					obj, err := collection.GetObjectVersions(q.Payload.(GetObjectVersions))
-					return respond(obj, err)
-				} else {
-					return respond("Collection does not exist", nil)
-				}
-			} else {
-				return respond("Database not selected", nil)
+			collection, err := d.getCollection(c, q.Payload.(GetObjectVersions).Collection)
+			if err != nil {
+				return respond(nil, err)
 			}
+			return respond(collection.GetObjectVersions(q.Payload.(GetObjectVersions)))
+		case GetObjectDiff:
+			collection, err := d.getCollection(c, q.Payload.(GetObjectDiff).Collection)
+			if err != nil {
+				return respond(nil, err)
+			}
+			return respond(collection.GetObjectDiff(q.Payload.(GetObjectDiff)))
 		default:
 			ErrorLog.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
 			return respond(nil, errors.New(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(q.Payload))))
 		}
 	}
 	return respond("Authentication required", nil)
+}
+
+func (d *DbCore) getCollection(c *Client, collectionName string) (*Collection, error) {
+	if clientDb, ok := d.databases[c.Db]; ok {
+		collectionKey := hash(collectionName)
+		if collection, ok := clientDb.Collections[collectionKey]; ok {
+			return collection, nil
+		} else {
+			return nil, errors.New("Collection " + collectionName + " does not exist")
+		}
+	} else {
+		return nil, errors.New("Database not selected")
+	}
 }
 
 // Wraps response structure and error into JSON
