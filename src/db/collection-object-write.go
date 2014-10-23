@@ -20,6 +20,7 @@ func (c *Collection) WriteObject(p WriteObject) error {
 		return err
 	}
 	c.addObjectToIndex(&p, offset, buf.Len())
+	c.AddObjectToIndices(&p)
 	return nil
 }
 

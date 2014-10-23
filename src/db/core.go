@@ -179,6 +179,7 @@ func (c *DbCore) populateCollections(d *Database) error {
 				logger.ErrorLog.Printf("Could not read object index: %s", err)
 				return err
 			}
+			// TODO add loading indices here
 		}
 	}
 	//logger.ErrorLog.Printf("%# v", pretty.Formatter(c.databases))
