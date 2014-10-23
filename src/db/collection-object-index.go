@@ -4,7 +4,7 @@ package db
 import (
 	"bytes"
 	"encoding/gob"
-	"github.com/kr/pretty"
+	_ "github.com/kr/pretty"
 	"logger"
 	"os"
 	"time"
@@ -51,7 +51,6 @@ func (c *Collection) objectIndexFlusher() {
 // Dump index structure to disk
 func (c *Collection) flushObjectIndex() error {
 	var b bytes.Buffer
-	logger.ErrorLog.Printf("%# v", pretty.Formatter(c.Objects))
 	enc := gob.NewEncoder(&b)
 	err := enc.Encode(c.Objects)
 	if err != nil {

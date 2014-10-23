@@ -4,7 +4,7 @@ package db
 import (
 	"encoding/json"
 	"errors"
-	"github.com/kr/pretty"
+	_ "github.com/kr/pretty"
 	"io/ioutil"
 	. "logger"
 	"os"
@@ -60,7 +60,7 @@ func (d *Database) CreateCollection(p CreateCollection) error {
 	d.Collections[collectionNameHash].IndexFile["primary"].Touch()
 	go d.Collections[collectionNameHash].objectIndexFlusher()
 	d.Collections[collectionNameHash].ObjectIndexFlush <- true
-	ErrorLog.Printf("%# v", pretty.Formatter(d.Collections[collectionNameHash]))
+	//ErrorLog.Printf("%# v", pretty.Formatter(d.Collections[collectionNameHash]))
 	return nil
 }
 

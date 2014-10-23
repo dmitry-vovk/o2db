@@ -148,25 +148,26 @@ $message = [
             'id'    => '5',
             'prop1' => 'New property value here!',
             'prop2' => 'val2',
+            'newprop' => 3,
         ],
     ],
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 */
-/*
+
 $message = [
     'type' => O2dbClient::TYPE_OBJECT_GET,
     'payload' => [
         'class' => 'Job',
         'data' => [
-            'id' => 13,
+            'id' => 3,
         ],
     ],
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-*/
+
 $message = [
     'type' => O2dbClient::TYPE_GET_OBJECT_VERSIONS,
     'payload' => [
