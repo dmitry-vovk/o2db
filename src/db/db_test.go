@@ -1,7 +1,6 @@
 package db
 
 import (
-	"github.com/kr/pretty"
 	"os"
 	"testing"
 	"types"
@@ -57,5 +56,5 @@ func TestCreateCollection(t *testing.T) {
 	if db.Collections[testCollectionHash].IndexPointerFile != testIndexFileName {
 		t.Error("Collection index file name is incorrect")
 	}
-	t.Logf("%# v", pretty.Formatter(db.Collections[testCollectionHash]))
+	//t.Logf("%# v", pretty.Formatter(db.Collections[testCollectionHash]))
 }
