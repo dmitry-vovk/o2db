@@ -36,7 +36,7 @@ func (d *Database) CreateCollection(p CreateCollection) error {
 	d.Collections[collectionNameHash] = &Collection{
 		Name:             p.Name,
 		Objects:          make(map[int]ObjectPointer),
-		IndexPointerFile: collectionPath + string(os.PathSeparator) + objectIndexFileName,
+		IndexPointerFile: collectionPath + string(os.PathSeparator) + ObjectIndexFileName,
 		ObjectIndexFlush: make(chan (bool), 100),
 	}
 	// TODO test how indices are created
@@ -50,12 +50,12 @@ func (d *Database) CreateCollection(p CreateCollection) error {
 		return err
 	}
 	d.Collections[collectionNameHash].DataFile = &DbFile{
-		FileName: basePath + dataFileName,
+		FileName: basePath + DataFileName,
 	}
 	d.Collections[collectionNameHash].DataFile.Touch()
 	d.Collections[collectionNameHash].IndexFile = make(map[string]*DbFile)
 	d.Collections[collectionNameHash].IndexFile["primary"] = &DbFile{
-		FileName: basePath + primaryIndexFileName,
+		FileName: basePath + PrimaryIndexFileName,
 	}
 	d.Collections[collectionNameHash].IndexFile["primary"].Touch()
 	go d.Collections[collectionNameHash].objectIndexFlusher()

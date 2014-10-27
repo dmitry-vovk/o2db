@@ -14,12 +14,6 @@ import (
 	. "types"
 )
 
-const (
-	dataFileName         = "objects.data"
-	primaryIndexFileName = "primary.index"
-	objectIndexFileName  = "objects.index"
-)
-
 type Package struct {
 	Container *Container
 	Client    *Client
@@ -149,7 +143,7 @@ func (c *DbCore) populateCollections(d *Database) error {
 			// full path to collection directory
 			collectionDir := d.DataDir + string(os.PathSeparator) + collectionHashedName + string(os.PathSeparator)
 			// check if primary index file is present
-			primaryIndexFile, err := os.Stat(collectionDir + primaryIndexFileName)
+			primaryIndexFile, err := os.Stat(collectionDir + PrimaryIndexFileName)
 			if err != nil {
 				logger.ErrorLog.Printf("No primary index file found in %s", collectionDir)
 				continue
@@ -160,10 +154,10 @@ func (c *DbCore) populateCollections(d *Database) error {
 				Objects: make(map[int]ObjectPointer),
 				Indices: make(map[string]ObjectIndex),
 				DataFile: &DbFile{
-					FileName: collectionDir + dataFileName,
+					FileName: collectionDir + DataFileName,
 				},
 				IndexFile:        make(map[string]*DbFile),
-				IndexPointerFile: collectionDir + objectIndexFileName,
+				IndexPointerFile: collectionDir + ObjectIndexFileName,
 				ObjectIndexFlush: make(chan (bool), 100),
 			}
 			// Open object storage
