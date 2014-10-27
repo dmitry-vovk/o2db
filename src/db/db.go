@@ -40,10 +40,7 @@ func (d *Database) CreateCollection(p CreateCollection) error {
 		ObjectIndexFlush: make(chan (bool), 100),
 	}
 	// TODO test how indices are created
-	d.Collections[collectionNameHash].Indices = make(map[string]ObjectIndex)
-	for k, _ := range p.Fields {
-		d.Collections[collectionNameHash].Indices[k] = make(map[Hash][]int)
-	}
+	d.Collections[collectionNameHash].CreateIndices(p.Fields)
 	basePath := collectionPath + string(os.PathSeparator)
 	err = ioutil.WriteFile(basePath+"schema.json", schema, os.FileMode(0600))
 	if err != nil {

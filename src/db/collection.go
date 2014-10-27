@@ -8,9 +8,9 @@ const (
 	FIELD_VERSION = "__version__"
 )
 
-type Hash [20]byte // SHA1 hash
+//type Hash [20]byte // SHA1 hash
 
-type ObjectIndex map[Hash][]int
+//type ObjectIndex map[Hash][]int
 
 // Object instance
 type ObjectVersion struct {
@@ -22,11 +22,11 @@ type ObjectVersion struct {
 type ObjectPointer map[int]ObjectVersion
 
 type Collection struct {
-	Name             string                 // Collection/class name
-	Objects          map[int]ObjectPointer  // Objects. map index is object ID
-	Indices          map[string]ObjectIndex // collection of indices
-	DataFile         *DbFile                // Objects storage
-	IndexFile        map[string]*DbFile     // List of indices
+	Name             string                // Collection/class name
+	Objects          map[int]ObjectPointer // Objects. map index is object ID
+	Indices          map[string]FieldIndex // collection of indices
+	DataFile         *DbFile               // Objects storage
+	IndexFile        map[string]*DbFile    // List of indices
 	freeSlotOffset   int
 	IndexPointerFile string
 	ObjectIndexFlush chan (bool)

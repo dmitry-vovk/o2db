@@ -152,7 +152,7 @@ func (c *DbCore) populateCollections(d *Database) error {
 			d.Collections[collectionHashedName] = &Collection{
 				Name:    collectionHashedName,
 				Objects: make(map[int]ObjectPointer),
-				Indices: make(map[string]ObjectIndex),
+				Indices: make(map[string]FieldIndex),
 				DataFile: &DbFile{
 					FileName: collectionDir + DataFileName,
 				},

@@ -39,19 +39,19 @@ func OpenStringIndex(fileName string) (*StringIndex, error) {
 }
 
 // Return list of IDs matching value
-func (i *StringIndex) Find(value string) []int {
-	return i.Map[i.getHash(value)]
+func (i *StringIndex) Find(value interface{}) []int {
+	return i.Map[i.getHash(value.(string))]
 }
 
 // Add value to index
-func (i *StringIndex) Add(value string, id int) {
-	index := i.getHash(value)
+func (i *StringIndex) Add(value interface{}, id int) {
+	index := i.getHash(value.(string))
 	i.Map[index] = append(i.Map[index], id)
 }
 
 // Remove id associated with value
-func (i *StringIndex) Delete(value string, id int) {
-	index := i.getHash(value)
+func (i *StringIndex) Delete(value interface{}, id int) {
+	index := i.getHash(value.(string))
 	if ids, ok := i.Map[index]; ok {
 		for n, item := range ids {
 			if item == id {

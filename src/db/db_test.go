@@ -18,8 +18,10 @@ func TestCreateCollection(t *testing.T) {
 	db.Collections = make(map[string]*Collection)
 	fields := make(map[string]types.Field)
 	fields["f1"] = types.Field{
-		Type:  "int",
-		Index: "",
+		Type: "string",
+	}
+	fields["f2"] = types.Field{
+		Type: "int",
 	}
 	var cc types.CreateCollection
 	cc.Name = TestCollectionName

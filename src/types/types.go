@@ -43,13 +43,12 @@ type OpenDatabase struct {
 // Create collection with Name and Fields
 type CreateCollection struct {
 	Name   string           `json:"class"`  // Collection name (class in terms of OOP)
-	Fields map[string]Field `json:"fields"` // Collection of named fields
+	Fields map[string]Field `json:"fields"` // Collection of named fields (indices)
 }
 
 // Collection field description
 type Field struct {
-	Type  string `json:"type"`   // type
-	Index string `json:"length"` // index or not. Index can be 'primary' or 'secondary'.
+	Type string `json:"type"` // type
 }
 
 type DropCollection struct {
