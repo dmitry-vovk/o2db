@@ -1,3 +1,5 @@
+// Maintains index of integer values of versions and ids
+// 	int(value) > []int(versions) > ids
 package db
 
 import (
@@ -7,7 +9,8 @@ import (
 )
 
 type IntIndex struct {
-	Map map[int]idList
+	Name string         // Field name
+	Map  map[int]idList // index to id map
 }
 
 // Create new empty string index
@@ -33,26 +36,45 @@ func OpenIntIndex(fileName string) (*IntIndex, error) {
 	return i, nil
 }
 
-func (i *IntIndex) Add(value interface{}, id int) {
-	i.Map[value.(int)] = append(i.Map[value.(int)], id)
+// Add value/id/version to index
+func (i *IntIndex) Add(value interface{}, id, version int) {
+	intVal := value.(int)
+	if i.Map[intVal] == nil {
+		i.Map[intVal] = idList{}
+	}
+	if i.Map[intVal][id] == nil {
+		i.Map[intVal][id] = versionsList{}
+	}
+	i.Map[intVal][id] = append(i.Map[intVal][id], version)
 }
 
-func (i *IntIndex) Delete(value interface{}, id int) {
-	index := value.(int)
-	if ids, ok := i.Map[index]; ok {
-		for n, item := range ids {
-			if item == id {
-				i.Map[index] = append(ids[:n], ids[n+1:]...)
+// Remove value/id/version from the index
+func (i *IntIndex) Delete(value interface{}, id, version int) {
+	intVal := value.(int)
+	if i.Map[intVal][id] != nil {
+		versions := i.Map[intVal][id]
+		for n, ver := range versions {
+			if ver == version {
+				i.Map[intVal][id] = append(versions[:n], versions[n+1:]...)
+				if len(i.Map[intVal][id]) == 0 {
+					delete(i.Map[intVal], id)
+				}
 				break
 			}
 		}
 	}
 }
 
-func (i *IntIndex) Find(value interface{}) []int {
-	return i.Map[value.(int)]
+// Find map["id"]"versions"
+func (i *IntIndex) Find(value interface{}) map[int][]int {
+	ids := make(map[int][]int)
+	for k, v := range i.Map[value.(int)] {
+		ids[k] = v
+	}
+	return ids
 }
 
+// Write index data to file
 func (i *IntIndex) FlushToFile(fileName string) error {
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)

@@ -9,10 +9,13 @@ import (
 
 type hashIndex [20]byte
 
-type idList []int
+type versionsList []int
+
+type idList map[int]versionsList
 
 type StringIndex struct {
-	Map map[hashIndex]idList
+	Name string               // Field name
+	Map  map[hashIndex]idList // index to id map
 }
 
 // Create new empty string index
@@ -39,27 +42,60 @@ func OpenStringIndex(fileName string) (*StringIndex, error) {
 }
 
 // Return list of IDs matching value
-func (i *StringIndex) Find(value interface{}) []int {
-	return i.Map[i.getHash(value.(string))]
+func (i *StringIndex) Find(value interface{}) map[int][]int {
+	index := i.getHash(value.(string))
+	ids := make(map[int][]int)
+	for k, v := range i.Map[index] {
+		ids[k] = v
+	}
+	return ids
 }
 
 // Add value to index
-func (i *StringIndex) Add(value interface{}, id int) {
+func (i *StringIndex) Add(value interface{}, id, version int) {
 	index := i.getHash(value.(string))
-	i.Map[index] = append(i.Map[index], id)
+	if i.Map[index] == nil {
+		i.Map[index] = idList{}
+	}
+	if i.Map[index][id] == nil {
+		i.Map[index][id] = versionsList{}
+	}
+	i.Map[index][id] = append(i.Map[index][id], version)
+	/*
+		index := i.getHash(value.(string))
+		if _, ok := i.Map[index][id]; !ok {
+			i.Map[index][id] = make(map[int]versionsList)
+		}
+		i.Map[index] = append(i.Map[index], id)
+	*/
 }
 
 // Remove id associated with value
-func (i *StringIndex) Delete(value interface{}, id int) {
+func (i *StringIndex) Delete(value interface{}, id, version int) {
 	index := i.getHash(value.(string))
-	if ids, ok := i.Map[index]; ok {
-		for n, item := range ids {
-			if item == id {
-				i.Map[index] = append(ids[:n], ids[n+1:]...)
+	if i.Map[index][id] != nil {
+		versions := i.Map[index][id]
+		for n, ver := range versions {
+			if ver == version {
+				i.Map[index][id] = append(versions[:n], versions[n+1:]...)
+				if len(i.Map[index][id]) == 0 {
+					delete(i.Map[index], id)
+				}
 				break
 			}
 		}
 	}
+	/*
+		index := i.getHash(value.(string))
+		if ids, ok := i.Map[index]; ok {
+			for n, item := range ids[version] {
+				if item == id {
+					i.Map[index] = append(ids[:n], ids[n+1:]...)
+					break
+				}
+			}
+		}
+	*/
 }
 
 // Flush the index to file

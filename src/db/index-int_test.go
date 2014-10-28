@@ -8,20 +8,38 @@ import (
 
 func TestIntIndex(t *testing.T) {
 	idx := NewIntIndex()
-	idx.Add(IntTest1, TestId1)
-	idx.Add(IntTest2, TestId2)
-	idx.Add(IntTest1, TestId3)
-	found1 := idx.Find(IntTest1) // should return []int{37, 132}
-	if found1[0] != TestId1 {
-		t.Fatal("Finding by string did not work")
+	idx.Add(IntTestValue1, TestId1, 0)
+	idx.Add(IntTestValue2, TestId2, 0)
+	idx.Add(IntTestValue1, TestId3, 0)
+	// Try to find non-existing version
+	found0 := idx.Find(IntTestValue1)
+	if len(found0) != 2 {
+		t.Fatal("Finding non existing int value did not work")
 	}
-	if found1[1] != TestId3 {
-		t.Fatal("Finding by string did not work")
+	// Try to find non-existing value
+	found1 := idx.Find(IntTestValue3)
+	if len(found1) != 0 {
+		t.Fatal("Finding non existing int value did not work")
 	}
-	idx.Delete(IntTest1, TestId1)
-	found2 := idx.Find(IntTest1) // // should return []int{132}
-	if found2[0] != TestId3 {
-		t.Fatal("Finding by string did not work")
+	// Try to find existing value and version
+	found2 := idx.Find(IntTestValue1)
+	if found2[TestId1][0] != 0 {
+		t.Fatal("Finding by int did not work")
+	}
+	// found2 should contain two ids with one version each
+	for k, v := range found2 {
+		if !(k == TestId1 || k == TestId3) {
+			t.Fatal("Finding by int did not work (id) %d", k)
+		}
+		if len(v) != 1 {
+			t.Fatal("Finding by int did not work (version)")
+		}
+	}
+	// Try deleting single value/id/version
+	idx.Delete(IntTestValue1, TestId1, 0)
+	found3 := idx.Find(IntTestValue1)
+	if len(found3) != 1 {
+		t.Fatal("Deleting by id did not work")
 	}
 	// Test file IO
 	err := idx.FlushToFile(IndexFile)
