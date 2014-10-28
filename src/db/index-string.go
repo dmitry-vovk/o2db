@@ -61,13 +61,6 @@ func (i *StringIndex) Add(value interface{}, id, version int) {
 		i.Map[index][id] = versionsList{}
 	}
 	i.Map[index][id] = append(i.Map[index][id], version)
-	/*
-		index := i.getHash(value.(string))
-		if _, ok := i.Map[index][id]; !ok {
-			i.Map[index][id] = make(map[int]versionsList)
-		}
-		i.Map[index] = append(i.Map[index], id)
-	*/
 }
 
 // Remove id associated with value
@@ -85,17 +78,6 @@ func (i *StringIndex) Delete(value interface{}, id, version int) {
 			}
 		}
 	}
-	/*
-		index := i.getHash(value.(string))
-		if ids, ok := i.Map[index]; ok {
-			for n, item := range ids[version] {
-				if item == id {
-					i.Map[index] = append(ids[:n], ids[n+1:]...)
-					break
-				}
-			}
-		}
-	*/
 }
 
 // Flush the index to file
