@@ -16,6 +16,8 @@ func (c *Collection) CreateIndices(fields map[string]Field) {
 			c.Indices[k] = NewStringIndex()
 		case "int":
 			c.Indices[k] = NewIntIndex()
+		case "float":
+			c.Indices[k] = NewFloatIndex()
 		default:
 			logger.ErrorLog.Printf("Index handler of type %s not implemented", v.Type)
 		}
