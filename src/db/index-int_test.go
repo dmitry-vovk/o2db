@@ -7,7 +7,7 @@ import (
 )
 
 func TestIntIndex(t *testing.T) {
-	idx := NewIntIndex("int")
+	idx := NewIntIndex(IndexFile)
 	idx.Add(IntTestValue1, TestId1, 0)
 	idx.Add(IntTestValue2, TestId2, 0)
 	idx.Add(IntTestValue1, TestId3, 0)
@@ -42,7 +42,7 @@ func TestIntIndex(t *testing.T) {
 		t.Fatal("Deleting by id did not work")
 	}
 	// Test file IO
-	err := idx.FlushToFile(IndexFile)
+	err := idx.FlushToFile()
 	if err != nil {
 		t.Fatalf("Error flushing index to file: %s", err)
 	}

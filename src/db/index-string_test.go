@@ -42,7 +42,7 @@ func TestStringIndex(t *testing.T) {
 		t.Fatal("Deleting by id did not work")
 	}
 	// Test file IO
-	err := idx.FlushToFile(IndexFile)
+	err := idx.FlushToFile()
 	idx.Flush <- true
 	defer os.Remove(IndexFile)
 	idx2, err := OpenStringIndex(IndexFile)

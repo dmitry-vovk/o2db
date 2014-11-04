@@ -59,7 +59,7 @@ func (i *IntIndex) indexFlusher() {
 			flag = true
 		default:
 			if flag {
-				if err := i.FlushToFile(i.IndexFileName); err != nil {
+				if err := i.FlushToFile(); err != nil {
 					logger.ErrorLog.Printf("Error flushing index: %s", err)
 				}
 				flag = false
@@ -71,8 +71,8 @@ func (i *IntIndex) indexFlusher() {
 }
 
 // Flush the index to file
-func (i *IntIndex) FlushToFile(fileName string) error {
-	handler, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, os.FileMode(0600))
+func (i *IntIndex) FlushToFile() error {
+	handler, err := os.OpenFile(i.IndexFileName, os.O_RDWR|os.O_CREATE, os.FileMode(0600))
 	if err != nil {
 		return err
 	}
