@@ -14,5 +14,5 @@ const (
 	TestId1          = 37
 	TestId2          = 50
 	TestId3          = 132
-	IndexFile        = "/tmp/strings.index.tmp"
+	IndexFile        = "/tmp/test.index.tmp"
 )

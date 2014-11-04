@@ -14,7 +14,8 @@ import (
 const flushDelay = 100 * time.Millisecond
 
 // Adds object to indices
-func (c *Collection) addObjectToIndex(wo *WriteObject, offset, length int) {
+// Returns object version
+func (c *Collection) addObjectToIndex(wo *WriteObject, offset, length int) (version int) {
 	c.freeSlotOffset += length
 	wo.Id = getInt(wo.Data["id"])
 	next := len(c.Objects[wo.Id])
@@ -26,6 +27,7 @@ func (c *Collection) addObjectToIndex(wo *WriteObject, offset, length int) {
 		Offset: offset,
 	}
 	c.ObjectIndexFlush <- true
+	return next
 }
 
 // Goroutine to trigger object index flushing to disk

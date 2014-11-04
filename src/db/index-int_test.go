@@ -7,7 +7,7 @@ import (
 )
 
 func TestIntIndex(t *testing.T) {
-	idx := NewIntIndex()
+	idx := NewIntIndex("int")
 	idx.Add(IntTestValue1, TestId1, 0)
 	idx.Add(IntTestValue2, TestId2, 0)
 	idx.Add(IntTestValue1, TestId3, 0)

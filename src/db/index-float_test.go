@@ -7,7 +7,7 @@ import (
 )
 
 func TestFloatIndex(t *testing.T) {
-	idx := NewFloatIndex()
+	idx := NewFloatIndex("float")
 	idx.Add(FloatTestValue1, TestId1, 0)
 	idx.Add(FloatTestValue2, TestId2, 0)
 	idx.Add(FloatTestValue1, TestId3, 0)

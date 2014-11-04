@@ -19,8 +19,8 @@ func (c *Collection) WriteObject(p WriteObject) error {
 	if err != nil {
 		return err
 	}
-	c.addObjectToIndex(&p, offset, buf.Len())
-	c.AddObjectToIndices(&p)
+	version := c.addObjectToIndex(&p, offset, buf.Len())
+	c.AddObjectToIndices(&p, version)
 	return nil
 }
 

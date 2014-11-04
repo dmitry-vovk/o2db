@@ -5,19 +5,27 @@ package db
 import (
 	"bytes"
 	"encoding/gob"
+	"logger"
 	"os"
+	"time"
 )
 
 type IntIndex struct {
-	Name string         // Field name
-	Map  map[int]idList // index to id map
+	Name          string         // Field name
+	Map           map[int]idList // index to id map
+	IndexFileName string         // Name of the index file storage
+	Flush         chan bool      // chan to let index know to flush the index to file
 }
 
 // Create new empty string index
-func NewIntIndex() *IntIndex {
-	return &IntIndex{
+func NewIntIndex(fileName string) *IntIndex {
+	intIndex := IntIndex{
 		Map: make(map[int]idList),
 	}
+	intIndex.IndexFileName = fileName
+	intIndex.Flush = make(chan bool, 100)
+	go intIndex.indexFlusher()
+	return &intIndex
 }
 
 // Read existing int index from file
@@ -28,12 +36,49 @@ func OpenIntIndex(fileName string) (*IntIndex, error) {
 	}
 	defer handler.Close()
 	dec := gob.NewDecoder(handler)
-	i := NewIntIndex()
+	i := NewIntIndex(fileName)
 	err = dec.Decode(&i.Map)
 	if err != nil {
 		return nil, err
 	}
 	return i, nil
+}
+
+func (i *IntIndex) encode() []byte {
+	var b bytes.Buffer
+	enc := gob.NewEncoder(&b)
+	enc.Encode(i.Map)
+	return b.Bytes()
+}
+
+func (i *IntIndex) indexFlusher() {
+	var flag bool = false
+	for {
+		select {
+		case <-i.Flush:
+			flag = true
+		default:
+			if flag {
+				if err := i.FlushToFile(i.IndexFileName); err != nil {
+					logger.ErrorLog.Printf("Error flushing index: %s", err)
+				}
+				flag = false
+			} else {
+				time.Sleep(flushDelay)
+			}
+		}
+	}
+}
+
+// Flush the index to file
+func (i *IntIndex) FlushToFile(fileName string) error {
+	handler, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, os.FileMode(0600))
+	if err != nil {
+		return err
+	}
+	defer handler.Close()
+	_, err = handler.Write(i.encode())
+	return err
 }
 
 // Add value/id/version to index
@@ -72,21 +117,4 @@ func (i *IntIndex) Find(value interface{}) map[int][]int {
 		ids[k] = v
 	}
 	return ids
-}
-
-// Write index data to file
-func (i *IntIndex) FlushToFile(fileName string) error {
-	var b bytes.Buffer
-	enc := gob.NewEncoder(&b)
-	err := enc.Encode(i.Map)
-	if err != nil {
-		return err
-	}
-	handler, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, os.FileMode(0600))
-	if err != nil {
-		return err
-	}
-	defer handler.Close()
-	_, err = handler.Write(b.Bytes())
-	return err
 }

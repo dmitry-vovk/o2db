@@ -7,7 +7,7 @@ import (
 )
 
 func TestStringIndex(t *testing.T) {
-	idx := NewStringIndex()
+	idx := NewStringIndex(IndexFile)
 	idx.Add(StringTestValue1, TestId1, 1)
 	idx.Add(StringTestValue2, TestId2, 1)
 	idx.Add(StringTestValue1, TestId3, 1)
@@ -43,9 +43,7 @@ func TestStringIndex(t *testing.T) {
 	}
 	// Test file IO
 	err := idx.FlushToFile(IndexFile)
-	if err != nil {
-		t.Fatalf("Error flushing index to file: %s", err)
-	}
+	idx.Flush <- true
 	defer os.Remove(IndexFile)
 	idx2, err := OpenStringIndex(IndexFile)
 	if err != nil {

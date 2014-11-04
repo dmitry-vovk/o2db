@@ -139,7 +139,7 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 */
-/*
+
 $message = [
     'type'    => O2dbClient::TYPE_OBJECT_WRITE,
     'payload' => [
@@ -154,8 +154,8 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-*/
 
+/*
 $message = [
     'type' => O2dbClient::TYPE_OBJECT_GET,
     'payload' => [
@@ -165,6 +165,8 @@ $message = [
         ],
     ],
 ];
+*/
+
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 
@@ -177,7 +179,7 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
+/*
 $message = [
     'type' => O2dbClient::TYPE_GET_OBJECT_DIFF,
     'payload' => [
@@ -189,4 +191,4 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
+*/
