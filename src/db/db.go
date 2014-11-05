@@ -34,13 +34,12 @@ func (d *Database) CreateCollection(p CreateCollection) error {
 	}
 	collectionNameHash := hash(p.Name)
 	d.Collections[collectionNameHash] = &Collection{
+		BaseDir:          collectionPath + string(os.PathSeparator),
 		Name:             p.Name,
 		Objects:          make(map[int]ObjectPointer),
 		IndexPointerFile: collectionPath + string(os.PathSeparator) + ObjectIndexFileName,
 		ObjectIndexFlush: make(chan (bool), 100),
 	}
-	// TODO test how indices are created
-	d.Collections[collectionNameHash].CreateIndices(p.Fields)
 	basePath := collectionPath + string(os.PathSeparator)
 	err = ioutil.WriteFile(basePath+"schema.json", schema, os.FileMode(0600))
 	if err != nil {
@@ -57,7 +56,7 @@ func (d *Database) CreateCollection(p CreateCollection) error {
 	d.Collections[collectionNameHash].IndexFile["primary"].Touch()
 	go d.Collections[collectionNameHash].objectIndexFlusher()
 	d.Collections[collectionNameHash].ObjectIndexFlush <- true
-	//ErrorLog.Printf("%# v", pretty.Formatter(d.Collections[collectionNameHash]))
+	d.Collections[collectionNameHash].CreateIndices(p.Fields)
 	return nil
 }
 

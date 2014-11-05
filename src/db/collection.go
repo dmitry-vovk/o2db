@@ -22,6 +22,7 @@ type ObjectVersion struct {
 type ObjectPointer map[int]ObjectVersion
 
 type Collection struct {
+	BaseDir          string                // Where collection files are
 	Name             string                // Collection/class name
 	Objects          map[int]ObjectPointer // Objects. map index is object ID
 	Indices          map[string]FieldIndex // collection of indices

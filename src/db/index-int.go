@@ -51,6 +51,10 @@ func (i *IntIndex) encode() []byte {
 	return b.Bytes()
 }
 
+func (i *IntIndex) DoFlush() {
+	i.Flush <- true
+}
+
 func (i *IntIndex) indexFlusher() {
 	var flag bool = false
 	for {

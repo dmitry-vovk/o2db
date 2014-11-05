@@ -40,6 +40,10 @@ func (i *StringIndex) encode() []byte {
 	return b.Bytes()
 }
 
+func (i *StringIndex) DoFlush() {
+	i.Flush <- true
+}
+
 func (i *StringIndex) indexFlusher() {
 	var flag bool = false
 	for {

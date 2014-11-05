@@ -14,7 +14,7 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 // Create database
-/*
+
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_DB,
     'payload' => [
@@ -23,7 +23,7 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-*/
+
 // Open database
 
 $message = [
@@ -36,7 +36,7 @@ $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 
 // Create collection
-/*
+
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
     'payload' => [
@@ -58,7 +58,7 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
+/*
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
     'payload' => [
@@ -145,7 +145,7 @@ $message = [
     'payload' => [
         'class' => 'Job',
         'data'  => [
-            'id'    => '5',
+            'id'    => 5,
             'prop1' => 'New property value here!',
             'prop2' => 'val2',
             'newprop' => 3,

@@ -7,4 +7,5 @@ type FieldIndex interface {
 	Find(value interface{}) map[int][]int      // Find ids by value (direct match)
 	Delete(value interface{}, id, version int) // Delete value - id association
 	FlushToFile() error                        // Write index to file
+	DoFlush()                                  // trigger flushing
 }
