@@ -78,6 +78,12 @@ func (d *DbCore) ProcessQuery(c *Client, q *Container) Response {
 				return respond(nil, err)
 			}
 			return respond(collection.GetObjectDiff(q.Payload.(GetObjectDiff)))
+		case SelectObjects:
+			collection, err := d.getCollection(c, q.Payload.(SelectObjects).Collection)
+			if err != nil {
+				return respond(nil, err)
+			}
+			return respond(collection.SelectObjects(q.Payload.(SelectObjects)))
 		default:
 			ErrorLog.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
 			return respond(nil, errors.New(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(q.Payload))))

@@ -25,6 +25,7 @@ class O2dbClient {
     const TYPE_OBJECT_DROP = 302;
     const TYPE_GET_OBJECT_VERSIONS = 303;
     const TYPE_GET_OBJECT_DIFF = 304;
+    const TYPE_SELECT_OBJECTS = 305;
     /*
      0 TypeAuth
      1 TypeCreateDatabase

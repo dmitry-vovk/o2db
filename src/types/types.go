@@ -109,5 +109,10 @@ type GetObjectDiff struct {
 	To         int    `json:"to"`   // Version two
 }
 
+type SelectObjects struct {
+	Collection string       `json:"class"`
+	Conditions ObjectFields `json:"conditions"`
+}
+
 // Difference between two object versions
 type ObjectDiff ObjectFields

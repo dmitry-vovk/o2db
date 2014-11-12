@@ -5,11 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	. "types"
+	"types"
 )
 
+//const TypeObjectsFind uint = 305 // TODO weird issue. cannot see TypeObjectsFind when declared in types
+
+const TypeFindObjects uint = 305
+
 // Parse incoming JSON bytes into Package to be fed into query processor
-func Parse(msg []byte) (*Container, error) {
+func Parse(msg []byte) (*types.Container, error) {
 	var m map[string]*json.RawMessage
 	err := json.Unmarshal(msg, &m)
 	if err != nil {
@@ -21,75 +25,81 @@ func Parse(msg []byte) (*Container, error) {
 	if _, ok := m["payload"]; !ok {
 		return nil, errors.New("Unknown message format: missing payload field.")
 	}
-	parsedMessage := &Container{}
+	parsedMessage := &types.Container{}
 	err = json.Unmarshal([]byte(*m["type"]), &parsedMessage.Type)
 	if err != nil {
 		return nil, err
 	}
 	payload := []byte(*m["payload"])
 	switch parsedMessage.Type {
-	case TypeAuthenticate:
-		var p Authentication
+	case types.TypeAuthenticate:
+		var p types.Authentication
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case TypeCreateDatabase:
-		var p CreateDatabase
+	case types.TypeCreateDatabase:
+		var p types.CreateDatabase
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case TypeOpenDatabase:
-		var p OpenDatabase
+	case types.TypeOpenDatabase:
+		var p types.OpenDatabase
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case TypeDropDatabase:
-		var p DropDatabase
+	case types.TypeDropDatabase:
+		var p types.DropDatabase
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case TypeListDatabases:
-		var p ListDatabases
+	case types.TypeListDatabases:
+		var p types.ListDatabases
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case TypeCreateCollection:
-		var p CreateCollection
+	case types.TypeCreateCollection:
+		var p types.CreateCollection
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case TypeDropCollection:
-		var p DropCollection
+	case types.TypeDropCollection:
+		var p types.DropCollection
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case TypeObjectWrite:
-		var p WriteObject
+	case types.TypeObjectWrite:
+		var p types.WriteObject
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case TypeObjectGet:
-		var p ReadObject
+	case types.TypeObjectGet:
+		var p types.ReadObject
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case TypeGetObjectVersions:
-		var p GetObjectVersions
+	case TypeFindObjects: // TODO see const definition
+		var p types.SelectObjects
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case TypeGetObjectDiff:
-		var p GetObjectDiff
+	case types.TypeGetObjectVersions:
+		var p types.GetObjectVersions
+		err = json.Unmarshal(payload, &p)
+		if err == nil {
+			parsedMessage.Payload = p
+		}
+	case types.TypeGetObjectDiff:
+		var p types.GetObjectDiff
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p

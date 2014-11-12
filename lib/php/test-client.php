@@ -36,7 +36,7 @@ $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 
 // Create collection
-
+/*
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
     'payload' => [
@@ -58,6 +58,7 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+*/
 /*
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
@@ -139,7 +140,20 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 */
-
+$message = [
+    'type'    => O2dbClient::TYPE_SELECT_OBJECTS,
+    'payload' => [
+        'class' => 'Job',
+        'conditions' => [
+            'prop1' => [1, 2, 5],
+            'prop2' => 4,
+            'prop3' => ['<' => 2.5, '>=' => 1],
+        ],
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+/*
 $message = [
     'type'    => O2dbClient::TYPE_OBJECT_WRITE,
     'payload' => [
@@ -154,7 +168,7 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
+*/
 /*
 $message = [
     'type' => O2dbClient::TYPE_OBJECT_GET,
@@ -166,7 +180,7 @@ $message = [
     ],
 ];
 */
-
+/*
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 
@@ -179,6 +193,7 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+*/
 /*
 $message = [
     'type' => O2dbClient::TYPE_GET_OBJECT_DIFF,
