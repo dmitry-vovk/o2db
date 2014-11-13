@@ -100,13 +100,16 @@ func (c *DbCore) populateCollections(d *Database) error {
 				indexFileName := d.Collections[collectionHashedName].BaseDir + hash(indexName) + ".index"
 				switch indexDef.Type {
 				case "string":
-					d.Collections[collectionHashedName].Indices[indexName] = NewStringIndex(indexFileName)
+					d.Collections[collectionHashedName].Indices[indexName], err = OpenStringIndex(indexFileName)
 				case "int":
-					d.Collections[collectionHashedName].Indices[indexName] = NewIntIndex(indexFileName)
+					d.Collections[collectionHashedName].Indices[indexName], err = OpenIntIndex(indexFileName)
 				case "float":
-					d.Collections[collectionHashedName].Indices[indexName] = NewFloatIndex(indexFileName)
+					d.Collections[collectionHashedName].Indices[indexName], err = OpenFloatIndex(indexFileName)
 				default:
 					logger.ErrorLog.Printf("Index of type %s not supported, skipping", indexDef.Type)
+				}
+				if err != nil {
+					logger.ErrorLog.Printf("Error opening index %s: %s", indexName, err)
 				}
 			}
 		}
