@@ -8,10 +8,6 @@ import (
 	"types"
 )
 
-//const TypeObjectsFind uint = 305 // TODO weird issue. cannot see TypeObjectsFind when declared in types
-
-const TypeFindObjects uint = 305
-
 // Parse incoming JSON bytes into Package to be fed into query processor
 func Parse(msg []byte) (*types.Container, error) {
 	var m map[string]*json.RawMessage
@@ -86,7 +82,7 @@ func Parse(msg []byte) (*types.Container, error) {
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case TypeFindObjects: // TODO see const definition
+	case types.TypeFindObjects:
 		var p types.SelectObjects
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
