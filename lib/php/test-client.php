@@ -36,7 +36,7 @@ $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 
 // Create collection
-/*
+
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
     'payload' => [
@@ -44,21 +44,22 @@ $message = [
         'fields' => [
             'id'      => [
                 'type'  => 'int',
-                'index' => 'primary',
             ],
             'created' => [
-                'type'  => 'datetime',
-                'index' => 'secondary',
+                'type'  => 'int',
             ],
             'payload' => [
                 'type' => 'string',
+            ],
+            'price' => [
+                'type' => 'float',
             ],
         ],
     ],
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-*/
+
 /*
 $message = [
     'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
@@ -145,9 +146,9 @@ $message = [
     'payload' => [
         'class' => 'Job',
         'conditions' => [
-            'prop1' => [1, 2, 5],
-            'prop2' => 4,
-            'prop3' => ['<' => 2.5, '>=' => 1],
+            //'prop1' => [1, 2, 5],
+            'created' => 4,
+            //'prop3' => ['<' => 2.5, '>=' => 1],
         ],
     ],
 ];

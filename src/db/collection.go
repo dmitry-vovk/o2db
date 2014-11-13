@@ -1,16 +1,19 @@
 // Collection definition and methods to work with collection objects
 package db
 
-import . "types"
+import (
+	"bytes"
+	"encoding/gob"
+	"encoding/json"
+	"io/ioutil"
+	"os"
+	. "types"
+)
 
 const (
 	FIELD_ID      = "id"
 	FIELD_VERSION = "__version__"
 )
-
-//type Hash [20]byte // SHA1 hash
-
-//type ObjectIndex map[Hash][]int
 
 // Object instance
 type ObjectVersion struct {
@@ -31,6 +34,7 @@ type Collection struct {
 	freeSlotOffset   int
 	IndexPointerFile string
 	ObjectIndexFlush chan (bool)
+	Schema           map[string]Field
 }
 
 // Returns pointer to the start of unallocated file space
@@ -38,28 +42,34 @@ func (c *Collection) getFreeSpaceOffset() int {
 	return c.freeSlotOffset
 }
 
-// Returns the number of object versions
-func (c *Collection) GetObjectVersions(p GetObjectVersions) (ObjectVersions, error) {
-	return ObjectVersions(len(c.Objects[p.Id])), nil
+// Write collection schema to JSON and GOB files
+func (c *Collection) DumpSchema() error {
+	// JSON (human readable)
+	schema, err := json.MarshalIndent(c.Schema, "", "  ")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(c.BaseDir+CollectionSchema+".json", schema, os.FileMode(0600))
+	if err != nil {
+		return err
+	}
+	// GOB
+	var b bytes.Buffer
+	gob.NewEncoder(&b).Encode(c.Schema)
+	return ioutil.WriteFile(c.BaseDir+CollectionSchema, b.Bytes(), os.FileMode(0600))
 }
 
-// Compares two object versions and returns list of differentiating fields
-func (c *Collection) GetObjectDiff(p GetObjectDiff) (ObjectDiff, error) {
-	obj1, err := c.getObjectByIdAndVersion(p.Id, p.From)
+// Read schema from GOB file
+func (c *Collection) ReadSchema() error {
+	handler, err := os.Open(c.BaseDir + CollectionSchema)
 	if err != nil {
-		return ObjectDiff{}, err
+		return err
 	}
-	obj2, err := c.getObjectByIdAndVersion(p.Id, p.To)
+	defer handler.Close()
+	dec := gob.NewDecoder(handler)
+	err = dec.Decode(&c.Schema)
 	if err != nil {
-		return ObjectDiff{}, err
+		return err
 	}
-	var diff ObjectDiff = make(map[string]interface{})
-	o1 := *obj1
-	o2 := *obj2
-	for k, v := range o1 {
-		if o1[k] != o2[k] {
-			diff[k] = v
-		}
-	}
-	return diff, nil
+	return nil
 }

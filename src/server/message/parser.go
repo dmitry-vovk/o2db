@@ -82,12 +82,6 @@ func Parse(msg []byte) (*types.Container, error) {
 		if err == nil {
 			parsedMessage.Payload = p
 		}
-	case types.TypeFindObjects:
-		var p types.SelectObjects
-		err = json.Unmarshal(payload, &p)
-		if err == nil {
-			parsedMessage.Payload = p
-		}
 	case types.TypeGetObjectVersions:
 		var p types.GetObjectVersions
 		err = json.Unmarshal(payload, &p)
@@ -96,6 +90,12 @@ func Parse(msg []byte) (*types.Container, error) {
 		}
 	case types.TypeGetObjectDiff:
 		var p types.GetObjectDiff
+		err = json.Unmarshal(payload, &p)
+		if err == nil {
+			parsedMessage.Payload = p
+		}
+	case types.TypeSelectObjects:
+		var p types.SelectObjects
 		err = json.Unmarshal(payload, &p)
 		if err == nil {
 			parsedMessage.Payload = p

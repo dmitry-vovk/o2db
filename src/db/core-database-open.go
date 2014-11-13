@@ -3,6 +3,7 @@ package db
 import (
 	"config"
 	"errors"
+	"github.com/kr/pretty"
 	"logger"
 	"os"
 	"path/filepath"
@@ -73,6 +74,7 @@ func (c *DbCore) populateCollections(d *Database) error {
 				IndexFile:        make(map[string]*DbFile),
 				IndexPointerFile: collectionDir + ObjectIndexFileName,
 				ObjectIndexFlush: make(chan (bool), 100),
+				BaseDir:          collectionDir,
 			}
 			// Open object storage
 			d.Collections[collectionHashedName].DataFile.Open()
@@ -87,9 +89,23 @@ func (c *DbCore) populateCollections(d *Database) error {
 				logger.ErrorLog.Printf("Could not read object index: %s", err)
 				return err
 			}
-			// TODO add loading indices here
+			if err := d.Collections[collectionHashedName].ReadSchema(); err != nil {
+				logger.ErrorLog.Printf("Could not read schema: %s", err)
+				return err
+			}
+			for k, v := range d.Collections[collectionHashedName].Schema {
+				indexFileName := d.Collections[collectionHashedName].BaseDir + hash(k) + ".index"
+				switch v.Type {
+				case "string":
+					d.Collections[collectionHashedName].Indices[k] = NewStringIndex(indexFileName)
+				case "int":
+					d.Collections[collectionHashedName].Indices[k] = NewIntIndex(indexFileName)
+				case "float":
+					d.Collections[collectionHashedName].Indices[k] = NewFloatIndex(indexFileName)
+				}
+			}
 		}
 	}
-	//logger.ErrorLog.Printf("%# v", pretty.Formatter(c.databases))
+	logger.ErrorLog.Printf("%# v", pretty.Formatter(c.databases))
 	return nil
 }
