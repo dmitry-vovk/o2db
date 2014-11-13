@@ -20,7 +20,7 @@ func (с *DbCore) CreateDatabase(p CreateDatabase) error {
 		return err
 	}
 	с.databases[p.Name] = &Database{
-		DataDir:     p.Name,
+		DataDir:     dbPath,
 		Collections: make(map[string]*Collection),
 	}
 	return nil

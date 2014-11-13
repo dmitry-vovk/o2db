@@ -36,7 +36,8 @@ func (с *DbCore) openDatabase(dbName string) error {
 		DataDir:     dbPath,
 		Collections: make(map[string]*Collection),
 	}
-	return с.populateCollections(с.databases[dbName])
+	err := с.populateCollections(с.databases[dbName])
+	return err
 }
 
 // Scans directories under database data directory
@@ -89,19 +90,23 @@ func (c *DbCore) populateCollections(d *Database) error {
 				logger.ErrorLog.Printf("Could not read object index: %s", err)
 				return err
 			}
+			// Load schema
 			if err := d.Collections[collectionHashedName].ReadSchema(); err != nil {
 				logger.ErrorLog.Printf("Could not read schema: %s", err)
 				return err
 			}
-			for k, v := range d.Collections[collectionHashedName].Schema {
-				indexFileName := d.Collections[collectionHashedName].BaseDir + hash(k) + ".index"
-				switch v.Type {
+			// Create index handlers
+			for indexName, indexDef := range d.Collections[collectionHashedName].Schema {
+				indexFileName := d.Collections[collectionHashedName].BaseDir + hash(indexName) + ".index"
+				switch indexDef.Type {
 				case "string":
-					d.Collections[collectionHashedName].Indices[k] = NewStringIndex(indexFileName)
+					d.Collections[collectionHashedName].Indices[indexName] = NewStringIndex(indexFileName)
 				case "int":
-					d.Collections[collectionHashedName].Indices[k] = NewIntIndex(indexFileName)
+					d.Collections[collectionHashedName].Indices[indexName] = NewIntIndex(indexFileName)
 				case "float":
-					d.Collections[collectionHashedName].Indices[k] = NewFloatIndex(indexFileName)
+					d.Collections[collectionHashedName].Indices[indexName] = NewFloatIndex(indexFileName)
+				default:
+					logger.ErrorLog.Printf("Index of type %s not supported, skipping", indexDef.Type)
 				}
 			}
 		}
