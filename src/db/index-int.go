@@ -87,7 +87,7 @@ func (i *IntIndex) FlushToFile() error {
 
 // Add value/id/version to index
 func (i *IntIndex) Add(value interface{}, id, version int) {
-	intVal := value.(int)
+	intVal := int(value.(float64))
 	if i.Map[intVal] == nil {
 		i.Map[intVal] = idList{}
 	}
@@ -117,7 +117,7 @@ func (i *IntIndex) Delete(value interface{}, id, version int) {
 // Find map["id"]"versions"
 func (i *IntIndex) Find(value interface{}) map[int][]int {
 	ids := make(map[int][]int)
-	for k, v := range i.Map[value.(int)] {
+	for k, v := range i.Map[int(value.(float64))] {
 		ids[k] = v
 	}
 	return ids

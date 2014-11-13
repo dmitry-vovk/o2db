@@ -16,7 +16,7 @@ echo '<<<', $response, PHP_EOL;
 // Create database
 
 $message = [
-    'type'    => O2dbClient::TYPE_CREATE_DB,
+    'type' => O2dbClient::TYPE_CREATE_DB,
     'payload' => [
         'name' => 'test_01'
     ],
@@ -38,15 +38,15 @@ echo '<<<', $response, PHP_EOL;
 // Create collection
 
 $message = [
-    'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
+    'type' => O2dbClient::TYPE_CREATE_COLLECTION,
     'payload' => [
-        'class'  => 'Job',
+        'class' => 'Job',
         'fields' => [
-            'id'      => [
-                'type'  => 'int',
+            'id' => [
+                'type' => 'int',
             ],
             'created' => [
-                'type'  => 'int',
+                'type' => 'int',
             ],
             'payload' => [
                 'type' => 'string',
@@ -141,35 +141,39 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 */
-$message = [
-    'type'    => O2dbClient::TYPE_SELECT_OBJECTS,
-    'payload' => [
-        'class' => 'Job',
-        'conditions' => [
-            //'prop1' => [1, 2, 5],
-            'created' => 4,
-            //'prop3' => ['<' => 2.5, '>=' => 1],
-        ],
-    ],
-];
-$response = $client->send($message);
-echo '<<<', $response, PHP_EOL;
 /*
 $message = [
-    'type'    => O2dbClient::TYPE_OBJECT_WRITE,
+    'type' => O2dbClient::TYPE_OBJECT_WRITE,
     'payload' => [
         'class' => 'Job',
-        'data'  => [
-            'id'    => 5,
-            'prop1' => 'New property value here!',
-            'prop2' => 'val2',
-            'newprop' => 3,
+        'data' => [
+            'id' => 5,
+            'created' => 4,
+            'payload' => 'hello there',
+            'price' => 3.5,
+            'extra' => 'extra field!',
         ],
     ],
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 */
+$message = [
+    'type' => O2dbClient::TYPE_SELECT_OBJECTS,
+    'payload' => [
+        'class' => 'Job',
+        'conditions' => [
+            //'prop1' => [1, 2, 5],
+            'created' => 4,
+            'payload' => 'hello there',
+            //'prop3' => ['<' => 2.5, '>=' => 1],
+        ],
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+
+
 /*
 $message = [
     'type' => O2dbClient::TYPE_OBJECT_GET,
