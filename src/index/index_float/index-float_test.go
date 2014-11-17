@@ -23,7 +23,6 @@ func TestFloatIndex(t *testing.T) {
 	}
 	// Try to find existing value and version
 	found2 := idx.Find(FloatTestValue1)
-	//log.Printf("!!!!!!!!!!!!!!!!!!!!! %# v", pretty.Formatter(found2))
 	if found2[0] != TestId1 {
 		t.Fatal("Finding by float did not work")
 	}

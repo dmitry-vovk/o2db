@@ -101,36 +101,45 @@ func (i *IntIndex) FlushToFile() error {
 
 // Add value/id/version to index
 func (i *IntIndex) Add(value interface{}, id, version int) {
-	intVal := int(value.(int))
-	if i.maps.MapV[intVal] == nil {
-		i.maps.MapV[intVal] = idList{}
+	index := int(value.(int))
+	if i.maps.MapV[index] == nil {
+		i.maps.MapV[index] = idList{}
 	}
-	if i.maps.MapV[intVal][id] == nil {
-		i.maps.MapV[intVal][id] = versionsList{}
+	if i.maps.MapV[index][id] == nil {
+		i.maps.MapV[index][id] = versionsList{}
 	}
-	i.maps.MapV[intVal][id] = append(i.maps.MapV[intVal][id], version)
-	i.maps.Map[intVal] = append(i.maps.Map[intVal], id)
+	i.maps.MapV[index][id] = append(i.maps.MapV[index][id], version)
+	i.deleteMostRecent(index, id)
+	i.maps.Map[index] = append(i.maps.Map[index], id)
 }
 
 // Remove value/id/version from the index
 func (i *IntIndex) Delete(value interface{}, id, version int) {
-	intVal := value.(int)
-	if i.maps.MapV[intVal][id] != nil {
-		versions := i.maps.MapV[intVal][id]
+	index := value.(int)
+	i.deleteMostRecent(index, id)
+	i.deleteVersioned(index, id, version)
+}
+
+func (i *IntIndex) deleteVersioned(index, id, version int) {
+	if i.maps.MapV[index][id] != nil {
+		versions := i.maps.MapV[index][id]
 		for n, ver := range versions {
 			if ver == version {
-				i.maps.MapV[intVal][id] = append(versions[:n], versions[n+1:]...)
-				if len(i.maps.MapV[intVal][id]) == 0 {
-					delete(i.maps.MapV[intVal], id)
+				i.maps.MapV[index][id] = append(versions[:n], versions[n+1:]...)
+				if len(i.maps.MapV[index][id]) == 0 {
+					delete(i.maps.MapV[index], id)
 				}
 				break
 			}
 		}
 	}
-	if i.maps.Map[intVal] != nil {
-		for n, eid := range i.maps.Map[intVal] {
+}
+
+func (i *IntIndex) deleteMostRecent(index, id int) {
+	if i.maps.Map[index] != nil {
+		for n, eid := range i.maps.Map[index] {
 			if id == eid {
-				i.maps.Map[intVal] = append(i.maps.Map[intVal][:n], i.maps.Map[intVal][n+1:]...)
+				i.maps.Map[index] = append(i.maps.Map[index][:n], i.maps.Map[index][n+1:]...)
 			}
 		}
 	}
@@ -143,35 +152,35 @@ func (i *IntIndex) Find(value interface{}) []int {
 
 func (i *IntIndex) ConditionalFind(op string, value interface{}) []int {
 	ids := []int{}
-	intVal := int(value.(float64))
+	index := int(value.(float64))
 	switch op {
 	case "<", "lt": // less than
 		for v, n := range i.maps.Map {
-			if v < intVal {
+			if v < index {
 				ids = append(ids, n...)
 			}
 		}
 	case ">", "gt": // greater than
 		for v, n := range i.maps.Map {
-			if v > intVal {
+			if v > index {
 				ids = append(ids, n...)
 			}
 		}
 	case "<=", "=<", "le": // less or equal
 		for v, n := range i.maps.Map {
-			if v <= intVal {
+			if v <= index {
 				ids = append(ids, n...)
 			}
 		}
 	case ">=", "=>", "ge": // greater or equal
 		for v, n := range i.maps.Map {
-			if v >= intVal {
+			if v >= index {
 				ids = append(ids, n...)
 			}
 		}
 	case "!=", "<>", "ne": // not equal
 		for v, n := range i.maps.Map {
-			if v != intVal {
+			if v != index {
 				ids = append(ids, n...)
 			}
 		}

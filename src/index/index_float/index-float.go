@@ -101,36 +101,45 @@ func (i *FloatIndex) FlushToFile() error {
 
 // Add value/id/version to index
 func (i *FloatIndex) Add(value interface{}, id, version int) {
-	floatVal := value.(float64)
-	if i.maps.MapV[floatVal] == nil {
-		i.maps.MapV[floatVal] = idList{}
+	index := value.(float64)
+	if i.maps.MapV[index] == nil {
+		i.maps.MapV[index] = idList{}
 	}
-	if i.maps.MapV[floatVal][id] == nil {
-		i.maps.MapV[floatVal][id] = versionsList{}
+	if i.maps.MapV[index][id] == nil {
+		i.maps.MapV[index][id] = versionsList{}
 	}
-	i.maps.MapV[floatVal][id] = append(i.maps.MapV[floatVal][id], version)
-	i.maps.Map[floatVal] = append(i.maps.Map[floatVal], id)
+	i.maps.MapV[index][id] = append(i.maps.MapV[index][id], version)
+	i.deleteMostRecent(index, id)
+	i.maps.Map[index] = append(i.maps.Map[index], id)
 }
 
 // Remove value/id/version from the index
 func (i *FloatIndex) Delete(value interface{}, id, version int) {
-	floatVal := value.(float64)
-	if i.maps.MapV[floatVal][id] != nil {
-		versions := i.maps.MapV[floatVal][id]
+	index := value.(float64)
+	i.deleteMostRecent(index, id)
+	i.deleteVersioned(index, id, version)
+}
+
+func (i *FloatIndex) deleteVersioned(index float64, id, version int) {
+	if i.maps.MapV[index][id] != nil {
+		versions := i.maps.MapV[index][id]
 		for n, ver := range versions {
 			if ver == version {
-				i.maps.MapV[floatVal][id] = append(versions[:n], versions[n+1:]...)
-				if len(i.maps.MapV[floatVal][id]) == 0 {
-					delete(i.maps.MapV[floatVal], id)
+				i.maps.MapV[index][id] = append(versions[:n], versions[n+1:]...)
+				if len(i.maps.MapV[index][id]) == 0 {
+					delete(i.maps.MapV[index], id)
 				}
 				break
 			}
 		}
 	}
-	if i.maps.Map[floatVal] != nil {
-		for n, eid := range i.maps.Map[floatVal] {
+}
+
+func (i *FloatIndex) deleteMostRecent(index float64, id int) {
+	if i.maps.Map[index] != nil {
+		for n, eid := range i.maps.Map[index] {
 			if id == eid {
-				i.maps.Map[floatVal] = append(i.maps.Map[floatVal][:n], i.maps.Map[floatVal][n+1:]...)
+				i.maps.Map[index] = append(i.maps.Map[index][:n], i.maps.Map[index][n+1:]...)
 			}
 		}
 	}
@@ -143,35 +152,35 @@ func (i *FloatIndex) Find(value interface{}) []int {
 
 func (i *FloatIndex) ConditionalFind(op string, value interface{}) []int {
 	ids := []int{}
-	floatVal := value.(float64)
+	index := value.(float64)
 	switch op {
 	case "<", "lt": // less than
 		for v, n := range i.maps.Map {
-			if v < floatVal {
+			if v < index {
 				ids = append(ids, n...)
 			}
 		}
 	case ">", "gt": // greater than
 		for v, n := range i.maps.Map {
-			if v > floatVal {
+			if v > index {
 				ids = append(ids, n...)
 			}
 		}
 	case "<=", "=<", "le": // less or equal
 		for v, n := range i.maps.Map {
-			if v <= floatVal {
+			if v <= index {
 				ids = append(ids, n...)
 			}
 		}
 	case ">=", "=>", "ge": // greater or equal
 		for v, n := range i.maps.Map {
-			if v >= floatVal {
+			if v >= index {
 				ids = append(ids, n...)
 			}
 		}
 	case "!=", "<>", "ne": // not equal
 		for v, n := range i.maps.Map {
-			if v != floatVal {
+			if v != index {
 				ids = append(ids, n...)
 			}
 		}

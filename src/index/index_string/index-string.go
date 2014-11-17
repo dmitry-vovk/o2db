@@ -136,12 +136,18 @@ func (i *StringIndex) Add(value interface{}, id, version int) {
 		i.maps.MapV[index][id] = versionsList{}
 	}
 	i.maps.MapV[index][id] = append(i.maps.MapV[index][id], version)
+	i.deleteMostRecent(index, id)
 	i.maps.Map[index] = append(i.maps.Map[index], id)
 }
 
 // Remove id associated with value
 func (i *StringIndex) Delete(value interface{}, id, version int) {
 	index := i.getHash(value.(string))
+	i.deleteMostRecent(index, id)
+	i.deleteVersioned(index, id, version)
+}
+
+func (i *StringIndex) deleteVersioned(index hashIndex, id, version int) {
 	if i.maps.MapV[index][id] != nil {
 		versions := i.maps.MapV[index][id]
 		for n, ver := range versions {
@@ -154,6 +160,9 @@ func (i *StringIndex) Delete(value interface{}, id, version int) {
 			}
 		}
 	}
+}
+
+func (i *StringIndex) deleteMostRecent(index hashIndex, id int) {
 	if i.maps.Map[index] != nil {
 		for n, eid := range i.maps.Map[index] {
 			if id == eid {
