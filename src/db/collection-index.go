@@ -1,6 +1,9 @@
 package db
 
 import (
+	. "index/index_float"
+	. "index/index_int"
+	. "index/index_string"
 	"logger"
 	. "types"
 )

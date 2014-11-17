@@ -158,15 +158,39 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 */
+/*
 $message = [
     'type' => O2dbClient::TYPE_SELECT_OBJECTS,
     'payload' => [
         'class' => 'Job',
-        'conditions' => [
+        'query' => [
             //'prop1' => [1, 2, 5],
-            'created' => 4,
-            'payload' => 'hello there',
+            //'created' => ['<' => 5],
+            'price' => 3.5,
+            //'payload' => 'hello there',
             //'prop3' => ['<' => 2.5, '>=' => 1],
+        ],
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+*/
+$message = [
+    'type' => O2dbClient::TYPE_SELECT_OBJECTS,
+    'payload' => [
+        'class' => 'Job',
+        'query' => [
+            'OR' => [ // u<nion> (OR), i<ntersection> (AND), d<ifference> (XOR), n<not> (NOT)
+                'price' => 3.5,
+                'AND' => [
+                    'created' => 4,
+                    'payload' => 'hello',
+                    'NOT' => [
+                        'created' => 4,
+                        //'price' => ['<' => 5, '>=' => 1],
+                    ],
+                ],
+            ],
         ],
     ],
 ];
@@ -180,15 +204,15 @@ $message = [
     'payload' => [
         'class' => 'Job',
         'data' => [
-            'id' => 3,
+            'id' => 5,
         ],
     ],
 ];
-*/
-/*
+
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
+*/
+/*
 $message = [
     'type' => O2dbClient::TYPE_GET_OBJECT_VERSIONS,
     'payload' => [

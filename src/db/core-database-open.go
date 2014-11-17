@@ -3,7 +3,9 @@ package db
 import (
 	"config"
 	"errors"
-	"github.com/kr/pretty"
+	. "index/index_float"
+	. "index/index_int"
+	. "index/index_string"
 	"logger"
 	"os"
 	"path/filepath"
@@ -114,6 +116,6 @@ func (c *DbCore) populateCollections(d *Database) error {
 			}
 		}
 	}
-	logger.ErrorLog.Printf("%# v", pretty.Formatter(c.databases))
+	//logger.ErrorLog.Printf("%# v", pretty.Formatter(c.databases))
 	return nil
 }

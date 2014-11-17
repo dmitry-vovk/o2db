@@ -33,7 +33,7 @@ func (с *DbCore) Processor() {
 	с.databases = make(map[string]*Database)
 	for {
 		pkg := <-с.Input
-		pkg.RespChan <- с.ProcessQuery(pkg.Client, pkg.Container)
+		pkg.RespChan <- с.ProcessRequest(pkg.Client, pkg.Container)
 	}
 }
 

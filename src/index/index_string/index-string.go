@@ -1,4 +1,4 @@
-package db
+package index_string
 
 import (
 	"bytes"
@@ -9,23 +9,32 @@ import (
 	"time"
 )
 
+const flushDelay = 100 * time.Millisecond
+
 type hashIndex [20]byte
 
 type versionsList []int
 
 type idList map[int]versionsList
 
+type maps struct {
+	MapV map[hashIndex]idList // versioned index to id map
+	Map  map[hashIndex][]int  // index to id map
+}
 type StringIndex struct {
-	Name          string               // Field name
-	Map           map[hashIndex]idList // index to id map
-	IndexFileName string               // Name of the index file storage
-	Flush         chan bool            // chan to let index know to flush the index to file
+	Name          string    // Field name
+	maps          maps      // index to id map
+	IndexFileName string    // Name of the index file storage
+	Flush         chan bool // chan to let index know to flush the index to file
 }
 
 // Create new empty string index
 func NewStringIndex(fileName string) *StringIndex {
 	stringIndex := StringIndex{
-		Map: make(map[hashIndex]idList),
+		maps: maps{
+			MapV: make(map[hashIndex]idList),
+			Map:  make(map[hashIndex][]int),
+		},
 	}
 	stringIndex.IndexFileName = fileName
 	stringIndex.Flush = make(chan bool, 100)
@@ -36,7 +45,7 @@ func NewStringIndex(fileName string) *StringIndex {
 func (i *StringIndex) encode() []byte {
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)
-	enc.Encode(i.Map)
+	enc.Encode(i.maps)
 	return b.Bytes()
 }
 
@@ -83,7 +92,7 @@ func OpenStringIndex(fileName string) (*StringIndex, error) {
 	defer handler.Close()
 	dec := gob.NewDecoder(handler)
 	i := NewStringIndex(fileName)
-	err = dec.Decode(&i.Map)
+	err = dec.Decode(&i.maps)
 	if err != nil {
 		return nil, err
 	}
@@ -93,16 +102,26 @@ func OpenStringIndex(fileName string) (*StringIndex, error) {
 func (i *StringIndex) getEncodedData() *bytes.Buffer {
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)
-	enc.Encode(i.Map)
+	enc.Encode(i.maps)
 	return &b
 }
 
 // Return list of IDs matching value
-func (i *StringIndex) Find(value interface{}) map[int][]int {
-	index := i.getHash(value.(string))
-	ids := make(map[int][]int)
-	for k, v := range i.Map[index] {
-		ids[k] = v
+func (i *StringIndex) Find(value interface{}) []int {
+	return i.maps.Map[i.getHash(value.(string))]
+}
+
+// Does not implement
+func (i *StringIndex) ConditionalFind(op string, value interface{}) []int {
+	ids := []int{}
+	stringVal := i.getHash(value.(string))
+	switch op {
+	case "!=", "<>", "ne": // not equal
+		for v, n := range i.maps.Map {
+			if v != stringVal {
+				ids = append(ids, n...)
+			}
+		}
 	}
 	return ids
 }
@@ -110,27 +129,35 @@ func (i *StringIndex) Find(value interface{}) map[int][]int {
 // Add value to index
 func (i *StringIndex) Add(value interface{}, id, version int) {
 	index := i.getHash(value.(string))
-	if i.Map[index] == nil {
-		i.Map[index] = idList{}
+	if i.maps.MapV[index] == nil {
+		i.maps.MapV[index] = idList{}
 	}
-	if i.Map[index][id] == nil {
-		i.Map[index][id] = versionsList{}
+	if i.maps.MapV[index][id] == nil {
+		i.maps.MapV[index][id] = versionsList{}
 	}
-	i.Map[index][id] = append(i.Map[index][id], version)
+	i.maps.MapV[index][id] = append(i.maps.MapV[index][id], version)
+	i.maps.Map[index] = append(i.maps.Map[index], id)
 }
 
 // Remove id associated with value
 func (i *StringIndex) Delete(value interface{}, id, version int) {
 	index := i.getHash(value.(string))
-	if i.Map[index][id] != nil {
-		versions := i.Map[index][id]
+	if i.maps.MapV[index][id] != nil {
+		versions := i.maps.MapV[index][id]
 		for n, ver := range versions {
 			if ver == version {
-				i.Map[index][id] = append(versions[:n], versions[n+1:]...)
-				if len(i.Map[index][id]) == 0 {
-					delete(i.Map[index], id)
+				i.maps.MapV[index][id] = append(versions[:n], versions[n+1:]...)
+				if len(i.maps.MapV[index][id]) == 0 {
+					delete(i.maps.MapV[index], id)
 				}
 				break
+			}
+		}
+	}
+	if i.maps.Map[index] != nil {
+		for n, eid := range i.maps.Map[index] {
+			if id == eid {
+				i.maps.Map[index] = append(i.maps.Map[index][:n], i.maps.Map[index][n+1:]...)
 			}
 		}
 	}

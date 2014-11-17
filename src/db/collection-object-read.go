@@ -33,7 +33,6 @@ func (c *Collection) ReadObject(p ReadObject) (*ObjectFields, error) {
 		version := getInt(rawVersion)
 		return c.getObjectByIdAndVersion(id, version)
 	}
-	// TODO get by conditions
 	return nil, nil
 }
 

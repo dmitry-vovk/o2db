@@ -10,7 +10,7 @@ import (
 )
 
 // This is the main entry for processing queries
-func (d *DbCore) ProcessQuery(c *Client, q *Container) Response {
+func (d *DbCore) ProcessRequest(c *Client, q *Container) Response {
 	if q == nil {
 		return respond("no message", nil)
 	}

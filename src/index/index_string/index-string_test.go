@@ -1,8 +1,7 @@
-package db
+package index_string
 
 import (
 	. "dbtest"
-	"os"
 	"testing"
 )
 
@@ -23,16 +22,13 @@ func TestStringIndex(t *testing.T) {
 	}
 	// Try to find existing value and version
 	found2 := idx.Find(StringTestValue1)
-	if found2[TestId1][0] != 1 {
+	if found2[0] != TestId1 {
 		t.Fatal("Finding by string did not work")
 	}
 	// found2 should contain two ids with one version each
-	for k, v := range found2 {
+	for _, k := range found2 {
 		if !(k == TestId1 || k == TestId3) {
-			t.Fatal("Finding by string did not work (id) %d", k)
-		}
-		if len(v) != 1 {
-			t.Fatal("Finding by string did not work (version)")
+			t.Fatalf("Finding by string did not work (id) %d", k)
 		}
 	}
 	// Try deleting single value/id/version
@@ -40,16 +36,5 @@ func TestStringIndex(t *testing.T) {
 	found3 := idx.Find(StringTestValue1)
 	if len(found3) != 1 {
 		t.Fatal("Deleting by id did not work")
-	}
-	// Test file IO
-	err := idx.FlushToFile()
-	idx.Flush <- true
-	defer os.Remove(IndexFile)
-	idx2, err := OpenStringIndex(IndexFile)
-	if err != nil {
-		t.Fatalf("Error reading index from file: %s", err)
-	}
-	if len(idx.Map) != len(idx2.Map) {
-		t.Fatal("Read index not equal to stored")
 	}
 }

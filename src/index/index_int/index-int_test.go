@@ -1,4 +1,4 @@
-package db
+package index_int
 
 import (
 	. "dbtest"
@@ -23,16 +23,13 @@ func TestIntIndex(t *testing.T) {
 	}
 	// Try to find existing value and version
 	found2 := idx.Find(IntTestValue1)
-	if found2[TestId1][0] != 0 {
+	if found2[0] != TestId1 {
 		t.Fatal("Finding by int did not work")
 	}
 	// found2 should contain two ids with one version each
-	for k, v := range found2 {
+	for _, k := range found2 {
 		if !(k == TestId1 || k == TestId3) {
-			t.Fatal("Finding by int did not work (id) %d", k)
-		}
-		if len(v) != 1 {
-			t.Fatal("Finding by int did not work (version)")
+			t.Fatalf("Finding by int did not work (id) %d", k)
 		}
 	}
 	// Try deleting single value/id/version
@@ -47,11 +44,4 @@ func TestIntIndex(t *testing.T) {
 		t.Fatalf("Error flushing index to file: %s", err)
 	}
 	defer os.Remove(IndexFile)
-	idx2, err := OpenIntIndex(IndexFile)
-	if err != nil {
-		t.Fatalf("Error reading index from file: %s", err)
-	}
-	if len(idx.Map) != len(idx2.Map) {
-		t.Fatal("Read index not equal to stored")
-	}
 }

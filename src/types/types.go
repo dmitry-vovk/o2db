@@ -111,7 +111,7 @@ type GetObjectDiff struct {
 
 type SelectObjects struct {
 	Collection string       `json:"class"`
-	Conditions ObjectFields `json:"conditions"`
+	Query      ObjectFields `json:"query"`
 }
 
 // Difference between two object versions
