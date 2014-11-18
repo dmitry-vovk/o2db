@@ -147,10 +147,10 @@ $message = [
     'payload' => [
         'class' => 'Job',
         'data' => [
-            'id' => 5,
-            'created' => 4,
-            'payload' => 'hello there',
-            'price' => 3.5,
+            'id' => 9,
+            'created' => 5,
+            'payload' => 'hello there again',
+            'price' => 24.1,
             'extra' => 'extra field!',
         ],
     ],
@@ -181,7 +181,8 @@ $message = [
         'class' => 'Job',
         'query' => [
             'OR' => [ // u<nion> (OR), i<ntersection> (AND), d<ifference> (XOR), n<not> (NOT)
-                'price' => 3.5,
+                'price' => ['<=' => 50],
+                /*
                 'AND' => [
                     'created' => 4,
                     'payload' => 'hello',
@@ -189,7 +190,7 @@ $message = [
                         'created' => 4,
                         //'price' => ['<' => 5, '>=' => 1],
                     ],
-                ],
+                ],*/
             ],
         ],
     ],
