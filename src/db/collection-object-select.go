@@ -1,6 +1,7 @@
 package db
 
 import (
+	mapset "github.com/deckarep/golang-set"
 	"github.com/kr/pretty"
 	"logger"
 	. "types"
@@ -61,46 +62,82 @@ func (c *Collection) processQuery(verb string, q ObjectFields, indent string) []
 	return foundIds
 }
 
-func (c *Collection) slice2map(values []int) map[int]struct{} {
-	result := make(map[int]struct{})
-	for _, val := range values {
-		result[val] = struct{}{}
-	}
-	return result
-}
-
-func (c *Collection) map2slice(values map[int]struct{}) []int {
-	result := []int{}
-	for id, _ := range values {
-		result = append(result, id)
-	}
-	return result
-}
-
 // Return all
 func (c *Collection) joinOR(ids map[int][]int) []int {
-	result := []int{}
+	logger.ErrorLog.Printf("OR: %# v", pretty.Formatter(ids))
+	andSet := mapset.NewSet()
 	for _, set := range ids {
-		result = append(result, set...)
+		for _, id := range set {
+			andSet.Add(id)
+		}
+	}
+	result := []int{}
+	for id := range andSet.Iter() {
+		result = append(result, id.(int))
 	}
 	return result
 }
 
 // Return only those present in all slices
 func (c *Collection) joinAND(ids map[int][]int) []int {
+	logger.ErrorLog.Printf("AND: %# v", pretty.Formatter(ids))
+	sets := make([]mapset.Set, len(ids))
+	for s, set := range ids {
+		sets[s] = mapset.NewSet()
+		for _, id := range set {
+			sets[s].Add(id)
+		}
+	}
+	andSet := mapset.NewSet()
+	andSet.Union(sets[0])
+	for i := 1; i < len(sets); i++ {
+		andSet.Intersect(sets[i])
+	}
 	result := []int{}
+	for id := range andSet.Iter() {
+		result = append(result, id.(int))
+	}
 	return result
 }
 
 // Return only ones that are unique in slices
 func (c *Collection) joinXOR(ids map[int][]int) []int {
+	logger.ErrorLog.Printf("XOR: %# v", pretty.Formatter(ids))
+	sets := make([]mapset.Set, len(ids))
+	for s, set := range ids {
+		sets[s] = mapset.NewSet()
+		for _, id := range set {
+			sets[s].Add(id)
+		}
+	}
+	andSet := mapset.NewSet()
+	andSet.Union(sets[0])
+	for i := 1; i < len(sets); i++ {
+		andSet.Difference(sets[i])
+	}
 	result := []int{}
+	for id := range andSet.Iter() {
+		result = append(result, id.(int))
+	}
 	return result
 }
 
 // Return all those present in first but not is the last
 func (c *Collection) joinNOT(ids map[int][]int) []int {
-	result := ids[0]
+	logger.ErrorLog.Printf("NOT: %# v", pretty.Formatter(ids))
+	set := mapset.NewSet()
+	for _, id := range ids[0] {
+		set.Add(id)
+	}
+	for i := 1; i < len(ids); i++ {
+		for _, id := range ids[i] {
+			set.Remove(id)
+		}
+	}
+	result := []int{}
+	for id := range set.Iter() {
+		result = append(result, id.(int))
+	}
 	return result
 }
 
