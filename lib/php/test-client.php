@@ -180,17 +180,9 @@ $message = [
     'payload' => [
         'class' => 'Job',
         'query' => [
-            'OR' => [ // u<nion> (OR), i<ntersection> (AND), d<ifference> (XOR), n<not> (NOT)
-                'price' => ['<=' => 50],
-                /*
-                'AND' => [
-                    'created' => 4,
-                    'payload' => 'hello',
-                    'NOT' => [
-                        'created' => 4,
-                        //'price' => ['<' => 5, '>=' => 1],
-                    ],
-                ],*/
+            'XOR' => [
+                'price' => 3.5,
+                'created' => 5,
             ],
         ],
     ],

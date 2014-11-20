@@ -82,19 +82,18 @@ func (c *Collection) joinOR(ids map[int][]int) []int {
 func (c *Collection) joinAND(ids map[int][]int) []int {
 	logger.ErrorLog.Printf("AND: %# v", pretty.Formatter(ids))
 	sets := make([]mapset.Set, len(ids))
-	for s, set := range ids {
+	for s, currentSet := range ids {
 		sets[s] = mapset.NewSet()
-		for _, id := range set {
+		for _, id := range currentSet {
 			sets[s].Add(id)
 		}
 	}
-	andSet := mapset.NewSet()
-	andSet.Union(sets[0])
+	set := mapset.NewSet().Union(sets[0])
 	for i := 1; i < len(sets); i++ {
-		andSet.Intersect(sets[i])
+		set = set.Intersect(sets[i])
 	}
 	result := []int{}
-	for id := range andSet.Iter() {
+	for id := range set.Iter() {
 		result = append(result, id.(int))
 	}
 	return result
@@ -104,19 +103,18 @@ func (c *Collection) joinAND(ids map[int][]int) []int {
 func (c *Collection) joinXOR(ids map[int][]int) []int {
 	logger.ErrorLog.Printf("XOR: %# v", pretty.Formatter(ids))
 	sets := make([]mapset.Set, len(ids))
-	for s, set := range ids {
+	for s, currentSet := range ids {
 		sets[s] = mapset.NewSet()
-		for _, id := range set {
+		for _, id := range currentSet {
 			sets[s].Add(id)
 		}
 	}
-	andSet := mapset.NewSet()
-	andSet.Union(sets[0])
+	set := mapset.NewSet().Union(sets[0])
 	for i := 1; i < len(sets); i++ {
-		andSet.Difference(sets[i])
+		set = set.Difference(sets[i])
 	}
 	result := []int{}
-	for id := range andSet.Iter() {
+	for id := range set.Iter() {
 		result = append(result, id.(int))
 	}
 	return result
