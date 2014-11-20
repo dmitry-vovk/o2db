@@ -175,6 +175,7 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 */
+/*
 $message = [
     'type' => O2dbClient::TYPE_SELECT_OBJECTS,
     'payload' => [
@@ -189,7 +190,29 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+*/
+$message = [
+    'type' => O2dbClient::TYPE_ADD_SUBSCRIPTION,
+    'payload' => [
+        'class' => 'Job',
+        'key' => '(subscription-key)',
+        'mask' => [
+            'price' => 3.5,
+        ],
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
 
+$message = [
+    'type' => O2dbClient::TYPE_SUBSCRIBE,
+    'payload' => [
+        'class' => 'Job',
+        'key' => '(subscription-key)',
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
 
 /*
 $message = [

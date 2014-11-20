@@ -3,7 +3,8 @@
 /**
  * @author Dmytro Vovk <dmitry.vovk@gmail.com>
  */
-class O2dbClient {
+class O2dbClient
+{
 
     /** @var resource */
     protected $socket;
@@ -26,6 +27,9 @@ class O2dbClient {
     const TYPE_GET_OBJECT_VERSIONS = 303;
     const TYPE_GET_OBJECT_DIFF = 304;
     const TYPE_SELECT_OBJECTS = 305;
+    const TYPE_SUBSCRIBE = 400;
+    const TYPE_ADD_SUBSCRIPTION = 401;
+    const TYPE_CANCEL_SUBSCRIPTION = 402;
     /*
      0 TypeAuth
      1 TypeCreateDatabase
@@ -47,13 +51,15 @@ class O2dbClient {
      * @param string $address
      * @param int $port
      */
-    public function __construct($address, $port = 1333) {
+    public function __construct($address, $port = 1333)
+    {
         $this->address = $address;
         $this->port = $port;
         $this->connect();
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
         socket_close($this->socket);
     }
 
@@ -62,7 +68,8 @@ class O2dbClient {
      *
      * @throws Exception
      */
-    protected function connect() {
+    protected function connect()
+    {
         $this->socket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (!$this->socket) {
             throw new Exception(socket_strerror(socket_last_error()));
@@ -79,7 +86,8 @@ class O2dbClient {
      *
      * @return string
      */
-    public function send($message) {
+    public function send($message)
+    {
         $msg = json_encode($message, JSON_PRETTY_PRINT) . chr(self::DELIMITER);
         echo '>>>', var_export($msg, true), PHP_EOL;
         socket_write($this->socket, $msg, strlen($msg));
@@ -94,9 +102,10 @@ class O2dbClient {
         return $incoming;
     }
 
-    public function createDatabase($dbName) {
+    public function createDatabase($dbName)
+    {
         $message = [
-            'type'    => O2dbClient::TYPE_CREATE_DB,
+            'type' => O2dbClient::TYPE_CREATE_DB,
             'payload' => [
                 'name' => $dbName,
             ],
@@ -104,12 +113,13 @@ class O2dbClient {
         return $this->send($message);
     }
 
-    public function getOne($class, $id) {
+    public function getOne($class, $id)
+    {
         $message = [
-            'type'    => O2dbClient::TYPE_OBJECT_GET,
+            'type' => O2dbClient::TYPE_OBJECT_GET,
             'payload' => [
                 'class' => $class,
-                'id'    => $id,
+                'id' => $id,
             ],
         ];
         return $this->send($message);

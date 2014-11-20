@@ -100,6 +100,24 @@ func Parse(msg []byte) (*types.Container, error) {
 		if err == nil {
 			parsedMessage.Payload = p
 		}
+	case types.TypeSubscribe:
+		var p types.Subscribe
+		err = json.Unmarshal(payload, &p)
+		if err == nil {
+			parsedMessage.Payload = p
+		}
+	case types.TypeAddSubscription:
+		var p types.AddSubscription
+		err = json.Unmarshal(payload, &p)
+		if err == nil {
+			parsedMessage.Payload = p
+		}
+	case types.TypeCancelSubscription:
+		var p types.CancelSubscription
+		err = json.Unmarshal(payload, &p)
+		if err == nil {
+			parsedMessage.Payload = p
+		}
 	default:
 		return nil, errors.New(fmt.Sprintf("Unsupported message type: %d", parsedMessage.Type))
 	}

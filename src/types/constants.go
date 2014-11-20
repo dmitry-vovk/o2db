@@ -20,7 +20,9 @@ const (
 	TypeGetObjectDiff     uint = 304
 	TypeSelectObjects     uint = 305
 
-	TypeSubscribe uint = 400
+	TypeSubscribe          uint = 400
+	TypeAddSubscription    uint = 401
+	TypeCancelSubscription uint = 402
 )
 
 // File names

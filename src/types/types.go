@@ -116,3 +116,22 @@ type SelectObjects struct {
 
 // Difference between two object versions
 type ObjectDiff ObjectFields
+
+// Create a subscription for updates when new objects are written
+type AddSubscription struct {
+	Collection string       `json:"class"` // Collection name
+	Key        string       `json:"key"`   // Authorisation key
+	Mask       ObjectFields `json:"mask"`  // Set of conditions for events
+}
+
+// Remove subscription
+type CancelSubscription struct {
+	Collection string `json:"class"` // Collection name
+	Key        string `json:"key"`   // Authorisation key
+}
+
+// Client call to receive object updates by specified key
+type Subscribe struct {
+	Collection string `json:"class"`
+	Key        string `json:"key"`
+}
