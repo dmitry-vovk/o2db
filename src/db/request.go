@@ -23,7 +23,13 @@ func (d *DbCore) ProcessRequest(c *Client, q *Container) Response {
 			return respond("Authentication failed", nil)
 		}
 	}
-	if c.Authenticated {
+	if subscribe, ok := q.Payload.(Subscribe); ok {
+		collection, err := d.getCollection(c, subscribe.Collection)
+		if err != nil {
+			return respond(nil, err)
+		}
+		return respond(collection.Subscribe(subscribe, c))
+	} else if c.Authenticated {
 		switch q.Payload.(type) {
 		case OpenDatabase:
 			dbName, err := d.OpenDatabase(q.Payload.(OpenDatabase))
@@ -96,12 +102,6 @@ func (d *DbCore) ProcessRequest(c *Client, q *Container) Response {
 				return respond(nil, err)
 			}
 			return respond(collection.CancelSubscription(q.Payload.(CancelSubscription)))
-		case Subscribe:
-			collection, err := d.getCollection(c, q.Payload.(Subscribe).Collection)
-			if err != nil {
-				return respond(nil, err)
-			}
-			return respond(collection.Subscribe(q.Payload.(Subscribe)))
 		default:
 			ErrorLog.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
 			return respond(nil, errors.New(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(q.Payload))))

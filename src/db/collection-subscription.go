@@ -21,7 +21,7 @@ func (c *Collection) CancelSubscription(p CancelSubscription) (string, error) {
 	return "Subscription cancelled", nil
 }
 
-func (c *Collection) Subscribe(p Subscribe) (string, error) {
+func (c *Collection) Subscribe(p Subscribe, client *Client) (string, error) {
 	if _, ok := c.Subscriptions[p.Key]; !ok {
 		return "", errors.New("Subscription does not exist")
 	}
@@ -29,4 +29,5 @@ func (c *Collection) Subscribe(p Subscribe) (string, error) {
 }
 
 func (c *Collection) subscriptionDispatcher(object *ObjectFields) {
+	// TODO send copy fo the object to all relevant subscribers
 }
