@@ -50,7 +50,6 @@ func (с *DbCore) ListDatabases(p ListDatabases) (string, error) {
 	for _, dir := range files {
 		fi, err := os.Stat(dir)
 		if err == nil && fi.IsDir() {
-			// TODO add more sophisticated check for database presence besides being a directory
 			dirs = append(dirs, strings.Replace(dir, config.Config.DataDir+string(os.PathSeparator), "", 1))
 		}
 	}

@@ -25,6 +25,7 @@ func (c *Collection) Subscribe(p Subscribe, client *Client) (string, error) {
 	if _, ok := c.Subscriptions[p.Key]; !ok {
 		return "", errors.New("Subscription does not exist")
 	}
+	// TODO add client
 	return "Subscribed using key " + p.Key, nil
 }
 

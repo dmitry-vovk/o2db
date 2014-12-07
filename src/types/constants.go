@@ -32,3 +32,7 @@ const (
 	ObjectIndexFileName  = "objects.index"
 	CollectionSchema     = "schema"
 )
+
+const (
+	MessageDelimiter byte = 0 // Message delimiter. Every message should end with this byte
+)

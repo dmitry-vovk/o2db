@@ -4,7 +4,7 @@ import (
 	"config"
 	"flag"
 	"log"
-	. "logger"
+	"logger"
 	"runtime"
 	"server"
 )
@@ -19,8 +19,8 @@ func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	var configFile = flag.String("config", "o2db.json", "Path to config.json")
 	flag.Parse()
+	logger.SystemLog.Printf("Using config %s", *configFile)
 	if err := config.Read(*configFile); err != nil {
 		log.Fatal(err)
 	}
-	SetupLogs()
 }

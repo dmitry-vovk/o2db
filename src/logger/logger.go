@@ -6,15 +6,7 @@ import (
 )
 
 var (
-	DebugLog *log.Logger
-	ErrorLog *log.Logger
+	DebugLog  *log.Logger = log.New(os.Stdout, "", log.Lmicroseconds|log.Lshortfile)
+	ErrorLog  *log.Logger = log.New(os.Stderr, "Error in ", log.Lshortfile)
+	SystemLog *log.Logger = log.New(os.Stdout, "", log.LstdFlags)
 )
-
-func init() {
-	SetupLogs()
-}
-
-func SetupLogs() {
-	ErrorLog = log.New(os.Stderr, "Error in ", log.Lshortfile)
-	DebugLog = log.New(os.Stdout, "", log.Lmicroseconds|log.Lshortfile)
-}
