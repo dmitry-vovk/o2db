@@ -2,7 +2,6 @@ package server
 
 import (
 	"db"
-	"fmt"
 	"github.com/gorilla/websocket"
 	. "logger"
 	"net/http"
@@ -31,7 +30,10 @@ func (s *ServerType) wsHandle(conn *websocket.Conn) {
 	for {
 		t, msg, err := conn.ReadMessage()
 		if err != nil {
-			ErrorLog.Printf("Error reading json message: %s", err)
+			// EOF is caught here
+			if err.Error() != "EOF" {
+				ErrorLog.Printf("Error reading json message: %s", err)
+			}
 			break
 		}
 		if t != websocket.TextMessage {
@@ -47,7 +49,7 @@ func (s *ServerType) wsHandle(conn *websocket.Conn) {
 			client.Respond(
 				Response{
 					Result:   false,
-					Response: fmt.Sprintf("%s", err),
+					Response: "message parse error",
 				},
 			)
 		} else {

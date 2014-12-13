@@ -26,14 +26,14 @@ func CreateNew(config *config.ConfigType) *ServerType {
 
 // Run processing
 func (s *ServerType) Run() error {
-	SystemLog.Print("Starting core processor...")
+	SystemLog.Print("Starting core processor")
 	go s.Core.Processor()
-	SystemLog.Printf("Starting socket listener on %s...", config.Config.ListenTCP)
+	SystemLog.Printf("Starting socket listener on %s", config.Config.ListenTCP)
 	err := s.runSocketListener()
 	if err != nil {
 		return err
 	}
 	http.HandleFunc("/", s.wsHandler)
-	SystemLog.Printf("Starting HTTP listener on %s...", config.Config.ListenHTTP)
+	SystemLog.Printf("Starting HTTP listener on %s", config.Config.ListenHTTP)
 	return http.ListenAndServe(config.Config.ListenHTTP, nil)
 }
