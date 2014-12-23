@@ -37,7 +37,7 @@ func (s *ServerType) wsHandle(conn *websocket.Conn) {
 			break
 		}
 		if t != websocket.TextMessage {
-			ErrorLog.Printf("Got message type %d: %s", msg)
+			ErrorLog.Printf("Got message type %d: %s", t, msg)
 			continue
 		}
 		client := &Client{
