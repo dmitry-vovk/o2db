@@ -65,7 +65,12 @@ func (d *DbCore) ProcessRequest(c *Client, q *Container) Response {
 			if err != nil {
 				return respond(nil, err)
 			}
-			return respond("Object written", collection.WriteObject(q.Payload.(WriteObject)))
+			err = collection.WriteObject(q.Payload.(WriteObject))
+			if err == nil {
+				data := q.Payload.(WriteObject).Data
+				collection.SubscriptionDispatcher(&data)
+			}
+			return respond("Object written", err)
 		case ReadObject:
 			collection, err := d.getCollection(c, q.Payload.(ReadObject).Collection)
 			if err != nil {

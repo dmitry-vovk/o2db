@@ -21,7 +21,6 @@ func (c *Collection) WriteObject(p WriteObject) error {
 	}
 	version := c.addObjectToIndex(&p, offset, buf.Len())
 	c.AddObjectToIndices(&p, version)
-	c.subscriptionDispatcher(&p.Data)
 	return nil
 }
 

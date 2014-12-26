@@ -40,7 +40,7 @@ func (c *Collection) Subscribe(p Subscribe, client *Client) (string, error) {
 	return "Subscribed using key " + p.Key, nil
 }
 
-func (c *Collection) subscriptionDispatcher(object *ObjectFields) {
+func (c *Collection) SubscriptionDispatcher(object *ObjectFields) {
 	for _, v := range c.Subscriptions {
 		if response := v.Match(object); response {
 			logger.ErrorLog.Printf("Subscription dispatched: %# v", pretty.Formatter(response))
