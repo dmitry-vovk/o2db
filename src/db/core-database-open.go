@@ -78,7 +78,7 @@ func (c *DbCore) populateCollections(d *Database) error {
 				IndexPointerFile: collectionDir + ObjectIndexFileName,
 				ObjectIndexFlush: make(chan (bool), 100),
 				BaseDir:          collectionDir,
-				Subscriptions:    make(map[string]ObjectFields),
+				Subscriptions:    make(map[string]*Subscription),
 			}
 			// Open object storage
 			d.Collections[collectionHashedName].DataFile.Open()

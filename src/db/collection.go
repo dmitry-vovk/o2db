@@ -35,7 +35,7 @@ type Collection struct {
 	IndexPointerFile string
 	ObjectIndexFlush chan (bool)
 	Schema           map[string]Field
-	Subscriptions    map[string]ObjectFields
+	Subscriptions    map[string]*Subscription
 }
 
 // Returns pointer to the start of unallocated file space

@@ -27,7 +27,7 @@ func (d *Database) CreateCollection(p CreateCollection) error {
 		IndexPointerFile: collectionPath + string(os.PathSeparator) + ObjectIndexFileName,
 		ObjectIndexFlush: make(chan (bool), 100),
 		Schema:           p.Fields,
-		Subscriptions:    make(map[string]ObjectFields),
+		Subscriptions:    make(map[string]*Subscription),
 	}
 	// Save schema
 	if err := d.Collections[collectionNameHash].DumpSchema(); err != nil {
