@@ -2,10 +2,8 @@ package server
 
 import (
 	"bufio"
-	"bytes"
 	"config"
 	"db"
-	"encoding/json"
 	"fmt"
 	"io"
 	. "logger"
@@ -60,12 +58,11 @@ func (s *ServerType) handler(client *Client) {
 		query, err := message.Parse(msg[:len(msg)-1]) // cut out delimiter
 		if err != nil {
 			ErrorLog.Printf("Parse error: %s", err)
-			handle(
+			client.Respond(
 				Response{
 					Result:   false,
 					Response: fmt.Sprintf("%s", err),
 				},
-				client,
 			)
 		} else {
 			DebugLog.Printf("Message: %v", query)
@@ -75,24 +72,9 @@ func (s *ServerType) handler(client *Client) {
 				RespChan:  make(chan Response),
 			}
 			go func(in *db.Package) {
-				go handle(<-in.RespChan, client)
+				go client.Respond(<-in.RespChan)
 			}(pkg)
 			s.Core.Input <- pkg
 		}
-	}
-}
-
-// Send response to client
-func handle(resp Response, client *Client) {
-	out, err := json.Marshal(resp)
-	if err != nil {
-		ErrorLog.Printf("Error encoding response: %s", err)
-		return
-	}
-	DebugLog.Printf("Response: %s", out)
-	_, err = io.Copy(client.Conn, bytes.NewBuffer(append(out, MessageDelimiter)))
-	if err != nil {
-		ErrorLog.Printf("Error sending response to client: %s", err)
-		return
 	}
 }
