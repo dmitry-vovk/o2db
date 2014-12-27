@@ -147,7 +147,7 @@ type ObjectDiff ObjectFields
 type AddSubscription struct {
 	Collection string       `json:"class"` // Collection name
 	Key        string       `json:"key"`   // Authorisation key
-	Mask       ObjectFields `json:"mask"`  // Set of conditions for events
+	Query      ObjectFields `json:"query"` // Set of conditions for events
 }
 
 // Remove subscription

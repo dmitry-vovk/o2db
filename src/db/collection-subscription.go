@@ -13,7 +13,7 @@ func (c *Collection) AddSubscription(p AddSubscription) (string, error) {
 	}
 	c.Subscriptions[p.Key] = &Subscription{
 		Key:   p.Key,
-		Query: p.Mask,
+		Query: p.Query,
 	}
 	return "Subscription created", nil
 }
@@ -36,7 +36,7 @@ func (c *Collection) Subscribe(p Subscribe, client *Client) (string, error) {
 
 func (c *Collection) SubscriptionDispatcher(object *ObjectFields) {
 	for _, v := range c.Subscriptions {
-		if response := v.Match(object); response {
+		if response := v.Match(*object); response {
 			logger.ErrorLog.Printf("Subscription dispatched: %# v", pretty.Formatter(response))
 		}
 	}

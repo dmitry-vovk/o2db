@@ -196,7 +196,7 @@ $message = [
     'payload' => [
         'class' => 'Job',
         'key' => '(subscription-key)',
-        'mask' => [
+        'query' => [
             'price' => 3.5,
         ],
     ],

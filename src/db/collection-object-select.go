@@ -26,6 +26,9 @@ func (c *Collection) SelectObjects(q SelectObjects) ([]*ObjectFields, error) {
 }
 
 func (c *Collection) processQuery(verb string, q ObjectFields, indent string) []int {
+	if len(q) == 0 {
+		return []int{}
+	}
 	var foundIds []int
 	ids := make(map[int][]int)
 	for field, cond := range q {
@@ -57,7 +60,7 @@ func (c *Collection) processQuery(verb string, q ObjectFields, indent string) []
 	case "NOT":
 		foundIds = c.joinNOT(ids)
 	default:
-		foundIds = ids[0]
+		logger.ErrorLog.Printf("Skipping unknown verb: %s", verb)
 	}
 	return foundIds
 }
