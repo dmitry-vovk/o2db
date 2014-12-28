@@ -23,6 +23,7 @@ const (
 	TypeSubscribe          uint = 400
 	TypeAddSubscription    uint = 401
 	TypeCancelSubscription uint = 402
+	TypeListSubscriptions  uint = 403
 )
 
 // File names

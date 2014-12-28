@@ -214,6 +214,16 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 
+
+$message = [
+    'type' => O2dbClient::TYPE_LIST_SUBSCRIPTIONS,
+    'payload' => [
+        'classes' => ['Job'],
+    ],
+];
+$response = $client->send($message);
+echo '<<<', $response, PHP_EOL;
+
 /*
 $message = [
     'type' => O2dbClient::TYPE_OBJECT_GET,

@@ -30,6 +30,7 @@ class O2dbClient
     const TYPE_SUBSCRIBE = 400;
     const TYPE_ADD_SUBSCRIPTION = 401;
     const TYPE_CANCEL_SUBSCRIPTION = 402;
+    const TYPE_LIST_SUBSCRIPTIONS = 403;
     /*
      0 TypeAuth
      1 TypeCreateDatabase

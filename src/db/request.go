@@ -107,6 +107,18 @@ func (d *DbCore) ProcessRequest(c *Client, q *Container) Response {
 				return respond(nil, err)
 			}
 			return respond(collection.CancelSubscription(q.Payload.(CancelSubscription)))
+		case ListSubscriptions:
+			var subscriptions []SubscriptionItem
+			var err error
+			for _, collectionName := range q.Payload.(ListSubscriptions).Collections {
+				collection, err := d.getCollection(c, collectionName)
+				if err != nil {
+					subscriptions = []SubscriptionItem{}
+					break
+				}
+				subscriptions = append(subscriptions, collection.ListSubscriptions()...)
+			}
+			return respond(subscriptions, err)
 		default:
 			ErrorLog.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
 			return respond(nil, errors.New(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(q.Payload))))

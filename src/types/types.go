@@ -161,3 +161,13 @@ type Subscribe struct {
 	Collection string `json:"class"`
 	Key        string `json:"key"`
 }
+
+type SubscriptionItem struct {
+	Collection string       `json:"collection"`
+	Key        string       `json:"key"`
+	Query      ObjectFields `json:"query"`
+}
+
+type ListSubscriptions struct {
+	Collections []string `json:"classes"`
+}

@@ -34,6 +34,21 @@ func (c *Collection) Subscribe(p Subscribe, client *Client) (string, error) {
 	return "Subscribed using key " + p.Key, nil
 }
 
+func (c *Collection) ListSubscriptions() []SubscriptionItem {
+	subscriptions := []SubscriptionItem{}
+	for _, s := range c.Subscriptions {
+		subscriptions = append(
+			subscriptions,
+			SubscriptionItem{
+				Collection: c.Name,
+				Key:        s.Key,
+				Query:      s.Query,
+			},
+		)
+	}
+	return subscriptions
+}
+
 func (c *Collection) SubscriptionDispatcher(object *ObjectFields) {
 	for _, v := range c.Subscriptions {
 		if response := v.Match(*object); response {
