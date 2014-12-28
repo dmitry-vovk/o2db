@@ -27,6 +27,9 @@ func (s *ServerType) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *ServerType) wsHandle(conn *websocket.Conn) {
 	defer conn.Close()
+	client := &Client{
+		WsConn: conn,
+	}
 	for {
 		t, msg, err := conn.ReadMessage()
 		if err != nil {
@@ -40,12 +43,10 @@ func (s *ServerType) wsHandle(conn *websocket.Conn) {
 			ErrorLog.Printf("Got message type %d: %s", t, msg)
 			continue
 		}
-		client := &Client{
-			WsConn: conn,
-		}
 		query, err := message.Parse(msg) // cut out delimiter
 		if err != nil {
 			ErrorLog.Printf("Parse error: %s", err)
+			ErrorLog.Printf("Message was: %s", msg)
 			client.Respond(
 				Response{
 					Result:   false,
