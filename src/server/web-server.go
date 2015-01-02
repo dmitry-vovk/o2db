@@ -2,6 +2,7 @@ package server
 
 import (
 	"db"
+	"fmt"
 	"github.com/gorilla/websocket"
 	. "logger"
 	"net/http"
@@ -50,7 +51,7 @@ func (s *ServerType) wsHandle(conn *websocket.Conn) {
 			client.Respond(
 				Response{
 					Result:   false,
-					Response: "message parse error",
+					Response: fmt.Sprintf("%s", err),
 				},
 			)
 		} else {
