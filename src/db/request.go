@@ -10,44 +10,44 @@ import (
 )
 
 // This is the main entry for processing queries
-func (d *DbCore) ProcessRequest(c *Client, q *Container) Response {
-	if q == nil {
+func (core *DbCore) ProcessRequest(client *Client, query *Container) Response {
+	if query == nil {
 		return respond("no message", nil)
 	}
-	DebugLog.Printf("Payload type: %s", reflect.TypeOf(q.Payload))
-	switch q.Payload.(type) {
+	DebugLog.Printf("Payload type: %s", reflect.TypeOf(query.Payload))
+	switch query.Payload.(type) {
 	case Authentication:
-		if d.Authenticate(c, q.Payload.(Authentication)) {
+		if core.Authenticate(client, query.Payload.(Authentication)) {
 			return respond("Authenticated", nil)
 		} else {
 			return respond("Authentication failed", nil)
 		}
 	}
-	if subscribe, ok := q.Payload.(Subscribe); ok {
-		collection, err := d.getCollection(c, subscribe.Collection)
+	if subscribe, ok := query.Payload.(Subscribe); ok {
+		collection, err := core.getCollection(client, subscribe.Collection)
 		if err != nil {
 			return respond(nil, err)
 		}
-		return respond(collection.Subscribe(subscribe, c))
-	} else if c.Authenticated {
-		switch q.Payload.(type) {
+		return respond(collection.Subscribe(subscribe, client))
+	} else if client.Authenticated {
+		switch query.Payload.(type) {
 		case OpenDatabase:
-			dbName, err := d.OpenDatabase(q.Payload.(OpenDatabase))
+			dbName, err := core.OpenDatabase(query.Payload.(OpenDatabase))
 			if err == nil {
-				c.Db = dbName
+				client.Db = dbName
 			}
 			return respond("Database opened", err)
 		case CreateDatabase:
-			return respond("Database created", d.CreateDatabase(q.Payload.(CreateDatabase)))
+			return respond("Database created", core.CreateDatabase(query.Payload.(CreateDatabase)))
 		case DropDatabase:
-			return respond("Database deleted", d.DropDatabase(q.Payload.(DropDatabase)))
+			return respond("Database deleted", core.DropDatabase(query.Payload.(DropDatabase)))
 		case ListDatabases:
-			resp, err := d.ListDatabases(q.Payload.(ListDatabases))
+			resp, err := core.ListDatabases(query.Payload.(ListDatabases))
 			return respond(resp, err)
 		case CreateCollection:
-			if clientDb, ok := d.databases[c.Db]; ok {
-				if _, ok := clientDb.Collections[q.Payload.(CreateCollection).Name]; !ok {
-					return respond("Collection created", clientDb.CreateCollection(q.Payload.(CreateCollection)))
+			if clientDb, ok := core.databases[client.Db]; ok {
+				if _, ok := clientDb.Collections[query.Payload.(CreateCollection).Name]; !ok {
+					return respond("Collection created", clientDb.CreateCollection(query.Payload.(CreateCollection)))
 				} else {
 					return respond("Collection already exists", nil)
 				}
@@ -55,80 +55,79 @@ func (d *DbCore) ProcessRequest(c *Client, q *Container) Response {
 				return respond("Database not selected", nil)
 			}
 		case DropCollection:
-			_, err := d.getCollection(c, q.Payload.(DropCollection).Name)
+			_, err := core.getCollection(client, query.Payload.(DropCollection).Name)
 			if err != nil {
 				return respond(nil, err)
 			}
-			return respond("Collection deleted", d.databases[c.Db].DropCollection(q.Payload.(DropCollection)))
+			return respond("Collection deleted", core.databases[client.Db].DropCollection(query.Payload.(DropCollection)))
 		case WriteObject:
-			collection, err := d.getCollection(c, q.Payload.(WriteObject).Collection)
+			collection, err := core.getCollection(client, query.Payload.(WriteObject).Collection)
 			if err != nil {
 				return respond(nil, err)
 			}
-			err = collection.WriteObject(q.Payload.(WriteObject))
+			err = collection.WriteObject(query.Payload.(WriteObject))
 			if err == nil {
-				data := q.Payload.(WriteObject).Data
+				data := query.Payload.(WriteObject).Data
 				collection.SubscriptionDispatcher(&data)
 			}
 			return respond("Object written", err)
 		case ReadObject:
-			collection, err := d.getCollection(c, q.Payload.(ReadObject).Collection)
+			collection, err := core.getCollection(client, query.Payload.(ReadObject).Collection)
 			if err != nil {
 				return respond(nil, err)
 			}
-			return respond(collection.ReadObject(q.Payload.(ReadObject)))
+			return respond(collection.ReadObject(query.Payload.(ReadObject)))
 		case GetObjectVersions:
-			collection, err := d.getCollection(c, q.Payload.(GetObjectVersions).Collection)
+			collection, err := core.getCollection(client, query.Payload.(GetObjectVersions).Collection)
 			if err != nil {
 				return respond(nil, err)
 			}
-			return respond(collection.GetObjectVersions(q.Payload.(GetObjectVersions)))
+			return respond(collection.GetObjectVersions(query.Payload.(GetObjectVersions)))
 		case GetObjectDiff:
-			collection, err := d.getCollection(c, q.Payload.(GetObjectDiff).Collection)
+			collection, err := core.getCollection(client, query.Payload.(GetObjectDiff).Collection)
 			if err != nil {
 				return respond(nil, err)
 			}
-			return respond(collection.GetObjectDiff(q.Payload.(GetObjectDiff)))
+			return respond(collection.GetObjectDiff(query.Payload.(GetObjectDiff)))
 		case SelectObjects:
-			collection, err := d.getCollection(c, q.Payload.(SelectObjects).Collection)
+			collection, err := core.getCollection(client, query.Payload.(SelectObjects).Collection)
 			if err != nil {
 				return respond(nil, err)
 			}
-			return respond(collection.SelectObjects(q.Payload.(SelectObjects)))
+			return respond(collection.SelectObjects(query.Payload.(SelectObjects)))
 		case AddSubscription:
-			collection, err := d.getCollection(c, q.Payload.(AddSubscription).Collection)
+			collection, err := core.getCollection(client, query.Payload.(AddSubscription).Collection)
 			if err != nil {
 				return respond(nil, err)
 			}
-			return respond(collection.AddSubscription(q.Payload.(AddSubscription)))
+			return respond(collection.AddSubscription(query.Payload.(AddSubscription)))
 		case CancelSubscription:
-			collection, err := d.getCollection(c, q.Payload.(CancelSubscription).Collection)
+			collection, err := core.getCollection(client, query.Payload.(CancelSubscription).Collection)
 			if err != nil {
 				return respond(nil, err)
 			}
-			return respond(collection.CancelSubscription(q.Payload.(CancelSubscription)))
+			return respond(collection.CancelSubscription(query.Payload.(CancelSubscription)))
 		case ListSubscriptions:
 			var subscriptions []SubscriptionItem
 			var err error
-			for _, collectionName := range q.Payload.(ListSubscriptions).Collections {
-				collection, err := d.getCollection(c, collectionName)
+			for _, collectionName := range query.Payload.(ListSubscriptions).Collections {
+				collection, err := core.getCollection(client, collectionName)
 				if err != nil {
-					subscriptions = []SubscriptionItem{}
-					break
+					return respond(nil, err)
 				}
 				subscriptions = append(subscriptions, collection.ListSubscriptions()...)
 			}
 			return respond(subscriptions, err)
 		default:
-			ErrorLog.Printf("Unknown query type [%s]", reflect.TypeOf(q.Payload))
-			return respond(nil, errors.New(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(q.Payload))))
+			ErrorLog.Printf("Unknown query type [%s]", reflect.TypeOf(query.Payload))
+			return respond(nil, errors.New(fmt.Sprintf("Unknown query type [%s]", reflect.TypeOf(query.Payload))))
 		}
 	}
 	return respond("Authentication required", nil)
 }
 
-func (d *DbCore) getCollection(c *Client, collectionName string) (*Collection, error) {
-	if clientDb, ok := d.databases[c.Db]; ok {
+func (core *DbCore) getCollection(client *Client, collectionName string) (*Collection, error) {
+	if clientDb, ok := core.databases[client.Db]; ok {
 		collectionKey := hash(collectionName)
 		if collection, ok := clientDb.Collections[collectionKey]; ok {
 			return collection, nil
