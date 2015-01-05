@@ -36,7 +36,6 @@ $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 
 // Create collection
-/*
 $message = [
     'type' => O2dbClient::TYPE_CREATE_COLLECTION,
     'payload' => [
@@ -60,29 +59,6 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 
-/*
-$message = [
-    'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
-    'payload' => [
-        'class'  => 'Batch',
-        'fields' => [
-            'id'      => [
-                'type'  => 'int',
-                'index' => 'primary',
-            ],
-            'created' => [
-                'type'  => 'datetime',
-                'index' => 'secondary',
-            ],
-            'payload' => [
-                'type' => 'string',
-            ],
-        ],
-    ],
-];
-$response = $client->send($message);
-echo '<<<', $response, PHP_EOL;
-*/
 // Drop collection
 /*
 $message = [
@@ -106,20 +82,22 @@ $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 */
 // Write object
-/*
+
 $message = [
-    'type'    => O2dbClient::TYPE_OBJECT_WRITE,
+    'type' => O2dbClient::TYPE_OBJECT_WRITE,
     'payload' => [
         'class' => 'Job',
-        'data'  => [
-            'id'    => '5',
-            'prop1' => 'val1',
-            'prop2' => 'val2',
+        'data' => [
+            'id' => '5',
+            'payload' => 'empty',
+            'price' => 3.5,
+            'hello' => 'there',
         ],
     ],
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+/*
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 $message['payload']['data']['id'] = 13;
@@ -191,18 +169,23 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 */
+
 $message = [
     'type' => O2dbClient::TYPE_ADD_SUBSCRIPTION,
     'payload' => [
         'class' => 'Job',
         'key' => '(subscription-key)',
         'query' => [
-            'price' => 3.5,
+            'OR' => [
+                'price' => 3.5,
+                'payload' => 'empty'
+            ]
         ],
     ],
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
+
 /*
 $message = [
     'type' => O2dbClient::TYPE_SUBSCRIBE,
@@ -214,7 +197,7 @@ $message = [
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
 */
-
+/*
 $message = [
     'type' => O2dbClient::TYPE_LIST_SUBSCRIPTIONS,
     'payload' => [
@@ -223,7 +206,7 @@ $message = [
 ];
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
-
+*/
 /*
 $message = [
     'type' => O2dbClient::TYPE_OBJECT_GET,
