@@ -53,10 +53,11 @@ func (s *Subscription) match(verb string, object ObjectFields, indent string) bo
 }
 
 func (s *Subscription) isAggregate(fn string) bool {
-	return fn == "OR" ||
-		fn == "AND" ||
-		fn == "NOT" ||
-		fn == "XOR"
+	switch fn {
+	case "OR", "AND", "NOT", "XOR":
+		return true
+	}
+	return false
 }
 
 func (s *Subscription) applyAggregate(fn string, object ObjectFields, cond ObjectFields) bool {
@@ -64,11 +65,8 @@ func (s *Subscription) applyAggregate(fn string, object ObjectFields, cond Objec
 	return true
 }
 
-func (s *Subscription) isConditional(val interface{}) bool {
-	if _, ok := val.(string); !ok {
-		return false
-	}
-	switch val.(string) {
+func (s *Subscription) isConditional(val string) bool {
+	switch val {
 	case "<", ">", "<=", ">=":
 		return true
 	}
