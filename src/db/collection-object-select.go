@@ -1,28 +1,31 @@
 package db
 
 import (
+	"errors"
 	mapset "github.com/deckarep/golang-set"
 	"github.com/kr/pretty"
 	"logger"
 	. "types"
 )
 
-func (c *Collection) SelectObjects(q SelectObjects) ([]*ObjectFields, error) {
+func (c *Collection) SelectObjects(q SelectObjects) ([]*ObjectFields, uint, error) {
 	logger.ErrorLog.Printf("%# v", pretty.Formatter(q))
 	var result []*ObjectFields
 	foundIds := c.processQuery("", q.Query, "")
 	logger.ErrorLog.Printf("Result: %# v", pretty.Formatter(foundIds))
 	for _, id := range foundIds {
-		object, err := c.ReadObject(ReadObject{
+		object, code, err := c.ReadObject(ReadObject{
 			Fields: ObjectFields{
 				FIELD_ID: id,
 			},
 		})
 		if err == nil {
 			result = append(result, object)
+		} else {
+			return nil, code, errors.New("Error reading object")
 		}
 	}
-	return result, nil
+	return result, RNoError, nil
 }
 
 func (c *Collection) processQuery(verb string, q ObjectFields, indent string) []int {

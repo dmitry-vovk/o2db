@@ -9,19 +9,19 @@ import (
 )
 
 // Writes (inserts/updates) object instance into collection
-func (c *Collection) WriteObject(p WriteObject) error {
+func (c *Collection) WriteObject(p WriteObject) (uint, error) {
 	buf, err := c.encodeObject(&p.Data)
 	if err != nil {
-		return err
+		return RObjectEncodeError, err
 	}
 	offset := c.getFreeSpaceOffset()
 	err = c.DataFile.Write(buf.Bytes(), offset)
 	if err != nil {
-		return err
+		return RDataWriteError, err
 	}
 	version := c.addObjectToIndex(&p, offset, buf.Len())
 	c.AddObjectToIndices(&p, version)
-	return nil
+	return RNoError, nil
 }
 
 // GOB encodes object

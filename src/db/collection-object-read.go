@@ -8,7 +8,7 @@ import (
 )
 
 // Reads object from collection file
-func (c *Collection) ReadObject(p ReadObject) (*ObjectFields, error) {
+func (c *Collection) ReadObject(p ReadObject) (*ObjectFields, uint, error) {
 	// Special case when object selected by ID only
 	var id int
 	// Prettify ID
@@ -17,11 +17,11 @@ func (c *Collection) ReadObject(p ReadObject) (*ObjectFields, error) {
 	}
 	// Object with zero ID cannot exist
 	if id == 0 {
-		return nil, nil
+		return nil, RObjectDoesNotExist, nil
 	}
 	// No objects there
 	if len(c.Objects[id]) == 0 {
-		return nil, nil
+		return nil, RObjectNotFound, nil
 	}
 	// Get by ID
 	if len(p.Fields) == 1 {
@@ -33,18 +33,21 @@ func (c *Collection) ReadObject(p ReadObject) (*ObjectFields, error) {
 		version := getInt(rawVersion)
 		return c.getObjectByIdAndVersion(id, version)
 	}
-	return nil, nil
+	return nil, RObjectNotFound, nil
 }
 
-func (c *Collection) getObjectByIdAndVersion(id, version int) (*ObjectFields, error) {
+func (c *Collection) getObjectByIdAndVersion(id, version int) (*ObjectFields, uint, error) {
 	data, err := c.DataFile.Read(c.Objects[id][version].Offset, c.Objects[id][version].Len)
 	if err != nil {
-		return nil, err
+		return nil, RDataReadError, err
 	}
 	// Decode bytes into object
 	dec := gob.NewDecoder(bytes.NewBuffer(data))
 	obj := ObjectFields{}
-	err = dec.Decode(&obj)
-	obj[FIELD_VERSION] = version
-	return &obj, err
+	if err = dec.Decode(&obj); err == nil {
+		obj[FIELD_VERSION] = version
+		return &obj, RNoError, err
+	} else {
+		return nil, RObjectDecodeError, nil
+	}
 }

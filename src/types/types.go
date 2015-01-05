@@ -18,6 +18,7 @@ type Container struct {
 // Response container
 type Response struct {
 	Result   bool        `json:"result"`
+	Code     uint        `json:"code"`
 	Response interface{} `json:"response"`
 }
 

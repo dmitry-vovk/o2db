@@ -26,6 +26,49 @@ const (
 	TypeListSubscriptions  uint = 403
 )
 
+// Response codes
+const (
+	RNoError = iota
+
+	RAuthenticated
+	RNotAuthenticated
+	RAuthenticationRequired
+
+	RDatabaseCreated
+	RDatabaseDeleted
+	RDatabaseSelected
+	RDatabaseList
+	RDatabaseAlreadyExist
+	RDatabaseNotSelected
+	RDatabaseDoesNotExist
+
+	RCollectionCreated
+	RCollectionDeleted
+	RCollectionAlreadyExists
+	RCollectionDoesNotExist
+	RCollectionList
+
+	RObject
+	RObjectWritten
+	RObjectEncodeError
+	RObjectDecodeError
+	RObjectDoesNotExist
+	RObjectNotFound
+
+	RDataWriteError
+	RDataReadError
+
+	RSubscribed
+	RUnsubscribed
+	RSubscriptionCreated
+	RSubscriptionCancelled
+	RSubscriptionAlreadyExists
+	RSubscriptionDoesNotExist
+	RSubscriptionList
+
+	RUnknownQueryType
+)
+
 // File names
 const (
 	DataFileName         = "objects.data"

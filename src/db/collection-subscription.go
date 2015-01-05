@@ -7,31 +7,31 @@ import (
 	. "types"
 )
 
-func (c *Collection) AddSubscription(p AddSubscription) (string, error) {
+func (c *Collection) AddSubscription(p AddSubscription) (string, uint, error) {
 	if _, ok := c.Subscriptions[p.Key]; ok {
-		return "", errors.New("Subscription already exists")
+		return "", RSubscriptionAlreadyExists, errors.New("Subscription already exists")
 	}
 	c.Subscriptions[p.Key] = &Subscription{
 		Key:   p.Key,
 		Query: p.Query,
 	}
-	return "Subscription created", nil
+	return "Subscription created", RSubscriptionCreated, nil
 }
 
-func (c *Collection) CancelSubscription(p CancelSubscription) (string, error) {
+func (c *Collection) CancelSubscription(p CancelSubscription) (string, uint, error) {
 	if _, ok := c.Subscriptions[p.Key]; !ok {
-		return "", errors.New("Subscription does not exist")
+		return "", RSubscriptionDoesNotExist, errors.New("Subscription does not exist")
 	}
 	delete(c.Subscriptions, p.Key)
-	return "Subscription cancelled", nil
+	return "Subscription cancelled", RSubscriptionCancelled, nil
 }
 
-func (c *Collection) Subscribe(p Subscribe, client *Client) (string, error) {
+func (c *Collection) Subscribe(p Subscribe, client *Client) (string, uint, error) {
 	if _, ok := c.Subscriptions[p.Key]; !ok {
-		return "", errors.New("Subscription does not exist")
+		return "", RSubscriptionDoesNotExist, errors.New("Subscription does not exist")
 	}
 	c.Subscriptions[p.Key].Clients = append(c.Subscriptions[p.Key].Clients, client)
-	return "Subscribed using key " + p.Key, nil
+	return "Subscribed using key " + p.Key, RSubscribed, nil
 }
 
 func (c *Collection) ListSubscriptions() []SubscriptionItem {
