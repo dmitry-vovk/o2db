@@ -72,10 +72,13 @@ func (s *ServerType) handler(client *Client) {
 				Client:    client,
 				RespChan:  make(chan Response),
 			}
+			/* FIXME temporarily disabled for sequential logs
 			go func(in *db.Package) {
 				go client.Respond(<-in.RespChan)
 			}(pkg)
+			*/
 			s.Core.Input <- pkg
+			client.Respond(<-pkg.RespChan)
 		}
 	}
 }

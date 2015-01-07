@@ -89,7 +89,7 @@ $message = [
         'class' => 'Job',
         'data' => [
             'id' => '5',
-            'payload' => 'empty',
+            'payload' => 'not empty',
             'price' => 3.5,
             'hello' => 'there',
         ],
@@ -177,8 +177,11 @@ $message = [
         'key' => '(subscription-key)',
         'query' => [
             'OR' => [
-                'price' => 3.5,
-                'payload' => 'empty'
+                'price' => 2,
+                'AND' => [
+                    'payload' => 'empty',
+                    'price' => 3.5,
+                ]
             ]
         ],
     ],

@@ -60,6 +60,7 @@ const (
 
 	RSubscribed
 	RUnsubscribed
+	RSubscriptionInvalidFormat
 	RSubscriptionCreated
 	RSubscriptionCancelled
 	RSubscriptionAlreadyExists

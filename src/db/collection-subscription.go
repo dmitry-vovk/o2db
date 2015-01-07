@@ -11,10 +11,14 @@ func (c *Collection) AddSubscription(p AddSubscription) (string, uint, error) {
 	if _, ok := c.Subscriptions[p.Key]; ok {
 		return "", RSubscriptionAlreadyExists, errors.New("Subscription already exists")
 	}
-	c.Subscriptions[p.Key] = &Subscription{
+	newSubscription := &Subscription{
 		Key:   p.Key,
 		Query: p.Query,
 	}
+	if err := newSubscription.IsValid(); err != nil {
+		return "Invalid subscription format", RSubscriptionInvalidFormat, err
+	}
+	c.Subscriptions[p.Key] = newSubscription
 	return "Subscription created", RSubscriptionCreated, nil
 }
 
