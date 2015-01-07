@@ -15,9 +15,9 @@ type Subscription struct {
 }
 
 // Tells if subscription query valid
-func (s *Subscription) IsValid() error {
+func (s *Subscription) Validate() error {
 	for key, condition := range s.Query {
-		if err := s.isValidPair(key, condition); err != nil {
+		if err := s.validatePair(key, condition); err != nil {
 			return err
 		}
 	}
@@ -25,7 +25,7 @@ func (s *Subscription) IsValid() error {
 }
 
 // Recursively validates pairs of key/condition
-func (s *Subscription) isValidPair(key string, condition interface{}) error {
+func (s *Subscription) validatePair(key string, condition interface{}) error {
 	switch key {
 	case "OR", "AND", "XOR":
 		if _, ok := condition.(map[string]interface{}); !ok {
@@ -44,7 +44,7 @@ func (s *Subscription) isValidPair(key string, condition interface{}) error {
 	}
 	if _, ok := condition.(map[string]interface{}); ok {
 		for key2, condition2 := range condition.(map[string]interface{}) {
-			if err := s.isValidPair(key2, condition2); err != nil {
+			if err := s.validatePair(key2, condition2); err != nil {
 				return err
 			}
 		}

@@ -15,7 +15,7 @@ func (c *Collection) AddSubscription(p AddSubscription) (string, uint, error) {
 		Key:   p.Key,
 		Query: p.Query,
 	}
-	if err := newSubscription.IsValid(); err != nil {
+	if err := newSubscription.Validate(); err != nil {
 		return "Invalid subscription format", RSubscriptionInvalidFormat, err
 	}
 	c.Subscriptions[p.Key] = newSubscription
