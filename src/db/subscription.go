@@ -103,7 +103,6 @@ func (s *Subscription) match(key string, condition interface{}, object ObjectFie
 			logger.ErrorLog.Printf("Key %s not supported", key)
 		}
 	} else if s.isScalarValue(condition) { // Plain value, perform comparison
-		// TODO see if subscription query can be validated somewhere before it is registered
 		if reflect.TypeOf(condition) != reflect.TypeOf(object[key]) {
 			logger.ErrorLog.Printf(
 				"Type mismatch for property %s: wanted %s, got %s",
