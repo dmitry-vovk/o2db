@@ -7,6 +7,7 @@ import (
 	"encoding/gob"
 	"logger"
 	"os"
+	"reflect"
 	"time"
 )
 
@@ -186,4 +187,8 @@ func (i *FloatIndex) ConditionalFind(op string, value interface{}) []int {
 		}
 	}
 	return ids
+}
+
+func (i *FloatIndex) GetType() reflect.Type {
+	return reflect.TypeOf(0.1)
 }

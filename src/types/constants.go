@@ -50,6 +50,7 @@ const (
 
 	RObject
 	RObjectWritten
+	RObjectInvalid
 	RObjectEncodeError
 	RObjectDecodeError
 	RObjectDoesNotExist

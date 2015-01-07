@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"logger"
 	"os"
+	"reflect"
 	"time"
 )
 
@@ -178,4 +179,8 @@ func (i *StringIndex) getHash(value string) hashIndex {
 	var s hashIndex
 	copy(s[:], sh.Sum(nil)[0:20])
 	return s
+}
+
+func (i *StringIndex) GetType() reflect.Type {
+	return reflect.TypeOf("string")
 }

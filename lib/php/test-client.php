@@ -88,10 +88,10 @@ $message = [
     'payload' => [
         'class' => 'Job',
         'data' => [
-            'id' => '5',
-            'payload' => 'not empty',
+            'id' => 5.1,
+            'payload' => 312.0,
             'price' => 3.5,
-            'hello' => 'there',
+            'hello' => 'tehere',
         ],
     ],
 ];
