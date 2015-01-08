@@ -159,6 +159,7 @@ type CancelSubscription struct {
 
 // Client call to receive object updates by specified key
 type Subscribe struct {
+	Database   string `json:"database"`
 	Collection string `json:"class"`
 	Key        string `json:"key"`
 }

@@ -24,6 +24,11 @@ func (core *DbCore) ProcessRequest(client *Client, query *Container) Response {
 		}
 	}
 	if subscribe, ok := query.Payload.(Subscribe); ok {
+		dbName, err := core.OpenDatabase(OpenDatabase{subscribe.Database})
+		if err != nil {
+			return respond(nil, RDatabaseNotSelected, err)
+		}
+		client.Db = dbName
 		collection, code, err := core.getCollection(client, subscribe.Collection)
 		if err != nil {
 			return respond(nil, code, err)
@@ -67,7 +72,7 @@ func (core *DbCore) ProcessRequest(client *Client, query *Container) Response {
 			}
 			if code, err := collection.WriteObject(query.Payload.(WriteObject)); err == nil {
 				data := query.Payload.(WriteObject).Data
-				collection.SubscriptionDispatcher(&data)
+				go collection.SubscriptionDispatcher(&data)
 				return respond("Object written", RObjectWritten, nil)
 			} else {
 				return respond(nil, code, err)

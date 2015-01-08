@@ -2,7 +2,6 @@ package db
 
 import (
 	"errors"
-	"github.com/kr/pretty"
 	"logger"
 	"reflect"
 	. "types"
@@ -58,8 +57,6 @@ func (s *Subscription) Match(object ObjectFields) bool {
 	if len(s.Query) == 0 {
 		return true
 	}
-	logger.ErrorLog.Printf("Object: %# v", pretty.Formatter(object))
-	logger.ErrorLog.Printf("Query: %# v", pretty.Formatter(s.Query))
 	if len(s.Query) == 1 {
 		for key, condition := range s.Query {
 			return s.match(key, condition, object)

@@ -6,7 +6,6 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	"github.com/kr/pretty"
 	"logger"
 	"reflect"
 	"strconv"
@@ -64,11 +63,9 @@ func (c *Collection) ObjectValid(p *WriteObject) (uint, error) {
 
 // Writes (inserts/updates) object instance into collection
 func (c *Collection) WriteObject(p WriteObject) (uint, error) {
-	logger.ErrorLog.Printf("Before sanitation: %# v", pretty.Formatter(p.Data))
 	if code, err := c.ObjectValid(&p); err != nil {
 		return code, err
 	}
-	logger.ErrorLog.Printf("Sanitised object: %# v", pretty.Formatter(p.Data))
 	buf, err := c.encodeObject(&p.Data)
 	if err != nil {
 		return RObjectEncodeError, err

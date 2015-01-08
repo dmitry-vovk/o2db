@@ -2,11 +2,10 @@ package db
 
 import (
 	"errors"
-	"github.com/kr/pretty"
-	"logger"
 	. "types"
 )
 
+// Create another subscription
 func (c *Collection) AddSubscription(p AddSubscription) (string, uint, error) {
 	if _, ok := c.Subscriptions[p.Key]; ok {
 		return "", RSubscriptionAlreadyExists, errors.New("Subscription already exists")
@@ -22,6 +21,7 @@ func (c *Collection) AddSubscription(p AddSubscription) (string, uint, error) {
 	return "Subscription created", RSubscriptionCreated, nil
 }
 
+// Deletes existing subscription
 func (c *Collection) CancelSubscription(p CancelSubscription) (string, uint, error) {
 	if _, ok := c.Subscriptions[p.Key]; !ok {
 		return "", RSubscriptionDoesNotExist, errors.New("Subscription does not exist")
@@ -30,6 +30,7 @@ func (c *Collection) CancelSubscription(p CancelSubscription) (string, uint, err
 	return "Subscription cancelled", RSubscriptionCancelled, nil
 }
 
+// Subscribe the client to existing subscription
 func (c *Collection) Subscribe(p Subscribe, client *Client) (string, uint, error) {
 	if _, ok := c.Subscriptions[p.Key]; !ok {
 		return "", RSubscriptionDoesNotExist, errors.New("Subscription does not exist")
@@ -38,6 +39,7 @@ func (c *Collection) Subscribe(p Subscribe, client *Client) (string, uint, error
 	return "Subscribed using key " + p.Key, RSubscribed, nil
 }
 
+// Returns the list of registered subscriptions
 func (c *Collection) ListSubscriptions() []SubscriptionItem {
 	subscriptions := []SubscriptionItem{}
 	for _, s := range c.Subscriptions {
@@ -53,17 +55,17 @@ func (c *Collection) ListSubscriptions() []SubscriptionItem {
 	return subscriptions
 }
 
+// See if the object match any subscription
+// and dispatch to subscribed clients if it does
 func (c *Collection) SubscriptionDispatcher(object *ObjectFields) {
 	for _, v := range c.Subscriptions {
-		if response := v.Match(*object); response {
-			logger.ErrorLog.Printf("Iterating over clients (%d)", len(v.Clients))
+		if ok := v.Match(*object); ok {
 			for _, client := range v.Clients {
 				client.Respond(Response{
 					Result:   true,
 					Response: object,
 				})
 			}
-			logger.ErrorLog.Printf("Subscription dispatched: %# v", pretty.Formatter(response))
 		}
 	}
 }
