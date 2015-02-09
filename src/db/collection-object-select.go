@@ -3,16 +3,12 @@ package db
 import (
 	"errors"
 	mapset "github.com/deckarep/golang-set"
-	"github.com/kr/pretty"
-	"logger"
 	. "types"
 )
 
 func (c *Collection) SelectObjects(q SelectObjects) ([]*ObjectFields, uint, error) {
-	logger.ErrorLog.Printf("%# v", pretty.Formatter(q))
 	var result []*ObjectFields
-	foundIds := c.processQuery("", q.Query, "")
-	logger.ErrorLog.Printf("Result: %# v", pretty.Formatter(foundIds))
+	foundIds := c.processQuery("", q.Query)
 	for _, id := range foundIds {
 		object, code, err := c.ReadObject(ReadObject{
 			Fields: ObjectFields{
@@ -28,7 +24,7 @@ func (c *Collection) SelectObjects(q SelectObjects) ([]*ObjectFields, uint, erro
 	return result, RNoError, nil
 }
 
-func (c *Collection) processQuery(verb string, q ObjectFields, indent string) []int {
+func (c *Collection) processQuery(verb string, q ObjectFields) []int {
 	if len(q) == 0 {
 		return []int{}
 	}
@@ -36,23 +32,19 @@ func (c *Collection) processQuery(verb string, q ObjectFields, indent string) []
 	ids := make(map[int][]int)
 	for field, cond := range q {
 		if c.isConditional(field) {
-			logger.ErrorLog.Printf("%sConditional %s %s %v", indent, verb, field, cond)
 			if set := c.Indices[verb].ConditionalFind(field, cond); set != nil {
 				ids[len(ids)] = set
 			}
 		} else if c.isScalarValue(cond) {
-			logger.ErrorLog.Printf("%sField %s = %v", indent, field, cond)
 			if set := c.Indices[field].Find(cond); set != nil {
 				ids[len(ids)] = set
 			}
 		} else {
-			logger.ErrorLog.Printf("%s%s", indent, field)
-			if set := c.processQuery(field, cond.(map[string]interface{}), indent+"  "); set != nil {
+			if set := c.processQuery(field, cond.(map[string]interface{})); set != nil {
 				ids[len(ids)] = set
 			}
 		}
 	}
-	logger.ErrorLog.Printf("Raw result: %# v", pretty.Formatter(ids))
 	switch verb {
 	case "OR":
 		foundIds = c.joinOR(ids)
@@ -62,15 +54,12 @@ func (c *Collection) processQuery(verb string, q ObjectFields, indent string) []
 		foundIds = c.joinXOR(ids)
 	case "NOT":
 		foundIds = c.joinNOT(ids)
-	default:
-		logger.ErrorLog.Printf("Skipping unknown verb: %s", verb)
 	}
 	return foundIds
 }
 
 // Return all
 func (c *Collection) joinOR(ids map[int][]int) []int {
-	logger.ErrorLog.Printf("OR: %# v", pretty.Formatter(ids))
 	andSet := mapset.NewSet()
 	for _, set := range ids {
 		for _, id := range set {
@@ -86,7 +75,6 @@ func (c *Collection) joinOR(ids map[int][]int) []int {
 
 // Return only those present in all slices
 func (c *Collection) joinAND(ids map[int][]int) []int {
-	logger.ErrorLog.Printf("AND: %# v", pretty.Formatter(ids))
 	sets := make([]mapset.Set, len(ids))
 	for s, currentSet := range ids {
 		sets[s] = mapset.NewSet()
@@ -107,7 +95,6 @@ func (c *Collection) joinAND(ids map[int][]int) []int {
 
 // Return only ones that are unique in slices
 func (c *Collection) joinXOR(ids map[int][]int) []int {
-	logger.ErrorLog.Printf("XOR: %# v", pretty.Formatter(ids))
 	sets := make([]mapset.Set, len(ids))
 	for s, currentSet := range ids {
 		sets[s] = mapset.NewSet()
@@ -128,7 +115,6 @@ func (c *Collection) joinXOR(ids map[int][]int) []int {
 
 // Return all those present in first but not is the last
 func (c *Collection) joinNOT(ids map[int][]int) []int {
-	logger.ErrorLog.Printf("NOT: %# v", pretty.Formatter(ids))
 	set := mapset.NewSet()
 	for _, id := range ids[0] {
 		set.Add(id)

@@ -32,7 +32,7 @@ const (
 
 	RAuthenticated
 	RNotAuthenticated
-	RAuthenticationRequired
+	RAuthenticationRequired // 3
 
 	RDatabaseCreated
 	RDatabaseDeleted

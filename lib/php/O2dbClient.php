@@ -48,6 +48,14 @@ class O2dbClient
     13 TypeTransactionCommit
     14 TypeTransactionAbort
     */
+    const RESP_AUTH_REQUIRED = 3;
+    /** @var bool */
+    protected $lastResult = true;
+    /** @var int */
+    protected $lastStatusCode = 0;
+    /** @var mixed */
+    protected $lastResponse = '';
+
     /**
      * @param string $address
      * @param int $port
@@ -90,7 +98,7 @@ class O2dbClient
     public function send($message)
     {
         $msg = json_encode($message, JSON_PRETTY_PRINT) . chr(self::DELIMITER);
-        echo '>>>', var_export($msg, true), PHP_EOL;
+        //echo '>>>', var_export($msg, true), PHP_EOL;
         socket_write($this->socket, $msg, strlen($msg));
         $incoming = '';
         while (($response = socket_read($this->socket, 1)) !== false) {
@@ -103,6 +111,71 @@ class O2dbClient
         return $incoming;
     }
 
+    /**
+     * @param string $result
+     * @return bool
+     */
+    protected function parseResult($result)
+    {
+        $parsed = json_decode($result, true);
+        $jsonError = json_last_error();
+        if ($jsonError !== JSON_ERROR_NONE) {
+            $this->lastResult = false;
+            $this->lastStatusCode = -1;
+            $this->lastResponse = $jsonError;
+            return false;
+        } else {
+            $this->lastResult = $parsed['result'];
+            $this->lastStatusCode = $parsed['code'];
+            $this->lastResponse = $parsed['response'];
+        }
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function success()
+    {
+        return $this->lastResult;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCode()
+    {
+        return $this->lastStatusCode;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getResponse()
+    {
+        return $this->lastResponse;
+    }
+
+    /**
+     * @param string $username
+     * @param string $password
+     * @return bool
+     */
+    public function authenticate($username, $password)
+    {
+        $message = [
+            'type' => O2dbClient::TYPE_AUTHENTICATE,
+            'payload' => [
+                'name' => $username,
+                'password' => $password,
+            ],
+        ];
+        if ($this->parseResult($this->send($message))) {
+            return $this->lastResult;
+        }
+        return false;
+    }
+
     public function createDatabase($dbName)
     {
         $message = [
@@ -111,7 +184,63 @@ class O2dbClient
                 'name' => $dbName,
             ],
         ];
-        return $this->send($message);
+        if ($this->parseResult($this->send($message))) {
+            return $this->lastResult;
+        }
+        return false;
+    }
+
+    public function openDatabase($dbName)
+    {
+        $message = [
+            'type' => O2dbClient::TYPE_OPEN_DB,
+            'payload' => [
+                'name' => $dbName,
+            ],
+        ];
+        if ($this->parseResult($this->send($message))) {
+            return $this->lastResult;
+        }
+        return false;
+    }
+
+    /**
+     * @param string $collectionName
+     * @param array $indices
+     * @return bool
+     */
+    public function createCollection($collectionName, array $indices = ['id' => ['type' => 'int']])
+    {
+        $message = [
+            'type' => O2dbClient::TYPE_CREATE_COLLECTION,
+            'payload' => [
+                'class' => $collectionName,
+                'fields' => $indices,
+            ],
+        ];
+        if ($this->parseResult($this->send($message))) {
+            return $this->lastResult;
+        }
+        return false;
+    }
+
+    /**
+     * @param $object
+     * @return bool
+     */
+    public function save($object)
+    {
+        $message = [
+            'type' => self::TYPE_OBJECT_WRITE,
+            'payload' => [
+                'class' => get_class($object),
+                'data' => $object,
+            ],
+        ];
+        if ($this->parseResult($this->send($message))) {
+            return $this->lastResult;
+        }
+        return false;
     }
 
     public function getOne($class, $id)
@@ -123,6 +252,13 @@ class O2dbClient
                 'id' => $id,
             ],
         ];
-        return $this->send($message);
+        if ($this->parseResult($this->send($message))) {
+            $object = new $class;
+            foreach ($this->lastResult as $key => $value) {
+                $object->{$key} = $value;
+            }
+            return $object;
+        }
+        return false;
     }
 }
