@@ -101,13 +101,17 @@ func (s *Subscription) match(key string, condition interface{}, object ObjectFie
 		}
 	} else if s.isScalarValue(condition) { // Plain value, perform comparison
 		if reflect.TypeOf(condition) != reflect.TypeOf(object[key]) {
-			logger.ErrorLog.Printf(
+			if {
+
+			} else {
+				logger.ErrorLog.Printf(
 				"Type mismatch for property %s: wanted %s, got %s",
 				key,
 				reflect.TypeOf(condition),
 				reflect.TypeOf(object[key]),
-			)
-			return false
+				)
+				return false
+			}
 		}
 		return condition == object[key]
 	}

@@ -31,24 +31,28 @@ class O2dbClient
     const TYPE_ADD_SUBSCRIPTION = 401;
     const TYPE_CANCEL_SUBSCRIPTION = 402;
     const TYPE_LIST_SUBSCRIPTIONS = 403;
-    /*
-     0 TypeAuth
-     1 TypeCreateDatabase
-     2 TypeDropDatabase
-     3 TypeCreateCollection
-     4 TypeDropCollection
-     5 TypeOpenDatabase
-     6 TypeListDatabases
-     7 TypeListCollections
-     8 TypeObjectInsert
-     9 TypeObjectUpdate
-    10 TypeObjectDelete
-    11 TypeObjectSelect
-    12 TypeTransactionStart
-    13 TypeTransactionCommit
-    14 TypeTransactionAbort
-    */
+    const RESP_NO_ERROR = 0;
+    const RESP_AUTHENTICATED = 1;
+    const RESP_NOT_AUTHENTICATED = 2;
     const RESP_AUTH_REQUIRED = 3;
+    const RESP_DATABASE_CREATED = 4;
+    const RESP_DATABASE_DELETED = 5;
+    const RESP_DATABASE_OPENED = 6;
+    const RESP_DATABASE_LIST = 7;
+    const RESP_DATABASE_ALREADY_EXISTS = 8;
+    const RESP_DATABASE_NOT_SELECTED = 9;
+    const RESP_DATABASE_DOES_NOT_EXIST = 10;
+    // TODO collection
+    // TODO objects
+    // TODO data
+    const RESP_SUBSCRIBED = 25;
+    const RESP_UNSUBSCRIBED = 26;
+    const RESP_SUBSCRIPTION_INVALID_FORMAT = 27;
+    const RESP_SUBSCRIPTION_CREATED = 28;
+    const RESP_SUBSCRIPTION_CANCELLED = 29;
+    const RESP_SUBSCRIPTION_ALREADY_EXISTS = 30;
+    const RESP_SUBSCRIPTION_DOES_NOT_EXIST = 31;
+    const RESP_SUBSCRIPTIONS_LIST = 32;
     /** @var bool */
     protected $lastResult = true;
     /** @var int */
@@ -176,6 +180,10 @@ class O2dbClient
         return false;
     }
 
+    /**
+     * @param string $dbName
+     * @return bool
+     */
     public function createDatabase($dbName)
     {
         $message = [
@@ -190,6 +198,10 @@ class O2dbClient
         return false;
     }
 
+    /**
+     * @param string $dbName
+     * @return bool
+     */
     public function openDatabase($dbName)
     {
         $message = [
@@ -228,7 +240,7 @@ class O2dbClient
      * @param $object
      * @return bool
      */
-    public function save($object)
+    public function write($object)
     {
         $message = [
             'type' => self::TYPE_OBJECT_WRITE,
@@ -243,21 +255,52 @@ class O2dbClient
         return false;
     }
 
+    /**
+     * @param string $class
+     * @param int $id
+     * @return bool
+     */
     public function getOne($class, $id)
     {
         $message = [
             'type' => O2dbClient::TYPE_OBJECT_GET,
             'payload' => [
                 'class' => $class,
-                'id' => $id,
+                'data' => [
+                    'id' => $id,
+                ],
             ],
         ];
         if ($this->parseResult($this->send($message))) {
-            $object = new $class;
-            foreach ($this->lastResult as $key => $value) {
-                $object->{$key} = $value;
+            if (is_array($this->lastResponse)) {
+                $object = new $class;
+                foreach ($this->lastResponse as $key => $value) {
+                    $object->{$key} = $value;
+                }
+                return $object;
             }
-            return $object;
+        }
+        return false;
+    }
+
+    /**
+     * @param string $class
+     * @param string $key
+     * @param array $mask
+     * @return bool
+     */
+    public function createSubscription($class, $key, array $mask)
+    {
+        $message = [
+            'type' => self::TYPE_ADD_SUBSCRIPTION,
+            'payload' => [
+                'class' => $class,
+                'key' => $key,
+                'query' => $mask,
+            ],
+        ];
+        if ($this->parseResult($this->send($message))) {
+            return $this->lastResult;
         }
         return false;
     }

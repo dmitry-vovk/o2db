@@ -28,47 +28,47 @@ const (
 
 // Response codes
 const (
-	RNoError = iota
+	RNoError = iota // 0
 
-	RAuthenticated
-	RNotAuthenticated
+	RAuthenticated          // 1
+	RNotAuthenticated       // 2
 	RAuthenticationRequired // 3
 
-	RDatabaseCreated
-	RDatabaseDeleted
-	RDatabaseSelected
-	RDatabaseList
-	RDatabaseAlreadyExist
-	RDatabaseNotSelected
-	RDatabaseDoesNotExist
+	RDatabaseCreated      // 4
+	RDatabaseDeleted      // 5
+	RDatabaseSelected     // 6
+	RDatabaseList         // 7
+	RDatabaseAlreadyExist // 8
+	RDatabaseNotSelected  // 9
+	RDatabaseDoesNotExist // 10
 
-	RCollectionCreated
-	RCollectionDeleted
-	RCollectionAlreadyExists
-	RCollectionDoesNotExist
-	RCollectionList
+	RCollectionCreated       // 11
+	RCollectionDeleted       // 12
+	RCollectionAlreadyExists // 13
+	RCollectionDoesNotExist  // 14
+	RCollectionList          // 15
 
-	RObject
-	RObjectWritten
-	RObjectInvalid
-	RObjectEncodeError
-	RObjectDecodeError
-	RObjectDoesNotExist
-	RObjectNotFound
+	RObject             // 16
+	RObjectWritten      // 17
+	RObjectInvalid      // 18
+	RObjectEncodeError  // 19
+	RObjectDecodeError  // 20
+	RObjectDoesNotExist // 21
+	RObjectNotFound     // 22
 
-	RDataWriteError
-	RDataReadError
+	RDataWriteError // 23
+	RDataReadError  // 24
 
-	RSubscribed
-	RUnsubscribed
-	RSubscriptionInvalidFormat
-	RSubscriptionCreated
-	RSubscriptionCancelled
-	RSubscriptionAlreadyExists
-	RSubscriptionDoesNotExist
-	RSubscriptionList
+	RSubscribed                // 25
+	RUnsubscribed              // 26
+	RSubscriptionInvalidFormat // 27
+	RSubscriptionCreated       // 28
+	RSubscriptionCancelled     // 29
+	RSubscriptionAlreadyExists // 30
+	RSubscriptionDoesNotExist  // 31
+	RSubscriptionList          // 32
 
-	RUnknownQueryType
+	RUnknownQueryType // 33
 )
 
 // File names

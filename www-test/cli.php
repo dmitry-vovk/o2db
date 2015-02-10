@@ -13,6 +13,5 @@ if ($client->authenticate(USERNAME, PASSWORD)) {
     $ent = new Entity;
     $ent->id = 12;
     $ent->val = 'hello';
-    $resp = $client->save($ent);
-    print_r($resp);
+    $client->write($ent);
 }

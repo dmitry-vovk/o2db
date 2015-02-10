@@ -13,3 +13,4 @@ $client = new O2dbClient('localhost');
 define('DATABASE', 'benchmark-db');
 define('USERNAME', 'root');
 define('PASSWORD', '12345');
+define('SUBSCRIPTION_KEY', '93756028743');
