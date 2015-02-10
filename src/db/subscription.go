@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	"logger"
+	"math"
 	"reflect"
 	. "types"
 )
@@ -101,14 +102,16 @@ func (s *Subscription) match(key string, condition interface{}, object ObjectFie
 		}
 	} else if s.isScalarValue(condition) { // Plain value, perform comparison
 		if reflect.TypeOf(condition) != reflect.TypeOf(object[key]) {
-			if {
-
+			f1, err1 := s.getFloat(condition)
+			f2, err2 := s.getFloat(object[key])
+			if err1 == nil && err2 == nil {
+				return f1 == f2
 			} else {
 				logger.ErrorLog.Printf(
-				"Type mismatch for property %s: wanted %s, got %s",
-				key,
-				reflect.TypeOf(condition),
-				reflect.TypeOf(object[key]),
+					"Type mismatch for property %s: wanted %s, got %s",
+					key,
+					reflect.TypeOf(condition),
+					reflect.TypeOf(object[key]),
 				)
 				return false
 			}
@@ -116,6 +119,21 @@ func (s *Subscription) match(key string, condition interface{}, object ObjectFie
 		return condition == object[key]
 	}
 	return false
+}
+
+func (s *Subscription) getFloat(val interface{}) (float64, error) {
+	switch v := val.(type) {
+	case float64:
+		return v, nil
+	case float32:
+		return float64(v), nil
+	case int64:
+		return float64(v), nil
+	case int:
+		return float64(v), nil
+	default:
+		return math.NaN(), errors.New("Not a number")
+	}
 }
 
 func (s *Subscription) isScalarValue(val interface{}) bool {
