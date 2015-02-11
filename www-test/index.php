@@ -24,9 +24,10 @@ if ($client->authenticate(USERNAME, PASSWORD)) {
 <head>
     <title>O2DB tests</title>
     <script type="text/javascript">
-        var db = '<?= DATABASE ?>';
-        var collection = '<?= Entity::class ?>';
-        var key = '<?= SUBSCRIPTION_KEY ?>';
+        var host = 'localhost:8088',
+            db = '<?= DATABASE ?>',
+            collection = '<?= Entity::class ?>',
+            key = '<?= SUBSCRIPTION_KEY ?>';
     </script>
     <script src="o2db.lib.js" type="text/javascript"></script>
 </head>
