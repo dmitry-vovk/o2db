@@ -10,8 +10,18 @@ if ($client->authenticate(USERNAME, PASSWORD)) {
         $client->openDatabase(DATABASE);
     }
     $client->createCollection(Entity::class);
-    $ent = new Entity;
-    $ent->id = 12;
-    $ent->val = 'hello';
+    /** @var $ent Entity|bool */
+    $ent = $client->getOne(Entity::class, 12);
+    if ($ent) {
+        $ent->val < 10
+            ? $ent->val++
+            : $ent->val = 0;
+    } else {
+        $ent = new Entity;
+        $ent->id = 12;
+        $ent->val = 0;
+    }
     $client->write($ent);
+    echo 'Written ';
+    print_r($ent);
 }

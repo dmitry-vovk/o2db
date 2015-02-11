@@ -5,12 +5,19 @@
  */
 require_once 'common.php';
 if ($client->authenticate(USERNAME, PASSWORD)) {
-    if (!$client->openDatabase(DATABASE) && $client->getCode() === O2dbClient::RESP_DATABASE_DOES_NOT_EXIST) {
+    error_log('Authenticated');
+    if (!$client->openDatabase(DATABASE)) {
+        error_log('Code ' . $client->getCode());
+        error_log('Creating database');
         $client->createDatabase(DATABASE);
+        error_log('Opening database');
         $client->openDatabase(DATABASE);
+        error_log('Creating collection');
         $client->createCollection(Entity::class);
     }
     $resp = $client->createSubscription(Entity::class, SUBSCRIPTION_KEY, ['id' => 12]);
+} else {
+    error_log('Not authenticated');
 }
 ?><!doctype html>
 <html>
@@ -30,5 +37,6 @@ $resp = $client->getOne(Entity::class, 12);
 var_dump($resp);
 ?>
 </pre>
+<progress id="progress" max="10" value="0"></progress>
 </body>
 </html>
