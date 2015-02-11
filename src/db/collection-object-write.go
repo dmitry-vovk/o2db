@@ -75,8 +75,7 @@ func (c *Collection) WriteObject(p WriteObject) (uint, error) {
 	if err != nil {
 		return RDataWriteError, err
 	}
-	version := c.addObjectToIndex(&p, offset, buf.Len())
-	c.AddObjectToIndices(&p, version)
+	go c.AddObjectToIndices(&p, c.addObjectToIndex(&p, offset, buf.Len()))
 	return RNoError, nil
 }
 

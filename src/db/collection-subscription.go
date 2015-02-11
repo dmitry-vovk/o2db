@@ -61,7 +61,7 @@ func (c *Collection) SubscriptionDispatcher(object *ObjectFields) {
 	for _, v := range c.Subscriptions {
 		if ok := v.Match(*object); ok {
 			for _, client := range v.Clients {
-				client.Respond(Response{
+				go client.Respond(Response{
 					Result:   true,
 					Response: object,
 				})
