@@ -15,7 +15,6 @@ const (
 
 	TypeObjectGet         uint = 300
 	TypeObjectWrite       uint = 301
-	TypeObjectDelete      uint = 302
 	TypeGetObjectVersions uint = 303
 	TypeGetObjectDiff     uint = 304
 	TypeSelectObjects     uint = 305
@@ -73,10 +72,10 @@ const (
 
 // File names
 const (
-	DataFileName         = "objects.data"
+	DataFileName = "objects.data"
 	PrimaryIndexFileName = "primary.index"
-	ObjectIndexFileName  = "objects.index"
-	CollectionSchema     = "schema"
+	ObjectIndexFileName = "objects.index"
+	CollectionSchema = "schema"
 )
 
 const (
