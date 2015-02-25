@@ -92,7 +92,7 @@ func (c *Client) Respond(resp Response) {
 		ErrorLog.Printf("Error encoding response: %s", err)
 		return
 	}
-	DebugLog.Printf("Response: %s", out)
+	//DebugLog.Printf("Response: %s", out)
 	if c.WsConn != nil {
 		c.WsConn.WriteMessage(websocket.TextMessage, out)
 	} else {

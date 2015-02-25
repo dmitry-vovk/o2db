@@ -83,6 +83,7 @@ func (c *Collection) WriteObject(p WriteObject) (uint, error) {
 func (c *Collection) encodeObject(data *ObjectFields) (*bytes.Buffer, error) {
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)
+	gob.Register([]interface{}{})
 	err := enc.Encode(data)
 	if err != nil {
 		logger.ErrorLog.Printf("%s", err)

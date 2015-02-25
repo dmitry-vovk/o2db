@@ -43,7 +43,7 @@ func (d *Database) CreateCollection(p CreateCollection) error {
 	}
 	d.Collections[collectionNameHash].IndexFile["primary"].Touch()
 	go d.Collections[collectionNameHash].objectIndexFlusher()
-	d.Collections[collectionNameHash].ObjectIndexFlush <- true
+	d.Collections[collectionNameHash].flushObjectIndex()
 	d.Collections[collectionNameHash].CreateIndices(p.Fields)
 	return nil
 }

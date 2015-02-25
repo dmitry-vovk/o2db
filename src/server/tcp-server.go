@@ -45,7 +45,7 @@ func (s *ServerType) handler(client *Client) {
 	}()
 	defer client.Conn.Close()
 	for {
-		DebugLog.Print("---------------------------------------------")
+		//DebugLog.Print("---------------------------------------------")
 		msg, err := bufio.NewReader(client.Conn).ReadBytes(MessageDelimiter)
 		if err != nil {
 			if err == io.EOF {
@@ -66,13 +66,13 @@ func (s *ServerType) handler(client *Client) {
 				},
 			)
 		} else {
-			DebugLog.Printf("Message: %v", query)
+			//DebugLog.Printf("Message: %v", query)
 			pkg := &db.Package{
 				Container: query,
 				Client:    client,
 				RespChan:  make(chan Response),
 			}
-			/* FIXME temporarily disabled for sequential logs
+			/* FIXME temporarily disabled in order to get correct log message sequence
 			go func(in *db.Package) {
 				go client.Respond(<-in.RespChan)
 			}(pkg)

@@ -8,6 +8,7 @@ ini_set('display_errors', true);
 ini_set('include_path', ini_get('include_path') . PATH_SEPARATOR . realpath(__DIR__ . '/../lib/php/'));
 require 'O2dbClient.php';
 require 'entity.php';
+require 'large-entity.php';
 $client = new O2dbClient('localhost');
 
 define('DATABASE', 'benchmark-db');
