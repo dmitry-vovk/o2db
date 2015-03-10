@@ -65,6 +65,12 @@ func (core *DbCore) ProcessRequest(client *Client, query *Container) Response {
 				return respond(nil, code, err)
 			}
 			return respond("Collection deleted", RCollectionDeleted, core.databases[client.Db].DropCollection(query.Payload.(DropCollection)))
+		case ListCollections:
+			if clientDb, ok := core.databases[client.Db]; ok {
+				return respond(clientDb.ListCollections(), RCollectionList, nil)
+			} else {
+				return respond("Database not selected", RDatabaseNotSelected, nil)
+			}
 		case WriteObject:
 			collection, code, err := core.getCollection(client, query.Payload.(WriteObject).Collection)
 			if err != nil {

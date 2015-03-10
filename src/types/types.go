@@ -54,6 +54,10 @@ type CreateCollection struct {
 	Fields map[string]Field `json:"fields"` // Collection of named fields (indices)
 }
 
+// List database collections
+type ListCollections struct {
+}
+
 // Collection field description
 type Field struct {
 	Type string `json:"type"` // type
