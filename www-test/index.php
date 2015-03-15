@@ -30,6 +30,29 @@ if ($client->authenticate(USERNAME, PASSWORD)) {
             key = '<?= SUBSCRIPTION_KEY ?>';
     </script>
     <script src="o2db.lib.js" type="text/javascript"></script>
+    <script>
+        var params = {
+            host: 'ws://' + host,
+            onopen: function () {
+                this.send({
+                    'type': client.Subscribe,
+                    'payload': {
+                        'database': db,
+                        'class': collection,
+                        'key': key
+                    }
+                });
+            },
+            onclose: function (e) {
+                console.log(e)
+            },
+            onmessage: function (data) {
+                var bar = document.getElementById('progress');
+                bar.setAttribute('value', data.response.val);
+            }
+        };
+        var client = new O2DB(params);
+    </script>
 </head>
 <body>
 <pre>
