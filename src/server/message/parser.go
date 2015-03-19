@@ -4,8 +4,14 @@ package message
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"types"
+)
+
+var (
+	ErrCannotParseMessage     = errors.New("Cannot parse message")
+	ErrMissingTypeField       = errors.New("Unknown message format: missing type field.")
+	ErrMissingPayloadField    = errors.New("Unknown message format: missing payload field.")
+	ErrUnsupportedMessageType = errors.New("Unsupported message type")
 )
 
 // Parse incoming JSON bytes into Package to be fed into query processor
@@ -13,13 +19,13 @@ func Parse(msg []byte) (*types.Container, error) {
 	var m map[string]*json.RawMessage
 	err := json.Unmarshal(msg, &m)
 	if err != nil {
-		return nil, errors.New("Cannot parse message")
+		return nil, ErrCannotParseMessage
 	}
 	if _, ok := m["type"]; !ok {
-		return nil, errors.New("Unknown message format: missing type field.")
+		return nil, ErrMissingTypeField
 	}
 	if _, ok := m["payload"]; !ok {
-		return nil, errors.New("Unknown message format: missing payload field.")
+		return nil, ErrMissingPayloadField
 	}
 	parsedMessage := &types.Container{}
 	err = json.Unmarshal([]byte(*m["type"]), &parsedMessage.Type)
@@ -125,7 +131,7 @@ func Parse(msg []byte) (*types.Container, error) {
 			parsedMessage.Payload = p
 		}
 	default:
-		return nil, errors.New(fmt.Sprintf("Unsupported message type: %d", parsedMessage.Type))
+		return nil, ErrUnsupportedMessageType
 	}
 	return parsedMessage, err
 }
