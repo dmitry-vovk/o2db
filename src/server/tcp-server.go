@@ -2,7 +2,6 @@ package server
 
 import (
 	"bufio"
-	"config"
 	"db"
 	"fmt"
 	"io"
@@ -14,7 +13,7 @@ import (
 )
 
 func (s *ServerType) runSocketListener() error {
-	socket, err := net.Listen("tcp4", config.Config.ListenTCP)
+	socket, err := net.Listen("tcp4", s.Config.ListenTCP)
 	if err != nil {
 		return err
 	}
