@@ -25,17 +25,17 @@ type ObjectVersion struct {
 type ObjectPointer map[int]ObjectVersion
 
 type Collection struct {
-	BaseDir          string                // Where collection files are
-	Name             string                // Collection/class name
-	Objects          map[int]ObjectPointer // Objects. map index is object ID
-	Indices          map[string]FieldIndex // collection of indices
-	DataFile         *DbFile               // Objects storage
-	IndexFile        map[string]*DbFile    // List of indices
-	freeSlotOffset   int
-	IndexPointerFile string
-	ObjectIndexFlush chan (bool)
-	Schema           map[string]Field
-	Subscriptions    map[string]*Subscription
+	BaseDir          string                   // Where collection files are
+	Name             string                   // Collection/class name
+	Objects          map[int]ObjectPointer    // Objects. map index is object ID
+	Indices          map[string]FieldIndex    // Collection of indices
+	DataFile         *DbFile                  // Objects storage
+	IndexFile        map[string]*DbFile       // List of indices
+	freeSlotOffset   int                      // Where next object can be stored
+	IndexPointerFile string                   // File name where offset/length of each object is stored
+	ObjectIndexFlush chan (bool)              // Channel to signal object index flushing to file
+	Schema           map[string]Field         // Collection schema description
+	Subscriptions    map[string]*Subscription // List of associated subscriptions
 }
 
 // Returns pointer to the start of unallocated file space
