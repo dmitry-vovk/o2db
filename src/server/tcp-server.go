@@ -3,11 +3,9 @@ package server
 import (
 	"bufio"
 	"db"
-	"fmt"
 	"io"
 	. "logger"
 	"net"
-	"server/message"
 	"time"
 	. "types"
 )
@@ -44,7 +42,6 @@ func (s *ServerType) handler(client *Client) {
 	}()
 	defer client.Conn.Close()
 	for {
-		//DebugLog.Print("---------------------------------------------")
 		msg, err := bufio.NewReader(client.Conn).ReadBytes(MessageDelimiter)
 		if err != nil {
 			if err == io.EOF {
@@ -54,30 +51,12 @@ func (s *ServerType) handler(client *Client) {
 			}
 			return
 		}
-		query, err := message.Parse(msg[:len(msg)-1]) // cut out delimiter
-		if err != nil {
-			ErrorLog.Printf("Parse error: %s", err)
-			ErrorLog.Printf("Message was: %s", msg)
-			client.Respond(
-				Response{
-					Result:   false,
-					Response: fmt.Sprintf("%s", err),
-				},
-			)
-		} else {
-			//DebugLog.Printf("Message: %v", query)
-			pkg := &db.Package{
-				Container: query,
-				Client:    client,
-				RespChan:  make(chan Response),
-			}
-			/* FIXME temporarily disabled in order to get correct log message sequence
-			go func(in *db.Package) {
-				go client.Respond(<-in.RespChan)
-			}(pkg)
-			*/
-			s.Core.Input <- pkg
-			client.Respond(<-pkg.RespChan)
+		pkg := &db.Package{
+			RawInput: msg[:len(msg)-1],
+			Client:   client,
+			RespChan: make(chan Response),
 		}
+		s.Core.Input <- pkg
+		client.Respond(<-pkg.RespChan)
 	}
 }

@@ -131,7 +131,9 @@ class O2dbClient {
      */
     public function read($blocking = true) {
         $incoming = '';
-        stream_set_blocking($this->socket, $blocking ? 1 : 0);
+        $blocking
+            ? socket_set_block($this->socket)
+            : socket_set_nonblock($this->socket);
         while (($response = socket_read($this->socket, 1)) !== false) {
             if (ord($response) === self::DELIMITER) {
                 break;

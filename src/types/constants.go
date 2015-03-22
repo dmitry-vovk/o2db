@@ -68,14 +68,16 @@ const (
 	RSubscriptionList          // 32
 
 	RUnknownQueryType // 33
+
+	RQueryParseError // 34
 )
 
 // File names
 const (
-	DataFileName = "objects.data"
+	DataFileName         = "objects.data"
 	PrimaryIndexFileName = "primary.index"
-	ObjectIndexFileName = "objects.index"
-	CollectionSchema = "schema"
+	ObjectIndexFileName  = "objects.index"
+	CollectionSchema     = "schema"
 )
 
 const (

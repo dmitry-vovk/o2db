@@ -11,8 +11,8 @@ $message = [
         'password' => '12345',
     ],
 ];
-$response = $client->send($message);
-echo '<<<', $response, PHP_EOL;
+$response = $client->sendAndRead($message);
+echo $response, PHP_EOL;
 // Create database
 
 $message = [
@@ -21,8 +21,8 @@ $message = [
         'name' => 'test_01'
     ],
 ];
-$response = $client->send($message);
-echo '<<<', $response, PHP_EOL;
+$response = $client->sendAndRead($message);
+echo $response, PHP_EOL;
 
 // Open database
 
@@ -32,8 +32,8 @@ $message = [
         'name' => 'test_01'
     ],
 ];
-$response = $client->send($message);
-echo '<<<', $response, PHP_EOL;
+$response = $client->sendAndRead($message);
+echo $response, PHP_EOL;
 
 // Create collection
 $message = [
@@ -56,8 +56,8 @@ $message = [
         ],
     ],
 ];
-$response = $client->send($message);
-echo '<<<', $response, PHP_EOL;
+$response = $client->sendAndRead($message);
+echo $response, PHP_EOL;
 
 // Drop collection
 /*
@@ -95,8 +95,8 @@ $message = [
         ],
     ],
 ];
-$response = $client->send($message);
-echo '<<<', $response, PHP_EOL;
+$response = $client->sendAndRead($message);
+echo $response, PHP_EOL;
 /*
 $response = $client->send($message);
 echo '<<<', $response, PHP_EOL;
@@ -186,8 +186,8 @@ $message = [
         ],
     ],
 ];
-$response = $client->send($message);
-echo '<<<', $response, PHP_EOL;
+$response = $client->sendAndRead($message);
+echo $response, PHP_EOL;
 
 /*
 $message = [

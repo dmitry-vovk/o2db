@@ -2,11 +2,9 @@ package server
 
 import (
 	"db"
-	"fmt"
 	"github.com/gorilla/websocket"
 	. "logger"
 	"net/http"
-	"server/message"
 	. "types"
 )
 
@@ -44,27 +42,14 @@ func (s *ServerType) wsHandle(conn *websocket.Conn) {
 			ErrorLog.Printf("Got message type %d: %s", t, msg)
 			continue
 		}
-		query, err := message.Parse(msg) // cut out delimiter
-		if err != nil {
-			ErrorLog.Printf("Parse error: %s", err)
-			ErrorLog.Printf("Message was: %s", msg)
-			client.Respond(
-				Response{
-					Result:   false,
-					Response: fmt.Sprintf("%s", err),
-				},
-			)
-		} else {
-			DebugLog.Printf("Message: %v", query)
-			pkg := &db.Package{
-				Container: query,
-				Client:    client,
-				RespChan:  make(chan Response),
-			}
-			go func(in *db.Package) {
-				go client.Respond(<-in.RespChan)
-			}(pkg)
-			s.Core.Input <- pkg
+		pkg := &db.Package{
+			RawInput: msg,
+			Client:   client,
+			RespChan: make(chan Response),
 		}
+		go func(in *db.Package) {
+			go client.Respond(<-in.RespChan)
+		}(pkg)
+		s.Core.Input <- pkg
 	}
 }

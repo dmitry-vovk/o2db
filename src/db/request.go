@@ -14,7 +14,6 @@ func (core *DbCore) ProcessRequest(client *Client, query *Container) Response {
 	if query == nil {
 		return respond("no message", RNoError, nil)
 	}
-	//DebugLog.Printf("Payload type: %s", reflect.TypeOf(query.Payload))
 	switch query.Payload.(type) {
 	case Authentication:
 		if core.Authenticate(client, query.Payload.(Authentication)) {

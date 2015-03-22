@@ -1,3 +1,4 @@
+// This package contains stuff used in tests only.
 package dbtest
 
 import (

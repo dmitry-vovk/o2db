@@ -3,13 +3,16 @@
 package db
 
 import (
+	"fmt"
+	. "logger"
+	"server/message"
 	. "types"
 )
 
 type Package struct {
-	Container *Container
-	Client    *Client
-	RespChan  chan Response
+	RawInput []byte
+	Client   *Client
+	RespChan chan Response
 }
 
 type DbCore struct {
@@ -22,6 +25,28 @@ func (с *DbCore) Processor() {
 	с.databases = make(map[string]*Database)
 	for {
 		pkg := <-с.Input
-		pkg.RespChan <- с.ProcessRequest(pkg.Client, pkg.Container)
+		container, err := с.parse(pkg.RawInput)
+		if err == nil {
+			pkg.RespChan <- с.ProcessRequest(pkg.Client, container)
+		} else {
+			ErrorLog.Printf("Parse error: %s", err)
+			ErrorLog.Printf("Message was: %s", pkg.RawInput)
+			pkg.Client.Respond(
+				Response{
+					Result:   false,
+					Code:     RQueryParseError,
+					Response: fmt.Sprintf("%s", err),
+				},
+			)
+		}
 	}
+}
+
+// Convert raw bytes into message container
+func (c *DbCore) parse(msg []byte) (*Container, error) {
+	container, err := message.Parse(msg)
+	if err != nil {
+		return nil, err
+	}
+	return container, nil
 }
