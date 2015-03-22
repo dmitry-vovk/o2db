@@ -1,6 +1,7 @@
 package db
 
 import (
+	"client"
 	"errors"
 	. "types"
 )
@@ -31,7 +32,7 @@ func (c *Collection) CancelSubscription(p CancelSubscription) (string, uint, err
 }
 
 // Subscribe the client to existing subscription
-func (c *Collection) Subscribe(p Subscribe, client *Client) (string, uint, error) {
+func (c *Collection) Subscribe(p Subscribe, client *client.Client) (string, uint, error) {
 	if _, ok := c.Subscriptions[p.Key]; !ok {
 		return "", RSubscriptionDoesNotExist, errors.New("Subscription does not exist")
 	}

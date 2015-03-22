@@ -1,6 +1,7 @@
 package db
 
 import (
+	"client"
 	"errors"
 	"logger"
 	"math"
@@ -11,7 +12,7 @@ import (
 type Subscription struct {
 	Key     string
 	Query   ObjectFields
-	Clients []*Client
+	Clients []*client.Client
 }
 
 // Tells if subscription query valid

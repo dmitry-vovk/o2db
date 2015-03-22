@@ -3,6 +3,7 @@
 package db
 
 import (
+	"client"
 	"fmt"
 	. "logger"
 	"server/message"
@@ -11,7 +12,7 @@ import (
 
 type Package struct {
 	RawInput []byte
-	Client   *Client
+	Client   *client.Client
 	RespChan chan Response
 }
 

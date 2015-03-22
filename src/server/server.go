@@ -1,16 +1,16 @@
 package server
 
 import (
+	"client"
 	"config"
 	"db"
 	. "logger"
 	"net/http"
-	. "types"
 )
 
 type ServerType struct {
 	Config  *config.ConfigType
-	Clients []*Client
+	Clients []*client.Client
 	Core    *db.DbCore
 }
 

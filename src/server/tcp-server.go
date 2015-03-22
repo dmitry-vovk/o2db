@@ -2,6 +2,7 @@ package server
 
 import (
 	"bufio"
+	"client"
 	"db"
 	"io"
 	. "logger"
@@ -27,7 +28,7 @@ func (s *ServerType) socketListener(socket net.Listener) {
 			continue
 		}
 		DebugLog.Printf("TCP client connected")
-		c := &Client{
+		c := &client.Client{
 			Conn: conn,
 		}
 		go s.handler(c)
@@ -35,7 +36,7 @@ func (s *ServerType) socketListener(socket net.Listener) {
 }
 
 // Handle single client connection
-func (s *ServerType) handler(client *Client) {
+func (s *ServerType) handler(client *client.Client) {
 	start := time.Now()
 	defer func() {
 		DebugLog.Printf("Completed in %.4f seconds", time.Now().Sub(start).Seconds())

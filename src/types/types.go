@@ -1,14 +1,5 @@
 package types
 
-import (
-	"bytes"
-	"encoding/json"
-	"github.com/gorilla/websocket"
-	"io"
-	. "logger"
-	"net"
-)
-
 // Query message container
 type Container struct {
 	Type    uint        `json:"type"`    // one of the Type... constant values
@@ -81,31 +72,6 @@ type Object struct {
 	Class  Schema
 	Id     uint64
 	Fields []Field
-}
-
-type Client struct {
-	Conn          net.Conn
-	WsConn        *websocket.Conn
-	Authenticated bool
-	Db            string
-}
-
-func (c *Client) Respond(resp Response) {
-	out, err := json.Marshal(resp)
-	if err != nil {
-		ErrorLog.Printf("Error encoding response: %s", err)
-		return
-	}
-	//DebugLog.Printf("Response: %s", out)
-	if c.WsConn != nil {
-		c.WsConn.WriteMessage(websocket.TextMessage, out)
-	} else {
-		_, err = io.Copy(c.Conn, bytes.NewBuffer(append(out, MessageDelimiter)))
-		if err != nil {
-			ErrorLog.Printf("Error sending response to client: %s", err)
-			return
-		}
-	}
 }
 
 type ObjectFields map[string]interface{}

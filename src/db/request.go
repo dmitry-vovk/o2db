@@ -2,6 +2,7 @@
 package db
 
 import (
+	"client"
 	"errors"
 	"fmt"
 	. "logger"
@@ -10,7 +11,7 @@ import (
 )
 
 // This is the main entry for processing queries
-func (core *DbCore) ProcessRequest(client *Client, query *Container) Response {
+func (core *DbCore) ProcessRequest(client *client.Client, query *Container) Response {
 	if query == nil {
 		return respond("no message", RNoError, nil)
 	}
@@ -136,7 +137,7 @@ func (core *DbCore) ProcessRequest(client *Client, query *Container) Response {
 	return respond("Authentication required", RAuthenticationRequired, nil)
 }
 
-func (core *DbCore) getCollection(client *Client, collectionName string) (*Collection, uint, error) {
+func (core *DbCore) getCollection(client *client.Client, collectionName string) (*Collection, uint, error) {
 	if clientDb, ok := core.databases[client.Db]; ok {
 		collectionKey := hash(collectionName)
 		if collection, ok := clientDb.Collections[collectionKey]; ok {

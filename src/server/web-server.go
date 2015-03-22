@@ -1,6 +1,7 @@
 package server
 
 import (
+	"client"
 	"db"
 	"github.com/gorilla/websocket"
 	. "logger"
@@ -26,7 +27,7 @@ func (s *ServerType) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *ServerType) wsHandle(conn *websocket.Conn) {
 	defer conn.Close()
-	client := &Client{
+	client := &client.Client{
 		WsConn: conn,
 	}
 	for {
