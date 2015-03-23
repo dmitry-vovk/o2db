@@ -12,5 +12,4 @@ type FieldIndex interface {
 	FlushToFile() error                               // Write index to file
 	DoFlush()                                         // trigger flushing
 	GetType() reflect.Type                            // Returns type of index
-	// TODO add versioned methods to find an object
 }
