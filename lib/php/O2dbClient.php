@@ -78,6 +78,10 @@ class O2dbClient {
      * @param int $port
      */
     public function __construct($address, $port = 1333) {
+        assert('is_string($address)');
+        assert('!empty($address)');
+        assert('is_int($port)');
+        assert('$port > 0');
         $this->address = $address;
         $this->port = $port;
         $this->connect();
@@ -194,9 +198,9 @@ class O2dbClient {
      */
     public function authenticate($username, $password) {
         $message = [
-            'type' => O2dbClient::TYPE_AUTHENTICATE,
+            'type'    => O2dbClient::TYPE_AUTHENTICATE,
             'payload' => [
-                'name' => $username,
+                'name'     => $username,
                 'password' => $password,
             ],
         ];
@@ -213,7 +217,7 @@ class O2dbClient {
      */
     public function createDatabase($dbName) {
         $message = [
-            'type' => O2dbClient::TYPE_CREATE_DB,
+            'type'    => O2dbClient::TYPE_CREATE_DB,
             'payload' => [
                 'name' => $dbName,
             ],
@@ -231,7 +235,7 @@ class O2dbClient {
      */
     public function openDatabase($dbName) {
         $message = [
-            'type' => O2dbClient::TYPE_OPEN_DB,
+            'type'    => O2dbClient::TYPE_OPEN_DB,
             'payload' => [
                 'name' => $dbName,
             ],
@@ -248,11 +252,11 @@ class O2dbClient {
      *
      * @return bool
      */
-    public function createCollection($collectionName, array $indices = ['id' => ['type' => 'int']]) {
+    public function createCollection($collectionName, array $indices = ['id' => ['type' => 'int',],]) {
         $message = [
-            'type' => O2dbClient::TYPE_CREATE_COLLECTION,
+            'type'    => O2dbClient::TYPE_CREATE_COLLECTION,
             'payload' => [
-                'class' => $collectionName,
+                'class'  => $collectionName,
                 'fields' => $indices,
             ],
         ];
@@ -269,10 +273,10 @@ class O2dbClient {
      */
     public function write($object) {
         $message = [
-            'type' => self::TYPE_OBJECT_WRITE,
+            'type'    => self::TYPE_OBJECT_WRITE,
             'payload' => [
                 'class' => get_class($object),
-                'data' => $object,
+                'data'  => $object,
             ],
         ];
         if ($this->parseResult($this->sendAndRead($message))) {
@@ -289,10 +293,10 @@ class O2dbClient {
      */
     public function getOne($class, $id) {
         $message = [
-            'type' => O2dbClient::TYPE_OBJECT_GET,
+            'type'    => O2dbClient::TYPE_OBJECT_GET,
             'payload' => [
                 'class' => $class,
-                'data' => [
+                'data'  => [
                     'id' => $id,
                 ],
             ],
@@ -318,15 +322,53 @@ class O2dbClient {
      */
     public function createSubscription($class, $key, array $mask) {
         $message = [
-            'type' => self::TYPE_ADD_SUBSCRIPTION,
+            'type'    => self::TYPE_ADD_SUBSCRIPTION,
             'payload' => [
                 'class' => $class,
-                'key' => $key,
+                'key'   => $key,
                 'query' => $mask,
             ],
         ];
         if ($this->parseResult($this->sendAndRead($message))) {
             return $this->lastResult;
+        }
+        return false;
+    }
+
+    /**
+     * @param string $class
+     * @param string $key
+     *
+     * @return bool
+     */
+    public function cancelSubscription($class, $key) {
+        $message = [
+            'type'    => self::TYPE_CANCEL_SUBSCRIPTION,
+            'payload' => [
+                'class' => $class,
+                'key'   => $key,
+            ],
+        ];
+        if ($this->parseResult($this->sendAndRead($message))) {
+            return $this->lastResult;
+        }
+        return false;
+    }
+
+    /**
+     * @param array $classes
+     *
+     * @return bool|mixed
+     */
+    public function listSubscriptions(array $classes) {
+        $message = [
+            'type'    => self::TYPE_CANCEL_SUBSCRIPTION,
+            'payload' => [
+                'classes' => $classes,
+            ],
+        ];
+        if ($this->parseResult($this->sendAndRead($message))) {
+            return $this->lastResponse;
         }
         return false;
     }
