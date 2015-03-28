@@ -18,7 +18,6 @@ func (d *Database) CreateCollection(p CreateCollection) error {
 		logger.ErrorLog.Printf("Error creating collection dir: %s", err)
 		return err
 	}
-	logger.DebugLog.Printf("Creating collection %s in %s", p.Name, collectionPath)
 	collectionNameHash := hash(p.Name)
 	d.Collections[collectionNameHash] = &Collection{
 		BaseDir:          collectionPath + string(os.PathSeparator),

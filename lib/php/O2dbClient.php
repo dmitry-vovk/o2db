@@ -444,7 +444,7 @@ class O2dbClient {
      */
     public function listSubscriptions(array $classes) {
         $message = [
-            'type'    => self::TYPE_CANCEL_SUBSCRIPTION,
+            'type'    => self::TYPE_LIST_SUBSCRIPTIONS,
             'payload' => [
                 'classes' => $classes,
             ],
