@@ -15,6 +15,7 @@ type Client struct {
 	WsConn        *websocket.Conn
 	Authenticated bool
 	Db            string
+	QueryCounter  uint
 }
 
 func (c *Client) Respond(resp Response) {

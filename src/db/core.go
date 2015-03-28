@@ -26,6 +26,7 @@ func (с *DbCore) Processor() {
 	с.databases = make(map[string]*Database)
 	for {
 		pkg := <-с.Input
+		pkg.Client.QueryCounter++
 		container, err := с.parse(pkg.RawInput)
 		if err == nil {
 			pkg.RespChan <- с.ProcessRequest(pkg.Client, container)

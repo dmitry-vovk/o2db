@@ -39,7 +39,7 @@ func (s *ServerType) socketListener(socket net.Listener) {
 func (s *ServerType) handler(client *client.Client) {
 	start := time.Now()
 	defer func() {
-		DebugLog.Printf("Completed in %.4f seconds", time.Now().Sub(start).Seconds())
+		DebugLog.Printf("Completed %d queries in %.4f seconds", client.QueryCounter, time.Now().Sub(start).Seconds())
 	}()
 	defer client.Conn.Close()
 	for {
