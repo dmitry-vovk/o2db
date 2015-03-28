@@ -15,10 +15,8 @@ func (c *Collection) GetObjectDiff(p GetObjectDiff) (ObjectDiff, uint, error) {
 		return ObjectDiff{}, code, err
 	}
 	var diff ObjectDiff = make(map[string]interface{})
-	o1 := *obj1
-	o2 := *obj2
-	for k, v := range o1 {
-		if o1[k] != o2[k] {
+	for k, v := range *obj2 {
+		if (*obj1)[k] != (*obj2)[k] {
 			diff[k] = v
 		}
 	}

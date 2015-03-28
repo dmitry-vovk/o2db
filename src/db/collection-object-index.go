@@ -11,7 +11,7 @@ import (
 	. "types"
 )
 
-const flushDelay = 100 * time.Millisecond
+const flushDelay = 20 * time.Millisecond
 
 // Adds object to indices
 // Returns object version
@@ -40,6 +40,9 @@ func (c *Collection) objectIndexFlusher() {
 		default:
 			if flag {
 				if err := c.flushObjectIndex(); err != nil {
+					if os.IsNotExist(err) {
+						return
+					}
 					logger.ErrorLog.Printf("Error flushing objects index: %s", err)
 				}
 				flag = false

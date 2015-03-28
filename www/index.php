@@ -3,7 +3,7 @@
  * @author Dmitry Vovk <dmitry.vovk@gmail.com>
  * @created 09/02/15 22:01
  */
-require_once 'common.php';
+require_once '../bootstrap.php';
 /**
  * Preparation for front-end interaction:
  * 1: Authenticate back-end client

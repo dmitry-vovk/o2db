@@ -9,9 +9,9 @@ error_reporting(E_ALL);
 define('BASE_DIR', __DIR__);
 ini_set('display_errors', true);
 
-require BASE_DIR . '/../lib/php/O2dbClient.php';
-require BASE_DIR . '/classes/entity.php';
-require BASE_DIR . '/classes/large-entity.php';
+require BASE_DIR . '/lib/php/O2dbClient.php';
+require BASE_DIR . '/tests/classes/entity.php';
+require BASE_DIR . '/tests/classes/large-entity.php';
 
 define('DATABASE', 'benchmark-db');
 define('USERNAME', 'root');

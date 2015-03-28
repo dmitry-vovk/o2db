@@ -79,6 +79,9 @@ func (i *IntIndex) indexFlusher() {
 		default:
 			if flag {
 				if err := i.FlushToFile(); err != nil {
+					if os.IsNotExist(err) {
+						return
+					}
 					logger.ErrorLog.Printf("Error flushing index: %s", err)
 				}
 				flag = false

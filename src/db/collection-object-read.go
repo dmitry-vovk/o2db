@@ -46,8 +46,8 @@ func (c *Collection) getObjectByIdAndVersion(id, version int) (*ObjectFields, ui
 	obj := ObjectFields{}
 	if err = dec.Decode(&obj); err == nil {
 		obj[FIELD_VERSION] = version
-		return &obj, RNoError, err
+		return &obj, RNoError, nil
 	} else {
-		return nil, RObjectDecodeError, nil
+		return nil, RObjectDecodeError, err
 	}
 }

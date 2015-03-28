@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * O2DB PHP Client
+ *
  * @author Dmytro Vovk <dmitry.vovk@gmail.com>
  */
 class O2dbClient {
@@ -247,6 +249,42 @@ class O2dbClient {
     }
 
     /**
+     * @param string $mask
+     *
+     * @return bool
+     */
+    public function listDatabases($mask = '*') {
+        $message = [
+            'type'    => O2dbClient::TYPE_LIST_DB,
+            'payload' => [
+                'mask' => $mask,
+            ],
+        ];
+        if ($this->parseResult($this->sendAndRead($message))) {
+            return $this->lastResponse;
+        }
+        return false;
+    }
+
+    /**
+     * @param string $dbName
+     *
+     * @return bool
+     */
+    public function dropDatabase($dbName) {
+        $message = [
+            'type'    => O2dbClient::TYPE_DROP_DB,
+            'payload' => [
+                'name' => $dbName,
+            ],
+        ];
+        if ($this->parseResult($this->sendAndRead($message))) {
+            return $this->lastResult;
+        }
+        return false;
+    }
+
+    /**
      * @param string $collectionName
      * @param array $indices
      *
@@ -309,6 +347,50 @@ class O2dbClient {
                 }
                 return $object;
             }
+        }
+        return false;
+    }
+
+    /**
+     * @param string $class
+     * @param int $id
+     *
+     * @return bool|mixed
+     */
+    public function getObjectVersions($class, $id) {
+        $message = [
+            'type'    => self::TYPE_GET_OBJECT_VERSIONS,
+            'payload' => [
+                'class' => $class,
+                'id'    => $id,
+            ],
+        ];
+        if ($this->parseResult($this->sendAndRead($message))) {
+            return $this->lastResponse;
+        }
+        return false;
+    }
+
+    /**
+     * @param string $class
+     * @param int $id
+     * @param int $v1
+     * @param int $v2
+     *
+     * @return bool|mixed
+     */
+    public function getObjectDiff($class, $id, $v1, $v2) {
+        $message = [
+            'type'    => self::TYPE_GET_OBJECT_DIFF,
+            'payload' => [
+                'class' => $class,
+                'id'    => $id,
+                'from'  => $v1,
+                'to'    => $v2,
+            ],
+        ];
+        if ($this->parseResult($this->sendAndRead($message))) {
+            return $this->lastResponse;
         }
         return false;
     }
