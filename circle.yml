@@ -1,0 +1,6 @@
+general:
+  build_dir: src
+
+machine:
+  environment:
+    GOPATH: /home/ubuntu/.go_workspace:/home/ubuntu/o2db
