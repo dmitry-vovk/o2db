@@ -23,4 +23,9 @@ func init() {
 	if err := config.Read(*configFile); err != nil {
 		log.Fatal(err)
 	}
+	if config.Config.Logs != "" {
+		if err := logger.SetLogPath(config.Config.Logs); err != nil {
+			log.Fatalf("Error setting log path: %s", err)
+		}
+	}
 }
