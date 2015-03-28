@@ -25,4 +25,7 @@ if ($client->authenticate(USERNAME, PASSWORD)) {
     $end = microtime(true);
     echo 'Time taken: ', round($end - $start, 6), ' seconds', PHP_EOL;
     echo '   Average: ', round(($end - $start) / TIMES, 6), ' seconds per insert', PHP_EOL;
+    $result = $client->getObjectVersions(Entity::class, $ent->id);
+    echo '  Versions: ', $result, PHP_EOL;
+    $client->dropDatabase(DATABASE);
 }
